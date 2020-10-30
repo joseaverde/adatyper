@@ -1,10 +1,10 @@
 -------------------------------------------------------------------------------
 --                                                                           --
---                              M A I N . A D B                              --
+--                           C R E D I T S . A D B                           --
 --                                                                           --
 --                              A D A T Y P E R                              --
 --                                                                           --
---                                  M A I N                                  --
+--                                  B O D Y                                  --
 --                                                                           --
 -------------------------------------------------------------------------------
 --     Copyright (c) 2020 José Antonio Verde Jiménez All Rights Reserved     --
@@ -26,20 +26,38 @@
 --                                                                           --
 -------------------------------------------------------------------------------
 
-with Credits;
-with Ansi.Colors;
+with Ada.Command_Line;
+with Ada.Text_IO;
 
--- This is the main function of the program, it returns an natural nuber with
--- the error code if any occurs.
-function Main return Natural is
-begin
-   
-   Ansi.Colors.Set_Color(Ansi.Colors.Blue, Ansi.Colors.Yellow, True);
-   Credits.Startup_Notice;
 
-   return 0;
+package body Credits is
 
-end Main;
+   procedure Startup_Notice is
+      procedure P(Item: String) renames Ada.Text_IO.Put_Line;
+      C: Character;
+   begin
+      P("AdaTyper Copyright (c) 2020 José Antonio Verde Jiménez");
+      P("This program comes with ABSOLUTELY NO WARRANTY; for details see the");
+      P("`Warranty'  subsection  inside the  `Credits'  menu or  running the");
+      P("program with the `--warranty' flag:");
+      P("   " & Ada.Command_Line.Command_Name & " --warranty");
+      P("This is free software software, and you are welcome to redistribute");
+      P("it under certain conditions; see the  `Redistribute it'  subsection");
+      P("inside  the   `Credits'  menu  or  running  the  program  with  the");
+      P("`--conditions' flag:");
+      P("   " & Ada.Command_Line.Command_Name & " --conditions");
+      P("");
+      P("In other languages the subsections' names inside the `Credits' menu");
+      P("may change but not the command line arguments.");
+      P("You can also  read the copy of the  GNU General Public Licence  you");
+      P("must have received with this piece of software. If not see:");
+      P("   <https://www.gnu.org/licenses/>   ");
+      P("");
+      P("      Warm your fingers up and press any key to continue...");
+      Ada.Text_IO.Get_Immediate(C);
+   end Startup_Notice;
+
+end Credits;
 
 
 ---=======================-------------------------=========================---

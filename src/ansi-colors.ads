@@ -1,10 +1,10 @@
 -------------------------------------------------------------------------------
 --                                                                           --
---                              M A I N . A D B                              --
+--                       A N S I - C O L O R S . A D S                       --
 --                                                                           --
 --                              A D A T Y P E R                              --
 --                                                                           --
---                                  M A I N                                  --
+--                                  S P E C                                  --
 --                                                                           --
 -------------------------------------------------------------------------------
 --     Copyright (c) 2020 José Antonio Verde Jiménez All Rights Reserved     --
@@ -26,20 +26,49 @@
 --                                                                           --
 -------------------------------------------------------------------------------
 
-with Credits;
-with Ansi.Colors;
 
--- This is the main function of the program, it returns an natural nuber with
--- the error code if any occurs.
-function Main return Natural is
-begin
+-- This package contains the functions and procedures to work with colours.
+package Ansi.Colors is
+
+   pragma Elaborate_Body (Ansi.Colors);
    
-   Ansi.Colors.Set_Color(Ansi.Colors.Blue, Ansi.Colors.Yellow, True);
-   Credits.Startup_Notice;
+   -- This type declares the avalible colours for a normal terminal or console.
+   -- FIXME: It may need some changes for the Windows console.
+   type Color_Type is (Black, Red, Green, Yellow, Blue, Magenta, Cyan, White);
+   for Color_Type use
+      (Black   => 0,
+       Red     => 1,
+       Green   => 2,
+       Yellow  => 3,
+       Blue    => 4,
+       Magenta => 5,
+       Cyan    => 6,
+       White   => 7);
+   for Color_Type'Size use 3;
 
-   return 0;
+   -- This is just a shortcut for Bright.
+   Bright: CONSTANT Boolean := True;
 
-end Main;
+   -- This procedure changes the foreground color of the terminal.
+   procedure Set_Foreground_Color (Color  : Color_Type;
+                                   Bright : Boolean := False);
+   
+   -- This procedure changes the background color of the terminal.
+   procedure Set_Background_Color (Color  : Color_Type;
+                                   Bright : Boolean := False);
+
+   -- This procedure is a shortcut for the two above, but it will make both
+   -- colours with the same chosen brightness.
+   procedure Set_Color (Fg_Color: Color_Type;
+                        Bg_Color: Color_Type;
+                        Bright  : Boolean := False);
+   pragma Inline (Set_Color);
+
+   -- This procedure resets the terminal colour.
+   procedure Plain;
+   pragma Inline (Plain);
+
+end Ansi.Colors;
 
 
 ---=======================-------------------------=========================---

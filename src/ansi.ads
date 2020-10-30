@@ -1,10 +1,10 @@
 -------------------------------------------------------------------------------
 --                                                                           --
---                              M A I N . A D B                              --
+--                              A N S I . A D S                              --
 --                                                                           --
 --                              A D A T Y P E R                              --
 --                                                                           --
---                                  M A I N                                  --
+--                                  S P E C                                  --
 --                                                                           --
 -------------------------------------------------------------------------------
 --     Copyright (c) 2020 José Antonio Verde Jiménez All Rights Reserved     --
@@ -26,20 +26,16 @@
 --                                                                           --
 -------------------------------------------------------------------------------
 
-with Credits;
-with Ansi.Colors;
 
--- This is the main function of the program, it returns an natural nuber with
--- the error code if any occurs.
-function Main return Natural is
-begin
-   
-   Ansi.Colors.Set_Color(Ansi.Colors.Blue, Ansi.Colors.Yellow, True);
-   Credits.Startup_Notice;
+-- This package contains everything to work with ANSI escape sequences for
+-- colours, styles, formatting, cursor position...
+package Ansi is
 
-   return 0;
+   pragma Pure (Ansi);
 
-end Main;
+   ESC: CONSTANT String := ASCII.ESC & '[';
+
+end Ansi;
 
 
 ---=======================-------------------------=========================---

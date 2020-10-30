@@ -1,10 +1,10 @@
 -------------------------------------------------------------------------------
 --                                                                           --
---                              M A I N . A D B                              --
+--                           C R E D I T S . A D S                           --
 --                                                                           --
 --                              A D A T Y P E R                              --
 --                                                                           --
---                                  M A I N                                  --
+--                                  S P E C                                  --
 --                                                                           --
 -------------------------------------------------------------------------------
 --     Copyright (c) 2020 José Antonio Verde Jiménez All Rights Reserved     --
@@ -26,20 +26,14 @@
 --                                                                           --
 -------------------------------------------------------------------------------
 
-with Credits;
-with Ansi.Colors;
+-- This package contains the credits information.
+package Credits is
 
--- This is the main function of the program, it returns an natural nuber with
--- the error code if any occurs.
-function Main return Natural is
-begin
-   
-   Ansi.Colors.Set_Color(Ansi.Colors.Blue, Ansi.Colors.Yellow, True);
-   Credits.Startup_Notice;
+   pragma Elaborate_Body (Credits);
 
-   return 0;
+   procedure Startup_Notice;
 
-end Main;
+end Credits;
 
 
 ---=======================-------------------------=========================---

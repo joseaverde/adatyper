@@ -1,10 +1,10 @@
 -------------------------------------------------------------------------------
 --                                                                           --
---                              M A I N . A D B                              --
+--                       A N S I - C O L O R S . A D S                       --
 --                                                                           --
 --                              A D A T Y P E R                              --
 --                                                                           --
---                                  M A I N                                  --
+--                                  B O D Y                                  --
 --                                                                           --
 -------------------------------------------------------------------------------
 --     Copyright (c) 2020 José Antonio Verde Jiménez All Rights Reserved     --
@@ -26,20 +26,58 @@
 --                                                                           --
 -------------------------------------------------------------------------------
 
-with Credits;
-with Ansi.Colors;
+with Ada.Text_IO;
 
--- This is the main function of the program, it returns an natural nuber with
--- the error code if any occurs.
-function Main return Natural is
-begin
+
+package body Ansi.Colors is
+
+
+   procedure Set_Foreground_Color (Color  : Color_Type;
+                                   Bright : Boolean := False) is
+   begin
+
+      Ada.Text_IO.Put(ESC                                &
+                      (if Bright then '9' else '3')      &
+                      Character'Val(48 + Color'Enum_Rep) &
+                      'm');
+
+   end Set_Foreground_Color;
+
+
    
-   Ansi.Colors.Set_Color(Ansi.Colors.Blue, Ansi.Colors.Yellow, True);
-   Credits.Startup_Notice;
+   procedure Set_Background_Color (Color  : Color_Type;
+                                   Bright : Boolean := False) is
+   begin
 
-   return 0;
+      Ada.Text_IO.Put(ESC                                &
+                      (if Bright then "4" else "10")     &
+                      Character'Val(48 + Color'Enum_Rep) &
+                      'm');
 
-end Main;
+   end Set_Background_Color;
+
+
+
+   procedure Set_Color (Fg_Color: Color_Type;
+                        Bg_Color: Color_Type;
+                        Bright  : Boolean := False) is
+   begin
+
+      Set_Foreground_Color(Fg_Color, Bright);
+      Set_Background_Color(Bg_Color, Bright);
+
+   end Set_Color;
+
+
+
+   procedure Plain is
+   begin
+
+      Ada.Text_IO.Put(ESC & "0m");
+
+   end Plain;
+
+end Ansi.Colors;
 
 
 ---=======================-------------------------=========================---

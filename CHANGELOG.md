@@ -12,4 +12,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - Created CHANGELOG.md file
 - Added GPLv3 licence read it [here](LICENCE)
 - Added main file of the project [main.adb](src/main.adb)
+- Added Colour support
+- Added Styling support
+- Added Cursor support
 

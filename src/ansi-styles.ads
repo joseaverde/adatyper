@@ -1,10 +1,10 @@
 -------------------------------------------------------------------------------
 --                                                                           --
---                              M A I N . A D B                              --
+--                       A N S I - S T Y L E S . A D S                       --
 --                                                                           --
 --                              A D A T Y P E R                              --
 --                                                                           --
---                                  M A I N                                  --
+--                                  S P E C                                  --
 --                                                                           --
 -------------------------------------------------------------------------------
 --     Copyright (c) 2020 José Antonio Verde Jiménez All Rights Reserved     --
@@ -26,26 +26,39 @@
 --                                                                           --
 -------------------------------------------------------------------------------
 
-with Credits;
-with Ansi.Colors;
-with Ansi.Styles;
 
--- This is the main function of the program, it returns an natural nuber with
--- the error code if any occurs.
-function Main return Natural is
-begin
-   
-   Ansi.Colors.Set_Color(Ansi.Colors.Blue, Ansi.Colors.Yellow, True);
-   Ansi.Styles.Set_Style(Ansi.Styles.Reversed);
-   Ansi.Styles.Set_Style(Ansi.Styles.Underline);
-   Ansi.Styles.Set_Style(Ansi.Styles.Italic);
-   Ansi.Styles.Remove_All_Styles;
-   Ansi.Colors.Plain;
-   Credits.Startup_Notice;
+-- This package contains procedures to work with styles.
+package Ansi.Styles is
 
-   return 0;
+   pragma Elaborate_Body (Ansi.Styles);
 
-end Main;
+   type Style_Type is (Bright, Dim, Italic, Underline, Reversed);
+   for Style_Type use
+      (Bright     => 1,
+       Dim        => 2,
+       Italic     => 3,
+       Underline  => 4,
+       Reversed   => 7);
+   for Style_Type'Size use 3;
+
+   -- It adds an style, many styles can be set at the same time.
+   procedure Set_Style (Style: Style_Type);
+
+   -- Removes a specific style. It doesn't raise any error if the style hasn't
+   -- been set before.
+   procedure Remove_Style (Style: Style_Type);
+
+   -- Removes all styles without removing the colours.
+   procedure Remove_All_Styles;
+
+   -- Resets the terminal to the initial state (colours included)
+   procedure Plain;
+
+private
+
+   Styles_Used: array (Style_Type'Range) of Boolean := (others => False);
+
+end Ansi.Styles;
 
 
 ---=======================-------------------------=========================---

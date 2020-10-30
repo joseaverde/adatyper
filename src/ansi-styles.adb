@@ -1,10 +1,10 @@
 -------------------------------------------------------------------------------
 --                                                                           --
---                              M A I N . A D B                              --
+--                       A N S I - S T Y L E S . A D B                       --
 --                                                                           --
 --                              A D A T Y P E R                              --
 --                                                                           --
---                                  M A I N                                  --
+--                                  B O D Y                                  --
 --                                                                           --
 -------------------------------------------------------------------------------
 --     Copyright (c) 2020 José Antonio Verde Jiménez All Rights Reserved     --
@@ -26,26 +26,53 @@
 --                                                                           --
 -------------------------------------------------------------------------------
 
-with Credits;
-with Ansi.Colors;
-with Ansi.Styles;
+with Ada.Text_IO;
 
--- This is the main function of the program, it returns an natural nuber with
--- the error code if any occurs.
-function Main return Natural is
-begin
+
+package body Ansi.Styles is
+
+
+   procedure Set_Style (Style: Style_Type) is
+   begin
+
+      Ada.Text_IO.Put(ESC & Character'Val(48 + Style'Enum_Rep) & 'm');
+      Styles_Used(Style) := True;
+
+   end Set_Style;
+
+
    
-   Ansi.Colors.Set_Color(Ansi.Colors.Blue, Ansi.Colors.Yellow, True);
-   Ansi.Styles.Set_Style(Ansi.Styles.Reversed);
-   Ansi.Styles.Set_Style(Ansi.Styles.Underline);
-   Ansi.Styles.Set_Style(Ansi.Styles.Italic);
-   Ansi.Styles.Remove_All_Styles;
-   Ansi.Colors.Plain;
-   Credits.Startup_Notice;
+   procedure Remove_Style (Style: Style_Type) is
+   begin
 
-   return 0;
+      Ada.Text_IO.Put(ESC & '2' & Character'Val(48 + Style'Enum_Rep) & 'm');
+      Styles_Used(Style) := False;
 
-end Main;
+   end Remove_Style;
+
+
+   
+   procedure Remove_All_Styles is
+   begin
+
+      for Style in Styles_Used'Range loop
+         if Styles_Used(Style) then
+            Remove_Style(Style);
+         end if;
+      end loop;
+
+   end Remove_All_Styles;
+
+
+
+   procedure Plain is
+   begin
+
+      Ada.Text_IO.Put(ESC & "0m");
+
+   end Plain;
+
+end Ansi.Styles;
 
 
 ---=======================-------------------------=========================---

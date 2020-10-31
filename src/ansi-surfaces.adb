@@ -1,6 +1,6 @@
 -------------------------------------------------------------------------------
 --                                                                           --
---                       A N S I - S T Y L E S . A D B                       --
+--                     A N S I - S U R F A C E S . A D B                     --
 --                                                                           --
 --                              A D A T Y P E R                              --
 --                                                                           --
@@ -26,55 +26,61 @@
 --                                                                           --
 -------------------------------------------------------------------------------
 
-with Ada.Text_IO;
+
+with Ansi.Exceptions;
 
 
-package body Ansi.Styles is
-
-
-   procedure Set_Style (Style: Style_Type) is
-   begin
-
-      -- Ada.Text_IO.Put(ESC & Character'Val(48 + Style'Enum_Rep) & 'm');
-      Styles_Used(Style) := True;
-
-   end Set_Style;
-
-
+package body Ansi.Surfaces is
    
-   procedure Remove_Style (Style: Style_Type) is
-   begin
-
-      -- Ada.Text_IO.Put(ESC & '2' & Character'Val(48 + Style'Enum_Rep) & 'm');
-      Styles_Used(Style) := False;
-
-   end Remove_Style;
-
-
    
-   procedure Remove_All_Styles is
+   procedure Put (Item   : Str_Type;
+                  Surface: Surface_Access := null) is
    begin
 
-      for Style in Styles_Used'Range loop
-         if Styles_Used(Style) then
-            Remove_Style(Style);
-         end if;
+      for Char of Item loop
+         Put(Item    => Char,
+             Surface => Surface);
       end loop;
 
-   end Remove_All_Styles;
+   exception
+      when Ansi.Exceptions.Out_Of_Bounds_Issue =>
+         raise Ansi.Exceptions.Out_Of_Bounds_Issue
+         with "String went out of bounds!";
+   end Put;
+   
+   
+   
+   procedure Put (Item   : Char_Type;
+                  Surface: Surface_Access := null) is
+      Surf: Surface_Access := (if Surface = null then
+                                 Main_Surface
+                               else
+                                 Surface);
+   begin
+      
+      if Surf.Cursor.Col > Surf.Width then
+         raise Ansi.Exceptions.Out_Of_Bounds_Issue
+         with "Character went out of bounds!";
+      end if;
 
-
-
-   procedure Plain is
+      Surf.Grid(Surf.Cursor.Row, Surf.Cursor.Col).Char := Item;
+      Surf.Push(Surf.Cursor.Row, Surf.Cursor.Col);
+      Surf.Cursor.Row := Surf.Cursor.Row + 1;
+      Surf.Cursor.Col := Surf.Cursor.Col + 1;
+      
+   end Put;
+   
+   
+   -- TODO: Finish this.
+   procedure Put (Surface: Surface_Access := null;
+                  Update : Boolean        := False) is
    begin
 
+      null;
 
-      NULL;
-      -- Ada.Text_IO.Put(ESC & "0m");
+   end Put;
 
-   end Plain;
-
-end Ansi.Styles;
+end Ansi.Surfaces;
 
 
 ---=======================-------------------------=========================---

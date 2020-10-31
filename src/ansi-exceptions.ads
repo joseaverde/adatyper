@@ -31,8 +31,9 @@
 package Ansi.Exceptions is
 
    -- Exceptions A.K.A issues --
-
-   Already_Initialized_Issue: exception;
+   
+   -- Raised when trying to print something out of bounds.
+   Out_Of_Bounds_Issue      : exception;
 
 end Ansi.Exceptions;
 

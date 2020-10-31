@@ -31,23 +31,6 @@
 package Ansi.Colors is
 
    pragma Elaborate_Body (Ansi.Colors);
-   
-   -- This type declares the avalible colours for a normal terminal or console.
-   -- FIXME: It may need some changes for the Windows console.
-   type Color_Type is (Black, Red, Green, Yellow, Blue, Magenta, Cyan, White);
-   for Color_Type use
-      (Black   => 0,
-       Red     => 1,
-       Green   => 2,
-       Yellow  => 3,
-       Blue    => 4,
-       Magenta => 5,
-       Cyan    => 6,
-       White   => 7);
-   for Color_Type'Size use 3;
-
-   -- This is just a shortcut for Bright.
-   Bright: CONSTANT Boolean := True;
 
    -- This procedure changes the foreground color of the terminal.
    procedure Set_Foreground_Color (Color  : Color_Type;

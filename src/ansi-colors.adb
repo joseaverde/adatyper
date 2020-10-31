@@ -26,54 +26,59 @@
 --                                                                           --
 -------------------------------------------------------------------------------
 
-with Ada.Text_IO;
 
 
 package body Ansi.Colors is
 
 
+   -- TODO: Implement for the surface.
    procedure Set_Foreground_Color (Color  : Color_Type;
                                    Bright : Boolean := False) is
-   begin
 
-      Ada.Text_IO.Put(ESC                                &
-                      (if Bright then '9' else '3')      &
-                      Character'Val(48 + Color'Enum_Rep) &
-                      'm');
+     -- A:Str_Type:= ESC & (if Bright then "9" else "4") &
+   -- Char_Type'Val(48 + Color'Enum_Rep) & "m";
+   begin
+      Null;
 
    end Set_Foreground_Color;
 
 
    
+   -- TODO: Implement for the surface.
    procedure Set_Background_Color (Color  : Color_Type;
                                    Bright : Boolean := False) is
    begin
 
-      Ada.Text_IO.Put(ESC                                &
-                      (if Bright then "10" else "4")     &
-                      Character'Val(48 + Color'Enum_Rep) &
-                      'm');
+      NULL;
+     -- Text_IO.Put(ESC                                &
+     --             (if Bright then "10" else "4")     &
+     --              Char_Type'Val(48 + Color'Enum_Rep) &
+     --              "m");
 
    end Set_Background_Color;
 
 
 
+   -- TODO: Implement for the surface.
    procedure Set_Color (Fg_Color: Color_Type;
                         Bg_Color: Color_Type;
                         Bright  : Boolean := False) is
    begin
 
-      Set_Foreground_Color(Fg_Color, Bright);
-      Set_Background_Color(Bg_Color, Bright);
+      NULL;
+      --Set_Foreground_Color(Fg_Color, Bright);
+      --Set_Background_Color(Bg_Color, Bright);
 
    end Set_Color;
 
 
 
+   -- TODO: Implement for the surface.
    procedure Plain is
    begin
-
-      Ada.Text_IO.Put(ESC & "0m");
+      
+      Null;
+      -- Text_IO.Put(ESC & "0m");
 
    end Plain;
 

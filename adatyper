@@ -1,0 +1,8 @@
+#!/bin/bash
+
+gprbuild -p -Padatyper
+stty -echo
+tput civis
+./bin/adatyper.bin
+stty echo
+tput cnorm

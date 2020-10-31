@@ -27,47 +27,58 @@
 -------------------------------------------------------------------------------
 
 
-with Ansi.Colors;
-with Ansi.Styles;
-
--- This package contains surfaces, which are objects where you can write and
--- then print onto the screen minimizing changes.
+-- This package contains functions to work with surfaces.
 package Ansi.Surfaces is
 
    -- pragma Elaborate_Body (Ansi.Surfaces);
+   
+   -- The layerer type can hold many layers of Surfaces that can be then sorted
+   -- and updated in that order together. This package only contains one.
+   type Layerer_Type is tagged limited private;
 
-   type Surface_Type (Width, Height: Positive) is tagged private;
+   ----------------------------
+   -- FUNCTIONS FOR SURFACES --
+   ----------------------------
+   
+   -- This procedure prints a string into a surface. If the surface is null, it
+   -- points to the main surface. It raises an error if the string goes out of
+   -- ranges but it writes it until it can. It also moves the cursor one space
+   -- to the left of the place where it ended. (Out_Of_Bounds_Issue)
+   procedure Put (Item   : Str_Type;
+                  Surface: Surface_Access := null);
 
+   -- This procedure prints a character into a surface. If the surface is null,
+   -- it points to the main surface. It raises an error if the character goes
+   -- out of bounds. (Out_Of_Bounds_Issue)
+   procedure Put (Item   : Char_Type;
+                  Surface: Surface_Access := null);
+
+   -- This procedure forces a surface to be printed onto the screen, if it goes
+   -- out of bounds it raises an exception Out_Of_Bounds_Issue. If the surface
+   -- is null, then it's the main surface.
+   -- The Update paramater tell whether to clear the stack and update the
+   -- surface.
+   procedure Put (Surface: Surface_Access := null;
+                  Update : Boolean        := False);
 
 private
+   
+   type Surface_Array is array (Positive range <>) of Surface_Access;
+   type Layer_Array is access Surface_Array;
 
-   subtype Color_Type is Ansi.Colors.Color_Type;
-   subtype Style_Type is Ansi.Styles.Style_Type;
+   -- The layers are stored in an array access that can upgraded in runtime,
+   -- the array contains Surface_Access_es in a given order that can be changed
+   -- with functions. There is a special surface which is Null which refers to
+   -- the main screen and which is always the first one in being displayed and
+   -- it's the one where all changes will be printed and the one that will be
+   -- printed.
+   type Layerer_Type is tagged limited
+      record
+         -- The array, which by default has only one item.
+         Layers: Layer_Array := new Surface_Array(1 .. 1);
+      end record;
 
-   -- This type is used to store every character on screen.
-   type Item_Type (Is_Formatted: Boolean := False) is
-   record
-      Char: Wide_Character := Wide_Character'Val(0);
-      case Is_Formatted is
-         when True =>
-            Color: Ansi.Colors.Color_Type;
-            Style: Ansi.Styles.Style_Type;
-         when others =>
-            null;
-      end case;
-   end record;
-   pragma Pack (Item_Type);
-
-   type Matrix_Type is array (Positive range<>, Positive range<>) of Item_Type;
-
-   type Surface_Type (Width, Height: Positive) is tagged
-   record
-
-      Matrix: Matrix_Type (1 .. Width, 1 .. Height);
-      -- CURSOR
-      
-   end record;
-
+   The_Layers: Layerer_Type;
 end Ansi.Surfaces;
 
 

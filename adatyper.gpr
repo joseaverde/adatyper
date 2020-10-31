@@ -36,7 +36,7 @@ project AdaTyper is
    for Main        use ("main.adb");
 
    package Builder is
-      for Executable ("main.adb") use "adatyper";
+      for Executable ("main.adb") use "adatyper.bin";
    end Builder;
 
    package Compiler is

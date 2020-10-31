@@ -32,27 +32,29 @@ with Ansi.Colors;
 with Ansi.Styles;
 with Ansi.Surfaces;
 with Credits;
+with System;
 
 -- This is the main function of the program, it returns an natural nuber with
 -- the error code if any occurs.
 function Main return Natural is
 begin
    
-   Ansi.Colors.Set_Color(Ansi.Colors.Blue, Ansi.Colors.Yellow, True);
-   Ansi.Styles.Set_Style(Ansi.Styles.Reversed);
-   Ansi.Styles.Set_Style(Ansi.Styles.Underline);
-   Ansi.Styles.Set_Style(Ansi.Styles.Italic);
+   Ansi.Colors.Set_Color(Ansi.Blue, Ansi.Yellow, True);
+   Ansi.Styles.Set_Style(Ansi.Reversed);
+   Ansi.Styles.Set_Style(Ansi.Underlined);
+   Ansi.Styles.Set_Style(Ansi.Italics);
    Ansi.Styles.Remove_All_Styles;
    Ansi.Colors.Plain;
-   Ansi.Colors.Set_Foreground_Color(Ansi.Colors.Green, Ansi.Colors.Bright);
-   Ansi.Colors.Set_Background_Color(Ansi.Colors.Black, False);
-   Ansi.Styles.Set_Style(Ansi.Styles.Bright);
-   Ansi.Styles.Set_Style(Ansi.Styles.Italic);
+   Ansi.Colors.Set_Foreground_Color(Ansi.Green, Ansi.Is_Bright);
+   Ansi.Colors.Set_Background_Color(Ansi.Black, False);
+   Ansi.Styles.Set_Style(Ansi.Bright);
+   Ansi.Styles.Set_Style(Ansi.Italics);
    Credits.Startup_Notice;
 
-   Ansi.Initialize;
+   -- Ansi.Initialize;
    Ada.Text_IO.Put_Line("Height:" & Ansi.Get_Height'Image);
    Ada.Text_IO.Put_Line("Width: " & Ansi.Get_Width'Image);
+   Ada.Text_IO.Put_Line("Storage Unit: " & System.Storage_Unit'Image);
 
    return 0;
 

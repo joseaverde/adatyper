@@ -30,21 +30,6 @@ with Ansi.Exceptions;
 
 package body Ansi is
 
-   procedure Initialize is
-      Temp_Boolean: Boolean;
-   begin
-      
-      if Is_Initialized then
-         raise Ansi.Exceptions.Already_Initialized_Issue
-         with  "The library has already been initialized";
-      end if;
-
-      Temp_Boolean := Update_Terminal_Size;
-      Create_Main_Surface;
-
-   end Initialize;
-
-
    
    function Get_Height return Positive is
    begin
@@ -64,7 +49,7 @@ package body Ansi is
 
 
 
-   function Get_Main_Surface return Surface is
+   function Get_Main_Surface return Surface_Access is
    begin
 
       return Main_Surface;
@@ -107,15 +92,37 @@ package body Ansi is
 
    end Update_Terminal_Size;
 
+
+-------------------------------------------------------------------------------
+-- private --------------------------------------------------------------------
+-------------------------------------------------------------------------------
    
-   
-   -- TODO: Impliment this procedure once the Ansi.Surfaces package is finished
-   procedure Create_Main_Surface is
+   procedure Push (Surface : in out Surface_Record;
+                   Row, Col:        Positive) is
+      Op: Operation := new Operation_Record'(Next => Surface.Head,
+                                             Row  => Row,
+                                             Col  => Col);
    begin
 
-      NULL;
+      if Surface.Tail = null then
+         Surface.Tail := Op;
+      end if;
+      Surface.Head := Op;
 
-   end Create_Main_Surface;
+   end Push;
+
+
+
+-------------------------------------------------------------------------------
+-- elaboration ----------------------------------------------------------------
+-------------------------------------------------------------------------------
+
+   Temp_Boolean: Boolean;
+begin
+
+   -- We initialize the package.
+   Temp_Boolean := Update_Terminal_Size;
+   Main_Surface := new Surface_Record(Height, Width);
 
 end Ansi;
 

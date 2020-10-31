@@ -31,7 +31,8 @@
 package Ansi.Styles is
 
    pragma Elaborate_Body (Ansi.Styles);
-
+   
+   -- This type used to describe the different kind of styles.
    type Style_Type is (Bright, Dim, Italic, Underline, Reversed);
    for Style_Type use
       (Bright     => 1,

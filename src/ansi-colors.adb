@@ -50,7 +50,7 @@ package body Ansi.Colors is
    begin
 
       Ada.Text_IO.Put(ESC                                &
-                      (if Bright then "4" else "10")     &
+                      (if Bright then "10" else "4")     &
                       Character'Val(48 + Color'Enum_Rep) &
                       'm');
 

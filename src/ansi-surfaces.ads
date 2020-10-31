@@ -1,10 +1,10 @@
 -------------------------------------------------------------------------------
 --                                                                           --
---                              M A I N . A D B                              --
+--                     A N S I - S U R F A C E S . A D S                     --
 --                                                                           --
 --                              A D A T Y P E R                              --
 --                                                                           --
---                                  M A I N                                  --
+--                                  S P E C                                  --
 --                                                                           --
 -------------------------------------------------------------------------------
 --     Copyright (c) 2020 José Antonio Verde Jiménez All Rights Reserved     --
@@ -26,37 +26,49 @@
 --                                                                           --
 -------------------------------------------------------------------------------
 
-with Ada.Text_IO;
-with Ansi;
+
 with Ansi.Colors;
 with Ansi.Styles;
-with Ansi.Surfaces;
-with Credits;
 
--- This is the main function of the program, it returns an natural nuber with
--- the error code if any occurs.
-function Main return Natural is
-begin
-   
-   Ansi.Colors.Set_Color(Ansi.Colors.Blue, Ansi.Colors.Yellow, True);
-   Ansi.Styles.Set_Style(Ansi.Styles.Reversed);
-   Ansi.Styles.Set_Style(Ansi.Styles.Underline);
-   Ansi.Styles.Set_Style(Ansi.Styles.Italic);
-   Ansi.Styles.Remove_All_Styles;
-   Ansi.Colors.Plain;
-   Ansi.Colors.Set_Foreground_Color(Ansi.Colors.Green, Ansi.Colors.Bright);
-   Ansi.Colors.Set_Background_Color(Ansi.Colors.Black, False);
-   Ansi.Styles.Set_Style(Ansi.Styles.Bright);
-   Ansi.Styles.Set_Style(Ansi.Styles.Italic);
-   Credits.Startup_Notice;
+-- This package contains surfaces, which are objects where you can write and
+-- then print onto the screen minimizing changes.
+package Ansi.Surfaces is
 
-   Ansi.Initialize;
-   Ada.Text_IO.Put_Line("Height:" & Ansi.Get_Height'Image);
-   Ada.Text_IO.Put_Line("Width: " & Ansi.Get_Width'Image);
+   -- pragma Elaborate_Body (Ansi.Surfaces);
 
-   return 0;
+   type Surface_Type (Width, Height: Positive) is tagged private;
 
-end Main;
+
+private
+
+   subtype Color_Type is Ansi.Colors.Color_Type;
+   subtype Style_Type is Ansi.Styles.Style_Type;
+
+   -- This type is used to store every character on screen.
+   type Item_Type (Is_Formatted: Boolean := False) is
+   record
+      Char: Wide_Character := Wide_Character'Val(0);
+      case Is_Formatted is
+         when True =>
+            Color: Ansi.Colors.Color_Type;
+            Style: Ansi.Styles.Style_Type;
+         when others =>
+            null;
+      end case;
+   end record;
+   pragma Pack (Item_Type);
+
+   type Matrix_Type is array (Positive range<>, Positive range<>) of Item_Type;
+
+   type Surface_Type (Width, Height: Positive) is tagged
+   record
+
+      Matrix: Matrix_Type (1 .. Width, 1 .. Height);
+      -- CURSOR
+      
+   end record;
+
+end Ansi.Surfaces;
 
 
 ---=======================-------------------------=========================---

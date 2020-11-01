@@ -40,8 +40,20 @@ project AdaTyper is
    end Builder;
 
    package Compiler is
-      for Switches ("Ada") use ("-g", "-O0");
+      for Switches ("Ada") use ("-g",        -- Use debug symbols
+                                "-O0",       -- No optimizations
+                                "-gnatd_F",  -- Detailed invocation information
+                                --"-gnatE",    -- Dynamic elaboration
+                                --"-gnato",    --
+                                "-gnatv",    -- Verbose messages
+                                --"-gnatws",   -- Suppress warnings
+                                "-gnatd7"    -- Suppress timestamps
+                                );
    end Compiler;
+
+   package Binder is
+      for Switches ("Ada") use ("-d_C"); -- Diagnose all circularities
+   end Binder;
 
 end AdaTyper;
 

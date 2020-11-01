@@ -1,10 +1,10 @@
 -------------------------------------------------------------------------------
 --                                                                           --
---                              M A I N . A D B                              --
+--                      A N S I - T E X T _ I O . A D B                      --
 --                                                                           --
 --                              A D A T Y P E R                              --
 --                                                                           --
---                                  M A I N                                  --
+--                                  B O D Y                                  --
 --                                                                           --
 -------------------------------------------------------------------------------
 --     Copyright (c) 2020 José Antonio Verde Jiménez All Rights Reserved     --
@@ -26,47 +26,51 @@
 --                                                                           --
 -------------------------------------------------------------------------------
 
-with Ada.Text_IO;
-with Ansi;
-with Ansi.Colors;
+with Ada.Wide_Text_IO;
 with Ansi.Cursors;
-with Ansi.Styles;
-with Ansi.Surfaces;
-with Credits;
-with System;
 
--- This is the main function of the program, it returns an natural nuber with
--- the error code if any occurs.
-function Main return Natural is
-   procedure Debug (N: Natural) is
+package body Ansi.Text_IO is
+
+   procedure Put (Item: Char_Type) is
    begin
-      Ada.Text_IO.Put_Line("DEBUG:"&N'Image);
-   end Debug;
-begin
+
+      Ada.Wide_Text_IO.Put(Wide_Character(Item));
+      Main_Cursor.Move_Right(1, False);
+      
+      -- If we have reached the maximum width, we move to the next line, no
+      -- error is raised. We suppose the Width is up-to-date, because checking
+      -- for the width everytime a character is printed is very expensive.
+      if Main_Cursor.Get_Col > Width then
+         Main_Cursor.Move_Down;
+         Main_Cursor.Set_Col(1);
+      end if;
+
+   end Put;
+
    
-   --Ansi.Colors.Set_Color(Ansi.Blue, Ansi.Yellow, True);
-   --Ansi.Styles.Set_Style(Ansi.Reversed);
-   --Ansi.Styles.Set_Style(Ansi.Underlined); Debug(2);
-   --Ansi.Styles.Set_Style(Ansi.Italics); Debug(3);
-   --Ansi.Styles.Remove_All_Styles; Debug(4);
-   --Ansi.Colors.Plain; Debug(5);
-   --Ansi.Colors.Set_Foreground_Color(Ansi.Green, Ansi.Is_Bright); Debug(6);
-   --Ansi.Colors.Set_Background_Color(Ansi.Black, False); Debug(7);
-   --Ansi.Styles.Set_Style(Ansi.Bright); Debug(8);
-   --Ansi.Styles.Set_Style(Ansi.Italics); Debug(9);
-   -- Ansi.Main_Cursor.Set_Position(1, 1); Debug(10);
-   --Ada.Text_IO.Put("hoal"); Debug(11);
-   Credits.Startup_Notice; Debug(12);
-   Ansi.Main_Cursor.Set_Position(1, 1);
 
-   -- Ansi.Initialize;
-   Ada.Text_IO.Put_Line("Height:" & Ansi.Get_Height'Image);
-   Ada.Text_IO.Put_Line("Width: " & Ansi.Get_Width'Image);
-   Ada.Text_IO.Put_Line("Storage Unit: " & System.Storage_Unit'Image);
+   procedure Put (Item: Str_Type) is
+   begin
 
-   return 0;
+      for Char of Item loop
+         Ansi.Text_IO.Put(Char);
+       --  Ada.Wide_Text_IO.Put(Wide_Character(Char));
+      end loop;
 
-end Main;
+   end Put;
+
+
+
+   procedure Put_Ansi_Sequence (Item: Str_Type) is
+   begin
+
+      for Char of Item loop
+         Ada.Wide_Text_IO.Put(Wide_Character(Char));
+      end loop;
+
+   end Put_Ansi_Sequence;
+
+end Ansi.Text_IO;
 
 
 ---=======================-------------------------=========================---

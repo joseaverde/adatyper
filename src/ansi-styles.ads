@@ -29,8 +29,6 @@
 
 -- This package contains procedures to work with styles.
 package Ansi.Styles is
-
-   pragma Elaborate_Body (Ansi.Styles);
    
    -- It adds an style, many styles can be set at the same time.
    procedure Set_Style (Style: Style_Type);

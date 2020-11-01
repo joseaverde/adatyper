@@ -27,6 +27,7 @@
 -------------------------------------------------------------------------------
 
 
+with Ansi.Cursors;
 with Ansi.Exceptions;
 
 
@@ -58,25 +59,36 @@ package body Ansi.Surfaces is
                                  Surface);
    begin
       
-      if Surf.Cursor.Col > Surf.Width then
+      if Surf.Cursor.Get_Col > Col_Type(Surf.Width) then
          raise Ansi.Exceptions.Out_Of_Bounds_Issue
          with "Character went out of bounds!";
       end if;
 
-      Surf.Grid(Surf.Cursor.Row, Surf.Cursor.Col).Char := Item;
-      Surf.Push(Surf.Cursor.Row, Surf.Cursor.Col);
-      Surf.Cursor.Row := Surf.Cursor.Row + 1;
-      Surf.Cursor.Col := Surf.Cursor.Col + 1;
+      Surf.Grid(Surf.Cursor.Get_Row, Surf.Cursor.Get_Col).Char := Item;
+      Surf.Push(Surf.Cursor);
+      Surf.Cursor.Move_Right(1);
       
    end Put;
    
    
-   -- TODO: Finish this.
-   procedure Put (Surface: Surface_Access := null;
-                  Update : Boolean        := False) is
+   procedure Put (Surface: Surface_Access := null) is
+      Item: Element;
    begin
 
-      null;
+      Main_Cursor.Set_Position(Surface.Cursor.Get_Row, Surface.Cursor.Get_Col);
+      for Y in Row_Type range 1 .. Surface.Cursor.Get_Row loop
+         for X in Col_Type range 1 .. Surface.Cursor.Get_Col loop
+            Item := Surface.Grid(Y, X);
+            --Ansi.Colors.Put_Foreground(Color  => Item.Fmt.Fg_Color,
+            --                           Bright => Item.Fmt.Fg_Bright);
+            --Ansi.Colors.Put_Background(Color  => Item.Fmt.Bg_Color,
+            --                           Bright => Item.Fmt.Bg_Color);
+            --Ansi.Styles.Put_Styles(Styles => Item.Fmt.Styles);
+            --Ansi.Text_IO.Put_Char(Item.Char);
+         end loop;
+         Main_Cursor.Move_Down(1);
+         Main_Cursor.Set_Col(1);
+      end loop;
 
    end Put;
 

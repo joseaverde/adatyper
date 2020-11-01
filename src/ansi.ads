@@ -27,7 +27,7 @@
 -------------------------------------------------------------------------------
 
 private with Ada.Unchecked_Deallocation;
-        with Ada.Wide_Text_IO;
+limited with Ansi.Cursors;
 private with Interfaces.C;
 private with System;
 
@@ -39,14 +39,20 @@ private with System;
 -- directly onto the screen but onto a surface.
 package Ansi is
    
+
    -----------
    -- TYPES --
    -----------
 
+   type Row_Type is new Positive;
+   type Col_Type is new Positive;
+   type Cursor_Type is access all Ansi.Cursors.Cursor_Type;
+
    -- This is the surface type, it is declared here so every child package can
    -- use even if it's private and it's implementation still being invisible
    -- for the rest of the program.
-   type Surface_Record (Height, Width: Positive) is tagged limited private;
+   type Surface_Record (Height: Row_Type;
+                        Width : Col_Type) is tagged limited private;
    type Surface_Access is access all Surface_Record;
    
    -- This type declares the avalible colours for a normal terminal or console.
@@ -80,27 +86,22 @@ package Ansi is
    -- The type of string we will use for this program.
    type Str_Type is array (Positive range <>) of Char_Type;
 
-   package Text_IO renames Ada.Wide_Text_IO;
-
-   -- Type of a moveable cursor in the surface.
-   type Cursor_Type is
-      record
-         Col: Positive := 1;
-         Row: Positive := 1;
-      end record;
-   pragma Pack (Cursor_Type);
-   
+    
    
    ---------------
    -- CONSTANTS --
    ---------------
 
    -- This constant contains the first part of every escape code sequence.
-   ESC: CONSTANT Char_Type := Char_Type'Val(Character'Pos((ASCII.ESC)) * 16 +
-                                                Character'Pos('['));
+   ESC: CONSTANT Str_Type (1 .. 2) :=
+      (1 => Char_Type'Val(Character'Pos(ASCII.ESC)),
+       2 => Char_Type'Val(Character'Pos('[')));
 
    -- This constant is a shortcut for True when setting a colour.
    Is_Bright: CONSTANT Boolean := True;
+
+   -- This is not a constant but an access type.
+   Main_Cursor: Cursor_Type;
    
 
    ---------------
@@ -108,11 +109,11 @@ package Ansi is
    ---------------
 
    -- This function returns the height of the screen.
-   function Get_Height return Positive;
+   function Get_Height return Row_Type;
    pragma Inline (Get_Height);
    
    -- This function returns the width of the screen.
-   function Get_Width  return Positive;
+   function Get_Width  return Col_Type;
    pragma Inline (Get_Width);
 
    -- This function returns the main surface.
@@ -163,7 +164,7 @@ private -----------------------------------------------------------------------
    -----------
    -- TYPES --
    -----------
-   
+  
    -- This type is just an array of styles telling which are on and which off.
    type Style_Array is array (Style_Type'Range) of Boolean
       with Default_Component_Value => False;
@@ -210,7 +211,7 @@ private -----------------------------------------------------------------------
 
    -- Finally we declare the matrix (the grid) that will contain the
    -- information about the Surface.
-   type Matrix is array (Positive range <>, Positive range <>) of Element;
+   type Matrix is array (Row_Type range <>, Col_Type range <>) of Element;
    
    -- This is the tail used to store the performed operations onto a surface,
    -- it must be updated to free it.
@@ -218,9 +219,8 @@ private -----------------------------------------------------------------------
    type Operation is access Operation_Record;
    type Operation_Record is
       record
-         Next: Operation := null;
-         Row : Positive;
-         Col : Positive;
+         Next  : Operation := null;
+         Cursor: Cursor_Type;
       end record;
 
    -- This procedure frees an operation.
@@ -229,7 +229,7 @@ private -----------------------------------------------------------------------
 
    -- This is the declaration for the Surface type.
    -- It will be a matrix of Wide_Characters and Escape sequences.
-   type Surface_Record (Height, Width: Positive) is tagged limited
+   type Surface_Record (Height: Row_Type; Width: Col_Type) is tagged limited
       record
          -- The grid is a matrix that contains all the elements of the surface.
          Grid: Matrix (1 .. Height, 1 .. Width) :=
@@ -264,9 +264,8 @@ private -----------------------------------------------------------------------
    
    -- This procedure pushes a new row and column into the operation tail of a
    -- surface.
-   procedure Push (Surface : in out Surface_Record;
-                   Row, Col:        Positive);
-
+   procedure Push (Surface: in out Surface_Record;
+                   Cursor :        Cursor_Type);
 
    -----------------
    -- IDENTIFIERS --
@@ -276,8 +275,8 @@ private -----------------------------------------------------------------------
    Main_Surface: Surface_Access;
 
    -- The dimensions of the screen.
-   Width : Positive := 1;
-   Height: Positive := 1;
+   Height: Row_Type := 1;
+   Width : Col_Type := 1;
 
    
 end Ansi;

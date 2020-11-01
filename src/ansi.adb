@@ -27,11 +27,12 @@
 -------------------------------------------------------------------------------
 
 with Ansi.Exceptions;
+with Ansi.Cursors;
 
 package body Ansi is
 
    
-   function Get_Height return Positive is
+   function Get_Height return Row_Type is
    begin
 
       return Height;
@@ -40,7 +41,7 @@ package body Ansi is
 
 
 
-   function Get_Width  return Positive is
+   function Get_Width  return Col_Type is
    begin
 
       return Width;
@@ -70,8 +71,8 @@ package body Ansi is
 
    function Update_Terminal_Size return Boolean is
       Ws        : Winsize;
-      New_Height: Positive;
-      New_Width : Positive;
+      New_Height: Row_Type;
+      New_Width : Col_Type;
       Temp_Int  : Interfaces.C.int;
    begin
       
@@ -79,8 +80,8 @@ package body Ansi is
                         Request => TIOCGWINSZ,
                         Struct  => Ws);
 
-      New_Height := Positive(Ws.ws_col);
-      New_Width  := Positive(Ws.ws_row);
+      New_Height := Row_Type(Ws.ws_col);
+      New_Width  := Col_Type(Ws.ws_row);
 
       if New_Height /= Height or New_Width /= Width then
          Height := New_Height;
@@ -97,12 +98,13 @@ package body Ansi is
 -- private --------------------------------------------------------------------
 -------------------------------------------------------------------------------
    
-   procedure Push (Surface : in out Surface_Record;
-                   Row, Col:        Positive) is
-      Op: Operation := new Operation_Record'(Next => Surface.Head,
-                                             Row  => Row,
-                                             Col  => Col);
+   procedure Push (Surface: in out Surface_Record;
+                   Cursor :        Cursor_Type) is
+      Op: Operation := new Operation_Record;
    begin
+
+      Op.Next := Surface.Head;
+      Op.Cursor.Set_Position(Surface.Cursor.Get_Row, Surface.Cursor.Get_Col);
 
       if Surface.Tail = null then
          Surface.Tail := Op;
@@ -110,8 +112,6 @@ package body Ansi is
       Surface.Head := Op;
 
    end Push;
-
-
 
 -------------------------------------------------------------------------------
 -- elaboration ----------------------------------------------------------------
@@ -123,6 +123,9 @@ begin
    -- We initialize the package.
    Temp_Boolean := Update_Terminal_Size;
    Main_Surface := new Surface_Record(Height, Width);
+   Main_Cursor := new Cursors.Cursor_Type;
+   Main_Cursor.Set_Position(1, 1);
+   Main_Surface.Cursor := Main_Cursor;
 
 end Ansi;
 

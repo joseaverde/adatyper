@@ -1,8 +1,13 @@
 #!/bin/bash
 
-gprbuild -p -Padatyper
-stty -echo
-tput civis
-./bin/adatyper.bin
-stty echo
-tput cnorm
+
+gprbuild -p -Padatyper || exit 1
+#stty -echo
+#tput civis
+if [ "$1" == "debug" ]; then
+   gdb bin/adatyper.bin -x debug/adatyper.gdb
+else
+   ./bin/adatyper.bin
+fi
+#stty echo
+#tput cnorm

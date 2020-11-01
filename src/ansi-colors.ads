@@ -30,8 +30,6 @@
 -- This package contains the functions and procedures to work with colours.
 package Ansi.Colors is
 
-   pragma Elaborate_Body (Ansi.Colors);
-
    -- This procedure changes the foreground color of the terminal.
    procedure Set_Foreground_Color (Color  : Color_Type;
                                    Bright : Boolean := False);

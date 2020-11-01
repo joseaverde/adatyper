@@ -1,6 +1,6 @@
 -------------------------------------------------------------------------------
 --                                                                           --
---                     A N S I - S U R F A C E S . A D S                     --
+--                      A N S I - T E X T _ I O . A D S                      --
 --                                                                           --
 --                              A D A T Y P E R                              --
 --                                                                           --
@@ -27,55 +27,20 @@
 -------------------------------------------------------------------------------
 
 
--- This package contains functions to work with surfaces.
-package Ansi.Surfaces is
+-- This package contains input and output functions.
+package Ansi.Text_IO is
    
-   -- The layerer type can hold many layers of Surfaces that can be then sorted
-   -- and updated in that order together. This package only contains one.
-   type Layerer_Type is tagged limited private;
-
-   ----------------------------
-   -- FUNCTIONS FOR SURFACES --
-   ----------------------------
+   -- This procedure prints a character onto the screen.
+   procedure Put (Item: Char_Type);
    
-   -- This procedure prints a string into a surface. If the surface is null, it
-   -- points to the main surface. It raises an error if the string goes out of
-   -- ranges but it writes it until it can. It also moves the cursor one space
-   -- to the left of the place where it ended. (Out_Of_Bounds_Issue)
-   procedure Put (Item   : Str_Type;
-                  Surface: Surface_Access := null);
+   -- This procedure prints a character onto the screen.
+   procedure Put (Item: Str_Type);
 
-   -- This procedure prints a character into a surface. If the surface is null,
-   -- it points to the main surface. It raises an error if the character goes
-   -- out of bounds. (Out_Of_Bounds_Issue)
-   procedure Put (Item   : Char_Type;
-                  Surface: Surface_Access := null);
+   -- This procedure prints an Ansi Sequence without moving the cursor.
+   procedure Put_Ansi_Sequence (Item: Str_Type);
 
-   -- This procedure forces a surface to be printed onto the screen, if it goes
-   -- out of bounds it raises an exception Out_Of_Bounds_Issue. If the surface
-   -- is null, then it's the main surface. It doesn't look at the tail, it's
-   -- the output of the full Surface without trying to minimize the changes.
-   procedure Put (Surface: Surface_Access := null);
 
-private
-   
-   type Surface_Array is array (Positive range <>) of Surface_Access;
-   type Layer_Array is access Surface_Array;
-
-   -- The layers are stored in an array access that can upgraded in runtime,
-   -- the array contains Surface_Access_es in a given order that can be changed
-   -- with functions. There is a special surface which is Null which refers to
-   -- the main screen and which is always the first one in being displayed and
-   -- it's the one where all changes will be printed and the one that will be
-   -- printed.
-   type Layerer_Type is tagged limited
-      record
-         -- The array, which by default has only one item.
-         Layers: Layer_Array := new Surface_Array(1 .. 1);
-      end record;
-
-   The_Layers: Layerer_Type;
-end Ansi.Surfaces;
+end Ansi.Text_IO;
 
 
 ---=======================-------------------------=========================---

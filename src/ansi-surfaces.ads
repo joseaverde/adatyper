@@ -86,6 +86,7 @@ private
       record
          -- The array, which by default has only one item.
          Layers: Layer_Array := new Surface_Array(1 .. 1);
+         -- TODO: Hideable surfaces.
       end record;
 
    The_Layers: Layerer_Type;

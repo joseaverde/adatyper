@@ -26,61 +26,196 @@
 --                                                                           --
 -------------------------------------------------------------------------------
 
+with Ansi.Text_IO;
 
 
 package body Ansi.Colors is
 
+   ZERO: CONSTANT Natural := Character'Pos('0');
+   -- TODO: Get Constraint_Error and raise Out_Bound_Error;
 
-   -- TODO: Implement for the surface.
-   procedure Set_Foreground_Color (Color  : Color_Type;
-                                   Bright : Boolean := False) is
+   ------------------------
+   -- SURFACE OPERATIONS --
+   ------------------------
 
-     -- A:Str_Type:= ESC & (if Bright then "9" else "4") &
-   -- Char_Type'Val(48 + Color'Enum_Rep) & "m";
-   begin
-      Null;
-
-   end Set_Foreground_Color;
-
-
-   
-   -- TODO: Implement for the surface.
-   procedure Set_Background_Color (Color  : Color_Type;
-                                   Bright : Boolean := False) is
-   begin
-
-      NULL;
-     -- Text_IO.Put(ESC                                &
-     --             (if Bright then "10" else "4")     &
-     --              Char_Type'Val(48 + Color'Enum_Rep) &
-     --              "m");
-
-   end Set_Background_Color;
-
-
-
-   -- TODO: Implement for the surface.
-   procedure Set_Color (Fg_Color: Color_Type;
-                        Bg_Color: Color_Type;
-                        Bright  : Boolean := False) is
-   begin
-
-      NULL;
-      --Set_Foreground_Color(Fg_Color, Bright);
-      --Set_Background_Color(Bg_Color, Bright);
-
-   end Set_Color;
-
-
-
-   -- TODO: Implement for the surface.
-   procedure Plain is
+   procedure Get_Foreground (Surface: in  Surface_Type;
+                             Color  : out Color_Type;
+                             Bright : out Boolean;
+                             Row    :     Row_Type;
+                             Col    :     Col_Type) is
    begin
       
-      Null;
-      -- Text_IO.Put(ESC & "0m");
+      Color  := Surface.Grid(Row, Col).Fmt.Fg_Color;
+      Bright := Surface.Grid(Row, Col).Fmt.Fg_Bright;
 
-   end Plain;
+   end Get_Foreground;
+
+
+   procedure Get_Background (Surface: in  Surface_Type;
+                             Color  : out Color_Type;
+                             Bright : out Boolean;
+                             Row    :     Row_Type;
+                             Col    :     Col_Type) is
+   begin
+
+      Color  := Surface.Grid(Row, Col).Fmt.Bg_Color;
+      Bright := Surface.Grid(Row, Col).Fmt.Bg_Bright;
+
+   end Get_Background;
+
+
+
+   procedure Put_Foreground (Color : Color_Type;
+                             Bright: Boolean) is
+   begin
+
+      Ansi.Text_IO.Put_Ansi_Sequence(ESC &
+                                     (if Bright then
+                                       "9"
+                                      else
+                                       "3") &
+                                     Char_Type'Val(ZERO + Color'Enum_Rep) &
+                                     "m");
+
+   end Put_Foreground;
+
+
+   procedure Put_Background (Color : Color_Type;
+                             Bright: Boolean) is
+   begin
+
+      Ansi.Text_IO.Put_Ansi_Sequence(ESC &
+                                     (if Bright then
+                                       "10"
+                                      else
+                                       "4") &
+                                     Char_Type'Val(ZERO + Color'Enum_Rep) &
+                                     "m");
+
+   end Put_Background;
+
+
+
+   procedure Set_Foreground (Surface: out Surface_Type;
+                             Color  : Color_Type;
+                             Bright : Boolean;
+                             Row    : Row_Type;
+                             Col    : Col_Type) is
+   begin
+
+      Surface.Grid(Row, Col).Fmt.Fg_Color  := Color;
+      Surface.Grid(Row, Col).Fmt.Fg_Bright := Bright;
+
+   end Set_Foreground;
+
+
+   procedure Set_Background (Surface: out Surface_Type;
+                             Color  : Color_Type;
+                             Bright : Boolean;
+                             Row    : Row_Type;
+                             Col    : Col_Type) is
+   begin
+
+      Surface.Grid(Row, Col).Fmt.Bg_Color  := Color;
+      Surface.Grid(Row, Col).Fmt.Bg_Bright := Bright;
+
+   end Set_Background;
+
+
+
+   procedure Set_Foreground (Surface : out Surface_Type;
+                             Color   : Color_Type;
+                             Bright  : Boolean;
+                             From_Row: Row_Type;
+                             From_Col: Col_Type;
+                             To_Row  : Row_Type;
+                             To_Col  : Col_Type) is
+   begin
+
+      for Row in Row_Type range From_Row .. To_Row loop
+         for Col in Col_Type range From_Col .. To_Col loop
+            Set_Foreground(Surface => Surface,
+                           Color   => Color,
+                           Bright  => Bright,
+                           Row     => Row,
+                           Col     => Col);
+         end loop;
+      end loop;
+
+   end Set_Foreground;
+
+
+   procedure Set_Background (Surface : out Surface_Type;
+                             Color   : Color_Type;
+                             Bright  : Boolean;
+                             From_Row: Row_Type;
+                             From_Col: Col_Type;
+                             To_Row  : Row_Type;
+                             To_Col  : Col_Type) is
+   begin
+
+      for Row in Row_Type range From_Row .. To_Row loop
+         for Col in Col_Type range From_Col .. To_Col loop
+            Set_Background(Surface => Surface,
+                           Color   => Color,
+                           Bright  => Bright,
+                           Row     => Row,
+                           Col     => Col);
+         end loop;
+      end loop;
+
+   end Set_Background;
+
+
+
+
+   ---------------------------------
+   -- SURFACE'S CURSOR OPERATIONS --
+   ---------------------------------
+
+   procedure Get_Cursor_Foreground (Surface: in  Surface_Type;
+                                    Color  : out Color_Type;
+                                    Bright : out Boolean) is
+   begin
+
+      Color  := Surface.Cursor_Fmt.Fg_Color;
+      Bright := Surface.Cursor_Fmt.Fg_Bright;
+
+   end Get_Cursor_Foreground;
+
+
+   procedure Get_Cursor_Background (Surface: in  Surface_Type;
+                                    Color  : out Color_Type;
+                                    Bright : out Boolean) is
+   begin
+
+      Color  := Surface.Cursor_Fmt.Bg_Color;
+      Bright := Surface.Cursor_Fmt.Bg_Bright;
+
+   end Get_Cursor_Background;
+
+
+
+   procedure Set_Cursor_Foreground (Surface: out Surface_Type;
+                                    Color  : Color_Type;
+                                    Bright : Boolean) is
+   begin
+
+      Surface.Cursor_Fmt.Fg_Color  := Color;
+      Surface.Cursor_Fmt.Fg_Bright := Bright;
+
+   end Set_Cursor_Foreground;
+
+
+   procedure Set_Cursor_Background (Surface: out Surface_Type;
+                                    Color  : Color_Type;
+                                    Bright : Boolean) is
+   begin
+
+      Surface.Cursor_Fmt.Bg_Color  := Color;
+      Surface.Cursor_Fmt.Bg_Bright := Bright;
+
+   end Set_Cursor_Background;
 
 end Ansi.Colors;
 

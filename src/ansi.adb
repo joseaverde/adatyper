@@ -105,6 +105,7 @@ package body Ansi is
       System_Command("tput cnorm");
 
       Main_Cursor.Set_Position(Height - 1, Width - 1);
+      Ada.Text_IO.Put_Line(ASCII.ESC & "[0m");
       Ada.Text_IO.Get_Immediate(Tmp);
 
    end Finalize;

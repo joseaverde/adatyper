@@ -1,1 +1,5 @@
-Remember to Free the operation's cursor as it's an access type.
+(Remember to Free the operation's cursor as it's an access type.)
+
+ * Create Input functions (Get_Immediate)
+ * Procedures to move the layers, to merge them and so on.
+

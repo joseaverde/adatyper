@@ -30,24 +30,101 @@
 -- This package contains the functions and procedures to work with colours.
 package Ansi.Colors is
 
-   -- This procedure changes the foreground color of the terminal.
-   procedure Set_Foreground_Color (Color  : Color_Type;
-                                   Bright : Boolean := False);
-   
-   -- This procedure changes the background color of the terminal.
-   procedure Set_Background_Color (Color  : Color_Type;
-                                   Bright : Boolean := False);
+   ------------------------
+   -- SURFACE OPERATIONS --
+   ------------------------
 
-   -- This procedure is a shortcut for the two above, but it will make both
-   -- colours with the same chosen brightness.
-   procedure Set_Color (Fg_Color: Color_Type;
-                        Bg_Color: Color_Type;
-                        Bright  : Boolean := False);
-   pragma Inline (Set_Color);
+   -- This procedure returns the foreground colour in a certain position of the
+   -- surface.
+   procedure Get_Foreground (Surface: in  Surface_Type;
+                             Color  : out Color_Type;
+                             Bright : out Boolean;
+                             Row    :     Row_Type;
+                             Col    :     Col_Type);
+   pragma Inline (Get_Foreground);
 
-   -- This procedure resets the terminal colour.
-   procedure Plain;
-   pragma Inline (Plain);
+   -- This procedure returns the background colour in a certain position of the
+   -- surface.
+   procedure Get_Background (Surface: in  Surface_Type;
+                             Color  : out Color_Type;
+                             Bright : out Boolean;
+                             Row    :     Row_Type;
+                             Col    :     Col_Type);
+   pragma Inline (Get_Background);
+
+
+   -- This procedure puts a colour into standard output.
+   procedure Put_Foreground (Color : Color_Type;
+                             Bright: Boolean);
+   pragma Inline (Put_Foreground);
+
+   -- This procedure puts a colour into standard output.
+   procedure Put_Background (Color : Color_Type;
+                             Bright: Boolean);
+   pragma Inline (Put_Background);
+
+   -- This procedure sets a foreground colour in a cell of the surface.
+   procedure Set_Foreground (Surface: out Surface_Type;
+                             Color  : Color_Type;
+                             Bright : Boolean;
+                             Row    : Row_Type;
+                             Col    : Col_Type);
+
+   -- This procedure sets a background colour in a cell of the surface.
+   procedure Set_Background (Surface: out Surface_Type;
+                             Color  : Color_Type;
+                             Bright : Boolean;
+                             Row    : Row_Type;
+                             Col    : Col_Type);
+
+   -- This procedure sets a foreground colour in a block of cells from the
+   -- surface.
+   procedure Set_Foreground (Surface : out Surface_Type;
+                             Color   : Color_Type;
+                             Bright  : Boolean;
+                             From_Row: Row_Type;
+                             From_Col: Col_Type;
+                             To_Row  : Row_Type;
+                             To_Col  : Col_Type);
+
+   -- This procedure sets a background colour in a block of cells from the
+   -- surface.
+   procedure Set_Background (Surface : out Surface_Type;
+                             Color   : Color_Type;
+                             Bright  : Boolean;
+                             From_Row: Row_Type;
+                             From_Col: Col_Type;
+                             To_Row  : Row_Type;
+                             To_Col  : Col_Type);
+
+
+   ---------------------------------
+   -- SURFACE'S CURSOR OPERATIONS --
+   ---------------------------------
+
+   -- This procedure returns the default foreground colour from the cursor.
+   procedure Get_Cursor_Foreground (Surface: in  Surface_Type;
+                                    Color  : out Color_Type;
+                                    Bright : out Boolean);
+   pragma Inline (Get_Cursor_Foreground);
+
+   -- This procedure returns the default background colour from the cursor.
+   procedure Get_Cursor_Background (Surface: in  Surface_Type;
+                                    Color  : out Color_Type;
+                                    Bright : out Boolean);
+   pragma Inline (Get_Cursor_Background);
+
+   -- This procedure changes the default foreground colour for the cursor.
+   procedure Set_Cursor_Foreground (Surface: out Surface_Type;
+                                    Color  : Color_Type;
+                                    Bright : Boolean);
+   pragma Inline (Set_Cursor_Foreground);
+
+   -- This procedure changes the default background colour for the cursor.
+   procedure Set_Cursor_Background (Surface: out Surface_Type;
+                                    Color  : Color_Type;
+                                    Bright : Boolean);
+   pragma Inline (Set_Cursor_Background);
 
 end Ansi.Colors;
 

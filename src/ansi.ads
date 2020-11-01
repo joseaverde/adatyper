@@ -262,6 +262,13 @@ private -----------------------------------------------------------------------
 
          -- The current cursor position in this surface.
          Cursor    : Cursor_Type;
+
+         -- The default format the cursor will write.
+         Cursor_Fmt: Format := Format'(Fg_Color  => White,
+                                       Fg_Bright => False,
+                                       Bg_Color  => Black,
+                                       Bg_Bright => False,
+                                       Style     => (others => False));
       end record;
 
    

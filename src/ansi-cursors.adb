@@ -27,7 +27,6 @@
 -------------------------------------------------------------------------------
 
 
-with  Ada.Text_IO;
 with Ansi.Text_IO;
 with Ansi.Exceptions;
 
@@ -74,7 +73,7 @@ package body Ansi.Cursors is
 
 
    procedure Set_Position (Cursor : in out Cursor_Type;
-                           Cursor2: in     Cursor_Type;
+                           Cursor2: in     Ansi.Cursor_Type;
                            Move   : Boolean := True) is
    begin
 

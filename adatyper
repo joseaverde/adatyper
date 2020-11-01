@@ -1,11 +1,18 @@
 #!/bin/bash
 
 
-gprbuild -p -Padatyper || exit 1
+if [ "$1" == "compile" ]; then
+   gprbuild -f -p -Padatyper || exit 1
+   exit 0
+else
+   gprbuild -p -Padatyper || exit 1
+fi
 #stty -echo
 #tput civis
 if [ "$1" == "debug" ]; then
    gdb bin/adatyper.bin -x debug/adatyper.gdb
+elif [ "$1" == "compile" ]; then
+   echo
 else
    ./bin/adatyper.bin
 fi

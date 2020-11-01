@@ -29,13 +29,38 @@
 
 with Ansi.Cursors;
 with Ansi.Exceptions;
+with Ansi.Text_IO;
+with Ada.Text_IO;
 
 
 package body Ansi.Surfaces is
    
+
+   function Create (Height: Row_Type;
+                    Width : Col_Type)
+                    return Surface_Type is
+   begin
+
+      return New_Surface: Surface_Type do
+         New_Surface := new Surface_Record(Height, Width);
+         New_Surface.Cursor := new Ansi.Cursors.Cursor_Type;
+         New_Surface.Cursor.Set_Position(1, 1, False);
+      end return;
+
+   end Create;
+
+
+   function Get_Cursor (Surface: Surface_Type)
+                        return Cursor_Type is
+   begin
+
+      return Surface.Cursor;
+
+   end Get_Cursor;
    
+
    procedure Put (Item   : Str_Type;
-                  Surface: Surface_Access := null) is
+                  Surface: Surface_Type := null) is
    begin
 
       for Char of Item loop
@@ -52,11 +77,11 @@ package body Ansi.Surfaces is
    
    
    procedure Put (Item   : Char_Type;
-                  Surface: Surface_Access := null) is
-      Surf: Surface_Access := (if Surface = null then
-                                 Main_Surface
-                               else
-                                 Surface);
+                  Surface: Surface_Type := null) is
+      Surf: Surface_Type := (if Surface = null then
+                              Main_Surface
+                             else
+                              Surface);
    begin
       
       if Surf.Cursor.Get_Col > Col_Type(Surf.Width) then
@@ -71,26 +96,34 @@ package body Ansi.Surfaces is
    end Put;
    
    
-   procedure Put (Surface: Surface_Access := null) is
+   procedure Put (Surface: Surface_Type := null;
+                  Row    : Row_Type := 1;
+                  Col    : Col_Type := 1) is
+      Surf: Surface_Type := (if Surface = null then
+                              Main_Surface
+                             else
+                              Surface);
       Item: Element;
    begin
 
-      Main_Cursor.Set_Position(Surface.Cursor.Get_Row, Surface.Cursor.Get_Col);
-      for Y in Row_Type range 1 .. Surface.Cursor.Get_Row loop
-         for X in Col_Type range 1 .. Surface.Cursor.Get_Col loop
-            Item := Surface.Grid(Y, X);
+      Main_Cursor.Set_Position(Row, Col);
+      for Y in Row_Type range 1 .. Surf.Height loop
+         for X in Col_Type range 1 .. Surf.Width loop
+            Item := Surf.Grid(Y, X);
             --Ansi.Colors.Put_Foreground(Color  => Item.Fmt.Fg_Color,
             --                           Bright => Item.Fmt.Fg_Bright);
             --Ansi.Colors.Put_Background(Color  => Item.Fmt.Bg_Color,
             --                           Bright => Item.Fmt.Bg_Color);
             --Ansi.Styles.Put_Styles(Styles => Item.Fmt.Styles);
-            --Ansi.Text_IO.Put_Char(Item.Char);
+           -- Ada.Text_IO.Put(Char_Type'Pos(Item.Char)'Image);
+            Ansi.Text_IO.Put(Item.Char);
          end loop;
          Main_Cursor.Move_Down(1);
          Main_Cursor.Set_Col(1);
       end loop;
 
    end Put;
+
 
 end Ansi.Surfaces;
 

@@ -26,6 +26,7 @@
 --                                                                           --
 -------------------------------------------------------------------------------
 
+with Ada.Exceptions;
 with Ada.Text_IO;
 with Ansi;
 with Ansi.Colors;
@@ -42,29 +43,35 @@ function Main return Natural is
    begin
       Ada.Text_IO.Put_Line("DEBUG:"&N'Image);
    end Debug;
+
+   My_Surface: Ansi.Surface_Type := Ansi.Surfaces.Create(10, 20);
+
 begin
+
+   Ansi.Surfaces.Get_Cursor(My_Surface).Set_Position(5, 1, False);
+   Ansi.Surfaces.Put("Hola mundo", My_Surface);
+   Ansi.Surfaces.Get_Cursor(My_Surface).Set_Position(7, 2, False);
+   Ansi.Surfaces.Put("Hello World", My_Surface);
+   Ansi.Surfaces.Put(My_Surface);
    
-   --Ansi.Colors.Set_Color(Ansi.Blue, Ansi.Yellow, True);
-   --Ansi.Styles.Set_Style(Ansi.Reversed);
-   --Ansi.Styles.Set_Style(Ansi.Underlined); Debug(2);
-   --Ansi.Styles.Set_Style(Ansi.Italics); Debug(3);
-   --Ansi.Styles.Remove_All_Styles; Debug(4);
-   --Ansi.Colors.Plain; Debug(5);
-   --Ansi.Colors.Set_Foreground_Color(Ansi.Green, Ansi.Is_Bright); Debug(6);
-   --Ansi.Colors.Set_Background_Color(Ansi.Black, False); Debug(7);
-   --Ansi.Styles.Set_Style(Ansi.Bright); Debug(8);
-   --Ansi.Styles.Set_Style(Ansi.Italics); Debug(9);
-   -- Ansi.Main_Cursor.Set_Position(1, 1); Debug(10);
-   --Ada.Text_IO.Put("hoal"); Debug(11);
-   Credits.Startup_Notice; Debug(12);
-   Ansi.Main_Cursor.Set_Position(1, 1);
 
-   -- Ansi.Initialize;
-   Ada.Text_IO.Put_Line("Height:" & Ansi.Get_Height'Image);
-   Ada.Text_IO.Put_Line("Width: " & Ansi.Get_Width'Image);
-   Ada.Text_IO.Put_Line("Storage Unit: " & System.Storage_Unit'Image);
-
+   -- Credits.Startup_Notice;
+   -- Credits.Start_UP
+   
+   
+   Ansi.Finalize;
    return 0;
+
+exception
+   when Error: others =>
+      Ansi.Finalize;
+      Ada.Text_IO.Put_Line(File => Ada.Text_IO.Standard_Error,
+                           Item => "Unexpected error occurred:  ");
+      Ada.Text_IO.Put_Line(File => Ada.Text_IO.Standard_Error,
+                           Item => Ada.Exceptions.Exception_Information(
+                                       Error));
+
+      return 255;
 
 end Main;
 

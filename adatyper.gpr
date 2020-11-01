@@ -43,6 +43,8 @@ project AdaTyper is
       for Switches ("Ada") use ("-g",        -- Use debug symbols
                                 "-O0",       -- No optimizations
                                 "-gnatd_F",  -- Detailed invocation information
+                                "-fdata-sections",
+                                "-ffunction-sections",
                                 --"-gnatE",    -- Dynamic elaboration
                                 --"-gnato",    --
                                 "-gnatv",    -- Verbose messages
@@ -50,6 +52,11 @@ project AdaTyper is
                                 "-gnatd7"    -- Suppress timestamps
                                 );
    end Compiler;
+
+   package Linker is
+      for Switches ("Ada") use ("-Wl,--gc-sections", -- Remove unused sections
+                                "-flto");
+   end Linker;
 
    package Binder is
       for Switches ("Ada") use ("-d_C"); -- Diagnose all circularities

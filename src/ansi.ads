@@ -53,7 +53,7 @@ package Ansi is
    -- for the rest of the program.
    type Surface_Record (Height: Row_Type;
                         Width : Col_Type) is tagged limited private;
-   type Surface_Access is access all Surface_Record;
+   type Surface_Type is access all Surface_Record;
    
    -- This type declares the avalible colours for a normal terminal or console.
    -- FIXME: It may need some changes for the Windows console.
@@ -117,7 +117,7 @@ package Ansi is
    pragma Inline (Get_Width);
 
    -- This function returns the main surface.
-   function Get_Main_Surface return Surface_Access;
+   function Get_Main_Surface return Surface_Type;
    pragma Inline (Get_Main_Surface);
    
    -- This procedure updates the main surface if it has been resized.
@@ -127,6 +127,9 @@ package Ansi is
    -- either the width or the height or both have changed.
    function Update_Terminal_Size return Boolean;
    pragma Inline (Update_Terminal_Size);
+
+   -- This procedure restores the old terminal.
+   procedure Finalize;
 
  
 -------------------------------------------------------------------------------
@@ -240,7 +243,7 @@ private -----------------------------------------------------------------------
                                                    Bg_Bright => False,
                                                    Style     =>
                                                       (others => False)),
-                                   Char => Char_Type'Val(0))));
+                                   Char => Char_Type'Val(Character'Pos(' ')))));
 
          -- Every operation performed onto the screen is stored onto a tail, so
          -- it requires the minimum number of operations and changes when
@@ -267,12 +270,21 @@ private -----------------------------------------------------------------------
    procedure Push (Surface: in out Surface_Record;
                    Cursor :        Cursor_Type);
 
+
+   ----------------
+   -- PROCEDURES --
+   ----------------
+
+   -- This procedure runs a system command using a C interface.
+   procedure System_Command(Cmd: String);
+
+
    -----------------
    -- IDENTIFIERS --
    -----------------
 
    -- The main surface.
-   Main_Surface: Surface_Access;
+   Main_Surface: Surface_Type;
 
    -- The dimensions of the screen.
    Height: Row_Type := 1;

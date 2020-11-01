@@ -41,7 +41,7 @@ package Ansi.Cursors is
 
    -- This procedure changes the position of the cursor to the one of another.
    procedure Set_Position (Cursor : in out Cursor_Type;
-                           Cursor2: in     Cursor_Type;
+                           Cursor2: in     Ansi.Cursor_Type;
                            Move   : Boolean := True);
    pragma Inline (Set_Position);
 

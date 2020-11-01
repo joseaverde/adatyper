@@ -26,8 +26,10 @@
 --                                                                           --
 -------------------------------------------------------------------------------
 
-with Ansi.Exceptions;
+with  Ada.Text_IO;
 with Ansi.Cursors;
+with Ansi.Exceptions;
+with Ansi.Surfaces;
 
 package body Ansi is
 
@@ -50,7 +52,7 @@ package body Ansi is
 
 
 
-   function Get_Main_Surface return Surface_Access is
+   function Get_Main_Surface return Surface_Type is
    begin
 
       return Main_Surface;
@@ -94,6 +96,20 @@ package body Ansi is
    end Update_Terminal_Size;
 
 
+
+   procedure Finalize is
+      Tmp: Character;
+   begin
+      
+      System_Command("stty echo");
+      System_Command("tput cnorm");
+
+      Main_Cursor.Set_Position(Height - 1, Width - 1);
+      Ada.Text_IO.Get_Immediate(Tmp);
+
+   end Finalize;
+
+
 -------------------------------------------------------------------------------
 -- private --------------------------------------------------------------------
 -------------------------------------------------------------------------------
@@ -104,7 +120,8 @@ package body Ansi is
    begin
 
       Op.Next := Surface.Head;
-      Op.Cursor.Set_Position(Surface.Cursor.Get_Row, Surface.Cursor.Get_Col);
+      Op.Cursor := new Ansi.Cursors.Cursor_Type;
+      Op.Cursor.Set_Position(Surface.Cursor, False);
 
       if Surface.Tail = null then
          Surface.Tail := Op;
@@ -113,6 +130,18 @@ package body Ansi is
 
    end Push;
 
+
+   procedure System_Command (Cmd: String) is
+      function C_System (Cmd: Interfaces.C.Char_Array) return Integer;
+      pragma Import (C, C_System, "system");
+      Ret_Val: Integer;
+   begin
+      
+      Ret_Val := C_System(Interfaces.C.To_C(Cmd));
+
+   end System_Command;
+
+
 -------------------------------------------------------------------------------
 -- elaboration ----------------------------------------------------------------
 -------------------------------------------------------------------------------
@@ -120,12 +149,17 @@ package body Ansi is
    Temp_Boolean: Boolean;
 begin
 
+   -- We prepare the screen.
+   System_Command("stty -echo");
+   System_Command("tput civis");
+
    -- We initialize the package.
    Temp_Boolean := Update_Terminal_Size;
-   Main_Surface := new Surface_Record(Height, Width);
+   Main_Surface := Ansi.Surfaces.Create(Height, Width);
    Main_Cursor := new Cursors.Cursor_Type;
    Main_Cursor.Set_Position(1, 1);
    Main_Surface.Cursor := Main_Cursor;
+
 
 end Ansi;
 

@@ -44,18 +44,35 @@ function Main return Natural is
       Ada.Text_IO.Put_Line("DEBUG:"&N'Image);
    end Debug;
 
-   My_Surface: Ansi.Surface_Type := Ansi.Surfaces.Create(10, 20);
-   Red_Surf  : Ansi.Surface_Type := Ansi.Surfaces.Create(10, 20);
+   My_Surface : Ansi.Surface_Type := Ansi.Surfaces.Create(10, 20);
+   Red_Surf   : Ansi.Surface_Type := Ansi.Surfaces.Create(10, 10);
+   Small_Green: Ansi.Surface_Type := Ansi.Surfaces.Create(5, 5);
+   Col_Blue   : Ansi.Surface_Type := Ansi.Surfaces.Create(12, 1);
 
 begin
 
+   Ansi.Colors.Set_Background (Surface  => Col_Blue,
+                               Color    => Ansi.Blue,
+                               Bright   => True,
+                               From_Row => 1,
+                               To_Row   => 12,
+                               From_Col => 1,
+                               To_Col   => 1);
+
+   Ansi.Colors.Set_Background (Surface  => Small_Green,
+                               Color    => Ansi.Green,
+                               Bright   => False,
+                               From_Row => 1,
+                               To_Row   => 5,
+                               From_Col => 1,
+                               To_Col   => 5);
    Ansi.Colors.Set_Background (Surface  => Red_Surf,
                                Color    => Ansi.Red,
                                Bright   => True,
                                From_Row => 1,
                                To_Row   => 10,
                                From_Col => 1,
-                               To_Col   => 20);
+                               To_Col   => 10);
 
    Ansi.Surfaces.Get_Cursor(My_Surface).Set_Position(1, 1, False);
    Ansi.Surfaces.Put("##########", My_Surface);
@@ -111,8 +128,10 @@ begin
       Ada.Text_IO.Put_Line(" ; " & MC'Image & "::" & BR'Image);
    end;
 
-   --Ansi.Surfaces.Put(My_Surface, 1, 1);
+   Ansi.Surfaces.Put(My_Surface, 10, 10);
    Ansi.Surfaces.Put(Red_Surf, 1, 1);
+   Ansi.Surfaces.Put(Small_Green, 2, 2);
+   Ansi.Surfaces.Put(Col_Blue, 4, 4);
    
 
    -- Credits.Startup_Notice;

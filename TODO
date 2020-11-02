@@ -2,4 +2,8 @@
 
  * Create Input functions (Get_Immediate)
  * Procedures to move the layers, to merge them and so on.
-
+ * Remove all the Ada.Text_IO;
+ * Set_Background (Overwrite := False)
+ * Raise Out_Of_Bounds_Issue in colours package.
+ * Check for null surface in colours package.
+  (The same for styles)

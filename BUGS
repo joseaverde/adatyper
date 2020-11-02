@@ -1,4 +1,4 @@
 The BUGS in this file describe only the general bugs, the bugs in functions
 are explained there.
 
- * src/ansi-surfaces.adb:Put__3 [BUG]
+ * src/ansi-surfaces.adb:Put__3 [BUG] [FIXED]

@@ -32,7 +32,7 @@ with Ansi.Colors;
 with Ansi.Exceptions;
 with Ansi.Styles;
 with Ansi.Text_IO;
-with Ada.Text_IO;
+-- with Ada.Text_IO; DEBUGING
 
 
 package body Ansi.Surfaces is
@@ -102,6 +102,7 @@ package body Ansi.Surfaces is
    end Put;
    
    
+   -- FIXED!!!
    -- XXX: Bug found, when printing the surface the last row is somehow printed
    -- onto the first row at least when printing into the first row. There is no
    -- problem with columns.
@@ -111,8 +112,25 @@ package body Ansi.Surfaces is
    -- TESTS: 1) Test 9x9, 8x8, and over 10x10, 11x11. If it only happens with
    --           two digit numbers, then it's the problem of the function that
    --           converts the numbers into strings. (Even thought the number of
-   --           columns seems right)
-   --        2) Test it without moving a line down.
+   --           columns seems right) [DONE]
+   --
+   --           REPLICATION FOUND: The problem happens when the number of rows
+   --           is over 10, which then turns into 9 (independently from the
+   --           intended number of rows)
+   --           It seems to be caused from the To_String | the range of the
+   --           function | the ANSI itself.
+   --
+   --
+   --        2) Test it without moving a line down. [DONE]
+   --           
+   --           When the line doesn't move down, it's all written in the same
+   --           line, so it's seems it's not the problem of ANSI.
+   --
+   --
+   --        3) Test to write the escape sequences into a file or to write
+   --           them without the escape. [DONE]
+   --
+   --           It's unreadable.
    --
    -- POSIBLE CAUSES: Maybe is the fault of the terminal emulator or the ANSI
    --                 escape sequences. In that case, (knowing that it only
@@ -120,7 +138,15 @@ package body Ansi.Surfaces is
    --                 number of rows of the matrix by one.
    --
    -- POSIBLE SOLUTIONS: Instead of using numbers use the range of the grid
-   --                    (matrix) instead.
+   --                    (matrix) instead. [DONE]
+   --
+   --                    The problem still occurs.
+   --
+   -- BUG CAUSE FOUND: After tinkering with Python3 and doing the same, it
+   -- doesn't seem to be a problem of ANSI or the program itself. The bug is
+   -- found in the Ansi.Cursors package To_String function, that doesn't
+   -- return the first cypher of the number. That's why 10 overflows to 0,
+   -- 11 to 1 and 12 to 2.
    --
    procedure Put (Surface: Surface_Type := null;
                   Row    : Row_Type := 1;
@@ -130,16 +156,11 @@ package body Ansi.Surfaces is
                              else
                               Surface);
       Item: Element;
-      
-      File: Ada.Text_IO.File_Type;
    begin
-      Ada.Text_IO.Create(Name => "Put.log",
-                         File => File,
-                         Mode => Ada.Text_IO.Out_File);
+
       Main_Cursor.Set_Position(Row, Col);
-      -- delay 1.0;
-      for Y in Row_Type range 1 .. Surf.Height loop
-         for X in Col_Type range 1 .. Surf.Width loop
+      for Y in Surf.Grid'Range(1) loop
+         for X in Surf.Grid'Range(2) loop
             Item := Surf.Grid(Y, X);
             -- TODO: Optimize it, checking if the last colour used was the same
             -- as the colour now and if so change the colour. Even though this
@@ -151,22 +172,16 @@ package body Ansi.Surfaces is
             Ansi.Colors.Put_Background(Color  => Item.Fmt.Bg_Color,
                                        Bright => Item.Fmt.Bg_Bright);
             --Ansi.Styles.Put_Styles(Styles => Item.Fmt.Styles);
-           -- Ada.Text_IO.Put(Char_Type'Pos(Item.Char)'Image);
-            Ada.Text_IO.Put(File => File,
-                            Item => Character'Val(Char_Type'Pos(Item.Char)));
             Ansi.Text_IO.Put(Item.Char);
-            -- delay 0.01;
+            -- delay 0.01; A good effect
          end loop;
+         -- This one is faster because the other two will call the To_String
+         -- function three times.
          Main_Cursor.Set_Position(Row + Y, Col);
-         --Main_Cursor.Move_Down;
-         --Main_Cursor.Set_Col(Col);
-         Ada.Text_IO.New_Line(File => File);
-         Ada.Text_IO.Put_Line(File => File,
-                              Item => "ROW" & Main_Cursor.Get_Row'Image & " :: " &
-                                      "COL" & Main_Cursor.Get_Col'Image & " :: " &
-                                      "Y "  & Y'Image);
+         -- Main_Cursor.Move_Down;
+         -- Main_Cursor.Set_Col(Col);
       end loop;
-      Ada.Text_IO.Close(File);
+
    end Put;
 
 

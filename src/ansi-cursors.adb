@@ -27,6 +27,7 @@
 -------------------------------------------------------------------------------
 
 
+with Ada.Text_IO;
 with Ansi.Text_IO;
 with Ansi.Exceptions;
 
@@ -46,10 +47,11 @@ package body Ansi.Cursors is
       for I of C loop
          if I /= ' ' then
             S(S'First + L) := Char_Type'Val(Character'Pos(I));
+            L := L + 1;
          end if;
       end loop;
 
-      return S(S'First .. S'First + L);
+      return S(S'First .. S'First + L - 1);
 
    end To_String;
 
@@ -167,7 +169,6 @@ package body Ansi.Cursors is
                         Rows  : Positive := 1;
                         Move  : Boolean  := True) is
    begin
-      
       if Move then
          Put_Ansi_Sequence(ESC & To_String(Rows) & "B");
       end if;

@@ -7,3 +7,9 @@
  * Raise Out_Of_Bounds_Issue in colours package.
  * Check for null surface in colours package.
   (The same for styles)
+ * Not using Ada.Text_IO because of flushing, look at streams or sequential_io
+   Also use Ada.Integer_Text_IO (Or the generic one) to print integer.
+   Check whether the printf or write functions are faster.
+ * Change the move function before the loop in Ansi.Surfaces:Put(3)
+ * Functions to get the character in certain position.
+ * Scrolling.

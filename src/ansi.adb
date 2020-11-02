@@ -82,8 +82,8 @@ package body Ansi is
                         Request => TIOCGWINSZ,
                         Struct  => Ws);
 
-      New_Height := Row_Type(Ws.ws_col);
-      New_Width  := Col_Type(Ws.ws_row);
+      New_Height := Row_Type(Ws.ws_row);
+      New_Width  := Col_Type(Ws.ws_col);
 
       if New_Height /= Height or New_Width /= Width then
          Height := New_Height;
@@ -107,6 +107,8 @@ package body Ansi is
       Main_Cursor.Set_Position(Height - 1, Width - 1);
       Ada.Text_IO.Put_Line(ASCII.ESC & "[0m");
       Ada.Text_IO.Get_Immediate(Tmp);
+     -- Ada.Text_IO.Put_Line("Height:"&Height'Image & " ;; " &
+     --                      "Width:"&Width'Image);
 
    end Finalize;
 
@@ -158,9 +160,10 @@ begin
    Temp_Boolean := Update_Terminal_Size;
    Main_Surface := Ansi.Surfaces.Create(Height, Width);
    Main_Cursor := new Cursors.Cursor_Type;
+
+   Ansi.Surfaces.Put(Main_Surface, 1, 1);
    Main_Cursor.Set_Position(1, 1);
    Main_Surface.Cursor := Main_Cursor;
-
 
 end Ansi;
 

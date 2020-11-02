@@ -118,14 +118,14 @@ begin
                                  Bright  => BR,
                                  Row     => 1,
                                  Col     => 4);
-      Ada.Text_IO.Put("COLOUR AT ROW_1 COL_4 = " &
-                        MC'Image & "::" & BR'Image);
+  --    Ada.Text_IO.Put("COLOUR AT ROW_1 COL_4 = " &
+  --                    MC'Image & "::" & BR'Image);
       Ansi.Colors.Get_Background(Surface => My_Surface,
                                  Color   => MC,
                                  Bright  => BR,
                                  Row     => 1,
                                  Col     => 4);
-      Ada.Text_IO.Put_Line(" ; " & MC'Image & "::" & BR'Image);
+--      Ada.Text_IO.Put_Line(" ; " & MC'Image & "::" & BR'Image);
    end;
 
    Ansi.Surfaces.Put(My_Surface, 10, 10);

@@ -4,6 +4,9 @@
 if [ "$1" == "compile" ]; then
    gprbuild -f -p -Padatyper || exit 1
    exit 0
+elif [ "$1" == "tests" ]; then
+   gprbuild -p -Ptests/tests.gpr || exit 1
+   exit 0
 else
    gprbuild -p -Padatyper || exit 1
 fi

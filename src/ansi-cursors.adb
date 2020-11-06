@@ -36,7 +36,8 @@ package body Ansi.Cursors is
    procedure Put_Ansi_Sequence (Item: Str_Type)
       renames Ansi.Text_IO.Put_Ansi_Sequence;
    
-   -- This function transforms a number into a string.
+  
+
    function To_String (N: Positive)
                        return Str_Type is
       C: String  := N'Image;
@@ -55,7 +56,22 @@ package body Ansi.Cursors is
 
    end To_String;
 
+
    ----------------------------------------------------------------------------
+   
+   function New_Cursor (Row: Row_Type;
+                        Col: Col_Type)
+                        return not null Ansi.Cursor_Type is
+   begin
+      
+      return new Cursor_Type'(Row => Row,
+                              Col => Col);
+
+   end New_Cursor;
+
+   -----------------------
+   -- CURSOR OPERATIONS --
+   -----------------------
    
    
    procedure Set_Position (Cursor : in out Cursor_Type;

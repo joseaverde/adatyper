@@ -26,6 +26,8 @@
 --                                                                           --
 -------------------------------------------------------------------------------
 
+with Ansi.Cursors;
+with Ansi.Exceptions;
 with Ansi.Text_IO;
 
 
@@ -38,7 +40,7 @@ package body Ansi.Colors is
    -- SURFACE OPERATIONS --
    ------------------------
 
-   procedure Get_Foreground (Surface: in  Surface_Type;
+   procedure Get_Foreground (Surface: in  not null Surface_Type;
                              Color  : out Color_Type;
                              Bright : out Boolean;
                              Row    :     Row_Type;
@@ -48,10 +50,15 @@ package body Ansi.Colors is
       Color  := Surface.Grid(Row, Col).Fmt.Fg_Color;
       Bright := Surface.Grid(Row, Col).Fmt.Fg_Bright;
 
+   exception
+      when Constraint_Error =>
+         raise Ansi.Exceptions.Out_Of_Bounds_Issue
+         with "Index out of range!";
+
    end Get_Foreground;
 
 
-   procedure Get_Background (Surface: in  Surface_Type;
+   procedure Get_Background (Surface: in  not null Surface_Type;
                              Color  : out Color_Type;
                              Bright : out Boolean;
                              Row    :     Row_Type;
@@ -60,6 +67,11 @@ package body Ansi.Colors is
 
       Color  := Surface.Grid(Row, Col).Fmt.Bg_Color;
       Bright := Surface.Grid(Row, Col).Fmt.Bg_Bright;
+
+   exception
+      when Constraint_Error =>
+         raise Ansi.Exceptions.Out_Of_Bounds_Issue
+         with "Index out of range!";
 
    end Get_Background;
 
@@ -96,34 +108,58 @@ package body Ansi.Colors is
 
 
 
-   procedure Set_Foreground (Surface: out Surface_Type;
+   procedure Set_Foreground (Surface: out not null Surface_Type;
                              Color  : Color_Type;
                              Bright : Boolean;
                              Row    : Row_Type;
                              Col    : Col_Type) is
    begin
+      
+      -- We check whether we are overwriting the colour.
+      if Surface.Grid(Row, Col).Fmt.Fg_Color  /= Color  or
+         Surface.Grid(Row, Col).Fmt.Fg_Bright /= Bright
+      then
+         -- If so we change it and push it to the tail.
+         Surface.Grid(Row, Col).Fmt.Fg_Color  := Color;
+         Surface.Grid(Row, Col).Fmt.Fg_Bright := Bright;
+         Surface.Push(Ansi.Cursors.New_Cursor(Row, Col));
+      end if;
 
-      Surface.Grid(Row, Col).Fmt.Fg_Color  := Color;
-      Surface.Grid(Row, Col).Fmt.Fg_Bright := Bright;
+   exception
+      when Constraint_Error =>
+         raise Ansi.Exceptions.Out_Of_Bounds_Issue
+         with "Index out of range!";
 
    end Set_Foreground;
 
 
-   procedure Set_Background (Surface: out Surface_Type;
+   procedure Set_Background (Surface: out not null Surface_Type;
                              Color  : Color_Type;
                              Bright : Boolean;
                              Row    : Row_Type;
                              Col    : Col_Type) is
    begin
+      
+      -- We check if we are overwriting the colour.
+      if Surface.Grid(Row, Col).Fmt.Bg_Color  /= Color or
+         Surface.Grid(Row, Col).Fmt.Bg_Bright /= Bright
+      then
+         -- If so we change it and push it to the tail.
+         Surface.Grid(Row, Col).Fmt.Bg_Color  := Color;
+         Surface.Grid(Row, Col).Fmt.Bg_Bright := Bright;
+         Surface.Push(Ansi.Cursors.New_Cursor(Row, Col));
+      end if;
 
-      Surface.Grid(Row, Col).Fmt.Bg_Color  := Color;
-      Surface.Grid(Row, Col).Fmt.Bg_Bright := Bright;
+   exception
+      when Constraint_Error =>
+         raise Ansi.Exceptions.Out_Of_Bounds_Issue
+         with "Index out of range!";
 
    end Set_Background;
 
 
 
-   procedure Set_Foreground (Surface : out Surface_Type;
+   procedure Set_Foreground (Surface : out not null Surface_Type;
                              Color   : Color_Type;
                              Bright  : Boolean;
                              From_Row: Row_Type;
@@ -131,6 +167,11 @@ package body Ansi.Colors is
                              To_Row  : Row_Type;
                              To_Col  : Col_Type) is
    begin
+
+      if To_Row > Surface.Height or To_Col > Surface.Width then
+         raise Ansi.Exceptions.Out_Of_Bounds_Issue
+         with "Range out of bounds!";
+      end if;
 
       for Row in Row_Type range From_Row .. To_Row loop
          for Col in Col_Type range From_Col .. To_Col loop
@@ -145,7 +186,7 @@ package body Ansi.Colors is
    end Set_Foreground;
 
 
-   procedure Set_Background (Surface : out Surface_Type;
+   procedure Set_Background (Surface : out not null Surface_Type;
                              Color   : Color_Type;
                              Bright  : Boolean;
                              From_Row: Row_Type;
@@ -153,6 +194,11 @@ package body Ansi.Colors is
                              To_Row  : Row_Type;
                              To_Col  : Col_Type) is
    begin
+
+      if To_Row > Surface.Height or To_Col > Surface.Width then
+         raise Ansi.Exceptions.Out_Of_Bounds_Issue
+         with "Range out of bounds!";
+      end if;
 
       for Row in Row_Type range From_Row .. To_Row loop
          for Col in Col_Type range From_Col .. To_Col loop
@@ -167,13 +213,47 @@ package body Ansi.Colors is
    end Set_Background;
 
 
+   procedure Set_Foreground (Surface: out not null Surface_Type;
+                             Color  : Color_Type;
+                             Bright : Boolean) is
+   begin
+
+      for Row in Surface.Grid'Range(1) loop
+         for Col in Surface.Grid'Range(2) loop
+            Surface.Grid(Row, Col).Fmt.Fg_Color  := Color;
+            Surface.Grid(Row, Col).Fmt.Fg_Bright := Bright;
+         end loop;
+      end loop;
+
+      Surface.Update_All := True;
+
+   end Set_Foreground;
+   
+
+   procedure Set_Background (Surface: out not null Surface_Type;
+                             Color  : Color_Type;
+                             Bright : Boolean) is
+   begin
+
+      for Row in Surface.Grid'Range(1) loop
+         for Col in Surface.Grid'Range(2) loop
+            Surface.Grid(Row, Col).Fmt.Bg_Color  := Color;
+            Surface.Grid(Row, Col).Fmt.Bg_Bright := Bright;
+         end loop;
+      end loop;
+
+      Surface.Update_All := True;
+
+   end Set_Background;
+
+
 
 
    ---------------------------------
    -- SURFACE'S CURSOR OPERATIONS --
    ---------------------------------
 
-   procedure Get_Cursor_Foreground (Surface: in  Surface_Type;
+   procedure Get_Cursor_Foreground (Surface: in  not null Surface_Type;
                                     Color  : out Color_Type;
                                     Bright : out Boolean) is
    begin
@@ -184,7 +264,7 @@ package body Ansi.Colors is
    end Get_Cursor_Foreground;
 
 
-   procedure Get_Cursor_Background (Surface: in  Surface_Type;
+   procedure Get_Cursor_Background (Surface: in  not null Surface_Type;
                                     Color  : out Color_Type;
                                     Bright : out Boolean) is
    begin
@@ -196,7 +276,7 @@ package body Ansi.Colors is
 
 
 
-   procedure Set_Cursor_Foreground (Surface: out Surface_Type;
+   procedure Set_Cursor_Foreground (Surface: out not null Surface_Type;
                                     Color  : Color_Type;
                                     Bright : Boolean) is
    begin
@@ -207,7 +287,7 @@ package body Ansi.Colors is
    end Set_Cursor_Foreground;
 
 
-   procedure Set_Cursor_Background (Surface: out Surface_Type;
+   procedure Set_Cursor_Background (Surface: out not null Surface_Type;
                                     Color  : Color_Type;
                                     Bright : Boolean) is
    begin

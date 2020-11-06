@@ -64,12 +64,14 @@ package body Ansi.Surfaces is
 
 
    procedure Put (Item   : Str_Type;
-                  Surface: Surface_Type := null) is
+                  Surface: Surface_Type := null;
+                  Feed   : Boolean      := False) is
    begin
 
       for Char of Item loop
          Put(Item    => Char,
-             Surface => Surface);
+             Surface => Surface,
+             Feed    => Feed);
       end loop;
 
    exception
@@ -81,7 +83,8 @@ package body Ansi.Surfaces is
    
    
    procedure Put (Item   : Char_Type;
-                  Surface: Surface_Type := null) is
+                  Surface: Surface_Type := null;
+                  Feed   : Boolean      := False) is
       Surf: Surface_Type := (if Surface = null then
                               Main_Surface
                              else
@@ -89,8 +92,12 @@ package body Ansi.Surfaces is
    begin
       
       if Surf.Cursor.Get_Col > Col_Type(Surf.Width) then
-         raise Ansi.Exceptions.Out_Of_Bounds_Issue
-         with "Character went out of bounds!";
+         if Feed then
+            Surf.Cursor.Set_Position(Surf.Cursor.Get_Row + 1, 1, False);
+         else
+            raise Ansi.Exceptions.Out_Of_Bounds_Issue
+            with "Character went out of bounds!";
+         end if;
       end if;
 
       Surf.Grid(Surf.Cursor.Get_Row, Surf.Cursor.Get_Col).Char := Item;

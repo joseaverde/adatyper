@@ -1,6 +1,6 @@
 -------------------------------------------------------------------------------
 --                                                                           --
---                           C R E D I T S . A D S                           --
+--                             T I T L E . A D S                             --
 --                                                                           --
 --                              A D A T Y P E R                              --
 --                                                                           --
@@ -26,14 +26,31 @@
 --                                                                           --
 -------------------------------------------------------------------------------
 
--- This package contains the credits information.
-package Credits is
+private with Ansi;
+private with Ansi.Surfaces;
 
-   pragma Elaborate_Body (Credits);
+-- This package contains the title.
+package Title is
 
-   procedure Startup_Notice;
+   pragma Elaborate_Body (Title);
 
-end Credits;
+   procedure Main_Title;
+
+
+private
+
+   -- The letters
+     Letter_Big_A: Ansi.Surface_Type := Ansi.Surfaces.Create(6, 7);
+   Letter_Small_d: Ansi.Surface_Type := Ansi.Surfaces.Create(6, 7);
+   Letter_Small_a: Ansi.Surface_Type := Ansi.Surfaces.Create(6, 7);
+     Letter_Big_T: Ansi.Surface_Type := Ansi.Surfaces.Create(6, 7);
+   Letter_Small_y: Ansi.Surface_Type := Ansi.Surfaces.Create(6, 7);
+   Letter_Small_p: Ansi.Surface_Type := Ansi.Surfaces.Create(6, 7);
+   Letter_Small_e: Ansi.Surface_Type := Ansi.Surfaces.Create(6, 7);
+   Letter_Small_r: Ansi.Surface_Type := Ansi.Surfaces.Create(6, 7);
+   Letter_Cursor : Ansi.Surface_Type := Ansi.Surfaces.Create(6, 7);
+   Letter_Space  : Ansi.Surface_Type := Ansi.Surfaces.Create(6, 7);
+end Title;
 
 
 ---=======================-------------------------=========================---

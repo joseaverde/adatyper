@@ -80,6 +80,11 @@ package Ansi is
        Reversed   => 7);
    for Style_Type'Size use 3;
 
+   -- This type is just an array of styles telling which are on and which off.
+   type Style_Array is array (Style_Type'Range) of Boolean
+      with Default_Component_Value => False;
+   pragma Pack(Style_Array);
+
    -- The type of character we will use for this program.
    subtype Char_Type is Wide_Character;
    
@@ -167,11 +172,6 @@ private -----------------------------------------------------------------------
    -----------
    -- TYPES --
    -----------
-  
-   -- This type is just an array of styles telling which are on and which off.
-   type Style_Array is array (Style_Type'Range) of Boolean
-      with Default_Component_Value => False;
-   pragma Pack(Style_Array);
    
    -- The format type contains the information about formatting in every cell
    -- of the matrix using only two bytes of memory to store the colour, the
@@ -258,7 +258,7 @@ private -----------------------------------------------------------------------
 
          -- Finally we add a variable to tell whether the surface has to be
          -- completely updated or not.
-         Uptade_All: Boolean := True;
+         Update_All: Boolean := True;
 
          -- The current cursor position in this surface.
          Cursor    : Cursor_Type;
@@ -291,7 +291,7 @@ private -----------------------------------------------------------------------
    -----------------
 
    -- The main surface.
-   Main_Surface: Surface_Type;
+   Main_Surface: Surface_Type := new Surface_Record(1, 1);
 
    -- The dimensions of the screen.
    Height: Row_Type := 1;

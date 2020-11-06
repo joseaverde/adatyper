@@ -31,6 +31,8 @@ with Ansi.Cursors;
 with Ansi.Exceptions;
 with Ansi.Surfaces;
 
+pragma Elaborate (Ansi.Surfaces);
+
 package body Ansi is
 
    
@@ -158,6 +160,7 @@ begin
 
    -- We initialize the package.
    Temp_Boolean := Update_Terminal_Size;
+   -- Free(Main_Surface);
    Main_Surface := Ansi.Surfaces.Create(Height, Width);
    Main_Cursor := new Cursors.Cursor_Type;
 

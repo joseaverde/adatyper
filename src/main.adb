@@ -35,6 +35,7 @@ with Ansi.Styles;
 with Ansi.Surfaces;
 with Credits;
 with System;
+with Title;
 
 -- This is the main function of the program, it returns an natural nuber with
 -- the error code if any occurs.
@@ -132,7 +133,9 @@ begin
    Ansi.Surfaces.Put(Red_Surf, 1, 1);
    Ansi.Surfaces.Put(Small_Green, 2, 2);
    Ansi.Surfaces.Put(Col_Blue, 4, 4);
-   
+   Ansi.Surfaces.Put(Ansi.Get_Main_Surface, 1, 1);
+
+   Title.Main_Title;
 
    -- Credits.Startup_Notice;
    -- Credits.Start_UP

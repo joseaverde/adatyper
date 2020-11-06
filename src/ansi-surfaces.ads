@@ -55,13 +55,15 @@ package Ansi.Surfaces is
    -- ranges but it writes it until it can. It also moves the cursor one space
    -- to the left of the place where it ended. (Out_Of_Bounds_Issue)
    procedure Put (Item   : Str_Type;
-                  Surface: Surface_Type := null);
+                  Surface: Surface_Type := null;
+                  Feed   : Boolean      := False);
 
    -- This procedure prints a character into a surface. If the surface is null,
    -- it points to the main surface. It raises an error if the character goes
    -- out of bounds. (Out_Of_Bounds_Issue)
    procedure Put (Item   : Char_Type;
-                  Surface: Surface_Type := null);
+                  Surface: Surface_Type := null;
+                  Feed   : Boolean      := False);
 
    -- This procedure forces a surface to be printed onto the screen, if it goes
    -- out of bounds it raises an exception Out_Of_Bounds_Issue. If the surface

@@ -31,6 +31,15 @@
 package Ansi.Cursors is
 
    type Cursor_Type is tagged limited private;
+
+
+   function New_Cursor (Row: Row_Type;
+                        Col: Col_Type)
+                        return not null Ansi.Cursor_Type;
+
+   -----------------------
+   -- CURSOR OPERATIONS --
+   -----------------------
    
    -- This procedure changes the position of the cursor to another.
    procedure Set_Position (Cursor : in out Cursor_Type;
@@ -106,7 +115,11 @@ private
          Row: Row_Type;
          Col: Col_Type;
       end record;
-
+   
+   -- This function transforms a number into a string.
+   function To_String (N: Positive)
+                       return Str_Type;
+   pragma Pure_Function (To_String);
    
 end Ansi.Cursors;
 

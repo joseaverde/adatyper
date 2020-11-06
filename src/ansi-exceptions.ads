@@ -34,6 +34,7 @@ package Ansi.Exceptions is
    
    -- Raised when trying to print something out of bounds.
    Out_Of_Bounds_Issue      : exception;
+   Windows_Size_Issue       : exception;
 
 end Ansi.Exceptions;
 

@@ -28,7 +28,6 @@
 
 private with Ada.Unchecked_Deallocation;
 limited with Ansi.Cursors;
-private with Interfaces.C;
 private with System;
 
 
@@ -44,8 +43,12 @@ package Ansi is
    -- TYPES --
    -----------
 
-   type Row_Type is new Positive;
-   type Col_Type is new Positive;
+   type Row_Type is new Positive range 1 .. 2**16 - 1;
+   for Row_Type'Size use 16;
+
+   type Col_Type is new Positive range 1 .. 2**16 - 1;
+   for Col_Type'Size use 16;
+
    type Cursor_Type is access all Ansi.Cursors.Cursor_Type;
 
    -- This is the surface type, it is declared here so every child package can
@@ -128,8 +131,8 @@ package Ansi is
    -- This procedure updates the main surface if it has been resized.
    procedure Update_Main_Surface;
 
-   -- This function is a wrapper for the Ioctl function. It returns True if
-   -- either the width or the height or both have changed.
+   -- This functionreturns True if either the width or the height or both have
+   -- changed.
    function Update_Terminal_Size return Boolean;
    pragma Inline (Update_Terminal_Size);
 
@@ -141,34 +144,6 @@ package Ansi is
 private -----------------------------------------------------------------------
 -------------------------------------------------------------------------------
    
-   -----------
-   -- IOCTL --
-   -----------
-
-   -- This is the winsize type from sys/ioctl.h library from C. It's used to
-   -- get the terminal size.
-   type Winsize is
-      record
-         ws_row   : Interfaces.C.unsigned_short;
-         ws_col   : Interfaces.C.unsigned_short;
-         ws_xpixel: Interfaces.C.unsigned_short;
-         ws_ypixel: Interfaces.C.unsigned_short;
-      end record
-         with Convention => C;
-
-   -- This function gets the size of the screen.
-   function Ioctl (Fd     :     Interfaces.C.int;
-                   Request:     Interfaces.C.unsigned_long;
-                   Struct : out Winsize)
-                   return Interfaces.C.int;
-   pragma Import (C, Ioctl, "ioctl");
-
-   -- This constant is found under /usr/include/asm-generic/ioctls.h and is the
-   -- request to get the size of the window with Ioctl, its a MACRO so it can't
-   -- be imported natively, so I'm writting the value found in the file.
-   TIOCGWINSZ: CONSTANT Interfaces.C.unsigned_long := 16#5413#;
-   
-
    -----------
    -- TYPES --
    -----------
@@ -276,14 +251,6 @@ private -----------------------------------------------------------------------
    -- surface.
    procedure Push (Surface: in out Surface_Record;
                    Cursor :        Cursor_Type);
-
-
-   ----------------
-   -- PROCEDURES --
-   ----------------
-
-   -- This procedure runs a system command using a C interface.
-   procedure System_Command(Cmd: String);
 
 
    -----------------

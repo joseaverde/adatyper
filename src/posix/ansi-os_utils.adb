@@ -1,10 +1,11 @@
 -------------------------------------------------------------------------------
 --                                                                           --
---                          A D A T Y P E R . G P R                          --
+--                     A N S I - O S _ U T I L S . A D B                     --
+--                                 P O S I X                                 --
 --                                                                           --
 --                              A D A T Y P E R                              --
 --                                                                           --
---                                   G P R                                   --
+--                                  S P E C                                  --
 --                                                                           --
 -------------------------------------------------------------------------------
 --     Copyright (c) 2020 José Antonio Verde Jiménez All Rights Reserved     --
@@ -26,43 +27,82 @@
 --                                                                           --
 -------------------------------------------------------------------------------
 
+with Ansi.Exceptions;
 
-project AdaTyper is
 
-   for Languages   use ("Ada");
-   for Source_Dirs use ("src", "src/posix");
-   for Object_Dir  use  "obj";
-   for Exec_Dir    use  "bin";
-   for Main        use ("main.adb");
+package body Ansi.Os_Utils is
 
-   package Builder is
-      for Executable ("main.adb") use "adatyper.bin";
-   end Builder;
+   ------------
+   -- SYSTEM --
+   ------------
 
-   package Compiler is
-      for Switches ("Ada") use ("-g",        -- Use debug symbols
-                                "-O0",       -- No optimizations
-                                -- "-gnatd_F",  -- Detailed invocation information
-                                "-fdata-sections",
-                                "-ffunction-sections",
-                                --"-gnatE",    -- Dynamic elaboration
-                                --"-gnato",    --
-                                "-gnatv",    -- Verbose messages
-                                --"-gnatws",   -- Suppress warnings
-                                "-gnatd7"    -- Suppress timestamps
-                                );
-   end Compiler;
+   function System_Command (Cmd: String)
+                            return Boolean is
+   begin
 
-   package Linker is
-      for Switches ("Ada") use ("-Wl,--gc-sections"); -- Remove unused sections
-     --                           "-flto");
-   end Linker;
+      return C_System(Interfaces.C.To_C(Cmd)) = 0;
 
-   --package Binder is
-   --   for Switches ("Ada") use ("-d_C"); -- Diagnose all circularities
-   --end Binder;
+   end System_Command;
 
-end AdaTyper;
+
+   --------------
+   -- TERMINAL --
+   --------------
+
+   procedure Prepare is
+   begin
+
+      if not System_Command("stty -echo") or
+         not System_Command("tput civis")
+      then
+
+         raise Ansi.Exceptions.Initialization_Issue
+         with "Couldn't prepare the terminal!";
+
+      end if;
+
+   end Prepare;
+
+
+   procedure Clean_Up is
+      Temp: Boolean;
+   begin
+
+      Temp := System_Command("stty echo");
+      Temp := System_Command("tput cnorm");
+
+   end Clean_Up;
+   
+   -----------
+   -- IOCTL --
+   -----------
+
+   function Update_Terminal_Size return Boolean is
+      Ws        : Winsize;
+      New_Height: Row_Type;
+      New_Width : Col_Type;
+      Temp_Int  : Interfaces.C.int;
+   begin
+
+      Temp_Int := Ioctl(Fd      => 1,  -- File descriptor = 1 (Standard output)
+                        Request => TIOCGWINSZ,
+                        Struct  => Ws);
+
+      New_Height := Row_Type(Ws.ws_row);
+      New_Width  := Col_Type(Ws.ws_col);
+
+      if New_Height /= Height or New_Width /= Width then
+         Height := New_Height;
+         Width  := New_Width;
+         return True;
+      end if;
+
+      return False;
+
+   end Update_Terminal_Size;
+
+
+end Ansi.Os_Utils;
 
 
 ---=======================-------------------------=========================---

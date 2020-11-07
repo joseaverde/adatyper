@@ -7,3 +7,11 @@
 # Directories
 bin/
 obj/
+
+# We ignore windows for now, I will work in it later, I first want to make the
+# library functional in linux.
+windows
+
+# I forgot, we also ignore log files.
+*.log
+logs

@@ -29,9 +29,11 @@
 with  Ada.Text_IO;
 with Ansi.Cursors;
 with Ansi.Exceptions;
+with Ansi.Os_Utils;
 with Ansi.Surfaces;
 
 pragma Elaborate (Ansi.Surfaces);
+pragma Elaborate (Ansi.Cursors);
 
 package body Ansi is
 
@@ -72,40 +74,19 @@ package body Ansi is
    end Update_Main_Surface;
 
 
-
    function Update_Terminal_Size return Boolean is
-      Ws        : Winsize;
-      New_Height: Row_Type;
-      New_Width : Col_Type;
-      Temp_Int  : Interfaces.C.int;
    begin
-      
-      Temp_Int := Ioctl(Fd      => 1,  -- File descriptor = 1 (Standard output)
-                        Request => TIOCGWINSZ,
-                        Struct  => Ws);
 
-      New_Height := Row_Type(Ws.ws_row);
-      New_Width  := Col_Type(Ws.ws_col);
-
-      if New_Height /= Height or New_Width /= Width then
-         Height := New_Height;
-         Width  := New_Width;
-         return False;
-      end if;
-
-      return True;
+      return Ansi.Os_Utils.Update_Terminal_Size;
 
    end Update_Terminal_Size;
-
 
 
    procedure Finalize is
       Tmp: Character;
    begin
       
-      System_Command("stty echo");
-      System_Command("tput cnorm");
-
+      Ansi.Os_Utils.Clean_Up;
       Main_Cursor.Set_Position(Height - 1, Width - 1);
       Ada.Text_IO.Put_Line(ASCII.ESC & "[0m");
       Ada.Text_IO.Get_Immediate(Tmp);
@@ -136,16 +117,6 @@ package body Ansi is
    end Push;
 
 
-   procedure System_Command (Cmd: String) is
-      function C_System (Cmd: Interfaces.C.Char_Array) return Integer;
-      pragma Import (C, C_System, "system");
-      Ret_Val: Integer;
-   begin
-      
-      Ret_Val := C_System(Interfaces.C.To_C(Cmd));
-
-   end System_Command;
-
 
 -------------------------------------------------------------------------------
 -- elaboration ----------------------------------------------------------------
@@ -155,8 +126,7 @@ package body Ansi is
 begin
 
    -- We prepare the screen.
-   System_Command("stty -echo");
-   System_Command("tput civis");
+   Ansi.Os_Utils.Prepare;
 
    -- We initialize the package.
    Temp_Boolean := Update_Terminal_Size;

@@ -13,3 +13,4 @@
  * Change the move function before the loop in Ansi.Surfaces:Put(3)
  * Functions to get the character in certain position.
  * Scrolling.
+ * Check `tput smcup' and `tput rmcup'

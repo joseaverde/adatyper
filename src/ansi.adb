@@ -32,8 +32,10 @@ with Ansi.Exceptions;
 with Ansi.Os_Utils;
 with Ansi.Surfaces;
 
-pragma Elaborate (Ansi.Surfaces);
 pragma Elaborate (Ansi.Cursors);
+pragma Elaborate (Ansi.Os_Utils);
+pragma Elaborate (Ansi.Surfaces);
+
 
 package body Ansi is
 
@@ -125,16 +127,18 @@ package body Ansi is
    Temp_Boolean: Boolean;
 begin
 
+   -- We initialize the package.
+   Temp_Boolean := Update_Terminal_Size;
+
    -- We prepare the screen.
    Ansi.Os_Utils.Prepare;
 
-   -- We initialize the package.
-   Temp_Boolean := Update_Terminal_Size;
    -- Free(Main_Surface);
    Main_Surface := Ansi.Surfaces.Create(Height, Width);
    Main_Cursor := new Cursors.Cursor_Type;
 
    Ansi.Surfaces.Put(Main_Surface, 1, 1);
+   Main_Surface.Protect_It := True;
    Main_Cursor.Set_Position(1, 1);
    Main_Surface.Cursor := Main_Cursor;
 

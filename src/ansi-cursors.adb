@@ -69,6 +69,17 @@ package body Ansi.Cursors is
 
    end New_Cursor;
 
+
+   procedure Free (Cursor: in out Ansi.Cursor_Type) is
+      procedure Deallocate is new Ada.Unchecked_Deallocation(Cursor_Type,
+                                                             Ansi.Cursor_Type);
+   begin
+
+      Deallocate(Cursor);
+
+   end Free;
+
+
    -----------------------
    -- CURSOR OPERATIONS --
    -----------------------

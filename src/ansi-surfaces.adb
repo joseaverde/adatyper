@@ -27,6 +27,7 @@
 -------------------------------------------------------------------------------
 
 
+with Ada .Unchecked_Deallocation;
 with Ansi.Cursors;
 with Ansi.Colors;
 with Ansi.Exceptions;
@@ -36,6 +37,27 @@ with Ansi.Text_IO;
 
 
 package body Ansi.Surfaces is
+
+
+   ----------------------------
+   -- FUNCTIONS FOR SURFACES --
+   ----------------------------
+
+   function Copy (Surface: Surface_Type)
+                  return Surface_Type is
+      Copied_Surface: Surface_Type := Create(Height => Surface.Height,
+                                             Width  => Surface.Width);
+   begin
+
+      Copied_Surface.Grid := Surface.Grid;
+      Copied_Surface.Update_All := True;
+      Copied_Surface.Cursor.Set_Position(Surface.Cursor, False);
+      Copied_Surface.Cursor_Fmt := Surface.Cursor_Fmt;
+      Copied_Surface.Protect_It := Surface.Protect_It;
+
+      return Copied_Surface;
+
+   end Copy;
    
 
    function Create (Height: Row_Type;
@@ -52,6 +74,30 @@ package body Ansi.Surfaces is
    end Create;
 
 
+   procedure Free (Surface: in out Surface_Type) is
+      procedure Deallocate is new Ada.Unchecked_Deallocation(Surface_Record,
+                                                             Surface_Type);
+      Temp_Queue: Operation;
+      Next_Queue: Operation := Surface.Head;
+   begin
+      
+      -- We first clean the queues and their cursors.
+      if Next_Queue /= null then
+         while Next_Queue /= null loop
+            Temp_Queue := Next_Queue;
+            Next_Queue := Next_Queue.Next;
+            Ansi.Cursors.Free(Temp_Queue.Cursor);
+            Free(Temp_Queue);
+         end loop;
+      end if;
+
+      -- Finally we deallocate the cursor and the surface.
+      Ansi.Cursors.Free(Surface.Cursor);
+      Deallocate(Surface);
+
+   end Free;
+
+
 
    function Get_Cursor (Surface: Surface_Type)
                         return Cursor_Type is
@@ -60,7 +106,35 @@ package body Ansi.Surfaces is
       return Surface.Cursor;
 
    end Get_Cursor;
-   
+
+
+   procedure Paste (Over   : Surface_Type;
+                    Surface: Surface_Type;
+                    Row    : Row_Type;
+                    Col    : Col_Type) is
+      To_Row: Row_Type := (if Over.Height - Row < Surface.Height then
+                              Over.Height
+                           else
+                              Row + Surface.Height);
+      To_Col: Col_Type := (if Over.Width - Col < Surface.Width then
+                              Over.Width
+                           else
+                              Col + Surface.Width);
+   begin
+
+      if Row > Over.Height or Col > Over.Width then
+         raise Ansi.Exceptions.Out_Of_Bounds_Issue
+         with "Trying to paste out of range!";
+      end if;
+      
+      for R in Row_Type range Row .. To_Row loop
+         for C in Col_Type range Col .. To_Col loop
+            Over.Grid(R, C) := Surface.Grid(R - Row, C - Col);
+            Over.Push(Ansi.Cursors.New_Cursor(R, C));
+         end loop;
+      end loop;
+
+   end Paste;
 
 
    procedure Put (Item   : Str_Type;
@@ -190,6 +264,141 @@ package body Ansi.Surfaces is
       end loop;
 
    end Put;
+
+
+   procedure Resize (Surface   : in out not null Surface_Type;
+                     Rows_Up   : Integer := 0;
+                     Rows_Down : Integer := 0;
+                     Cols_Left : Integer := 0;
+                     Cols_Right: Integer := 0) is
+      Resized_Surface: Surface_Type :=
+                 new Surface_Record(Height => Surface.Height +
+                                             Row_Type(Rows_Up + Rows_Down),
+                                    Width  => Surface.Width +
+                                             Col_Type(Cols_Right + Cols_Left));
+
+      -- We first declare the bounds of the old surface that will be copied.
+      Surface_Up  : Row_Type := (if Rows_Up < 0 then
+                                    Row_Type(abs Rows_Up)
+                                 else
+                                    Surface.Grid'First(1));
+      Surface_Down: Row_Type := (if Rows_Down < 0 then
+                                    Row_Type(abs Rows_Down)
+                                 else
+                                    Surface.Grid'Last(1));
+
+      Surface_Left : Col_Type := (if Cols_Left < 0 then
+                                    Col_Type(abs Cols_Left)
+                                  else
+                                    Surface.Grid'First(2));
+      Surface_Right: Col_Type := (if Cols_RIght < 0 then
+                                    Col_Type(abs Cols_Right)
+                                  else
+                                    Surface.Grid'Last(2));
+
+   begin
+
+      -- We first copy the grid (the matrix) from the old one to the new one.
+      for Row in Row_Type range Surface_Up .. Surface_Down loop
+         for Col in Col_Type range Surface_Left .. Surface_Right loop
+            -- Now we start writing in the new surface.
+            Resized_Surface.Grid(
+                  Row_Type(Integer(Surface_Up) + Rows_Up),
+                  Col_Type(Integer(Surface_Left) + Cols_Left))
+                     := Surface.Grid(Row, Col);
+         end loop;
+      end loop;
+      
+      -- We copy the rest of the record. Except the stack, because the layer
+      -- will be completely freed and it will be completely updated.
+      Resized_Surface.Update_All := True;
+      Resized_Surface.Cursor := Ansi.Cursors.New_Cursor
+                                          (Row => Surface.Cursor.Get_Row,
+                                           Col => Surface.Cursor.Get_Col);
+      Resized_Surface.Cursor_Fmt := Surface.Cursor_Fmt;
+      Resized_Surface.Protect_It := Surface.Protect_It;
+      
+      -- We set the position where the original image was.
+      Resized_Surface.Row := Row_Type(Integer(Surface.Row) + Rows_Up);
+      Resized_Surface.Col := Col_Type(Integer(Surface.Col) + Cols_Left);
+
+      -- Finally we free it and change the old one.
+      Free(Surface);
+      Surface := Resized_Surface;
+
+   exception
+      when Constraint_Error =>
+         -- TODO: Maybe free the old surface.
+         Free(Resized_Surface);
+         raise Ansi.Exceptions.Windows_Size_Issue
+         with "Couldn't create a new surface";
+
+   end Resize;
+
+
+   ---------------------
+   -- LAYER FUNCTIONS --
+   ---------------------
+   
+   procedure Add (Layerer: Layerer_Type;
+                  Layer  : Surface_Type) is
+   begin
+      null; -- TODO
+   end Add;
+
+
+   procedure Remove (Layerer: Layerer_Type;
+                     Layer  : Surface_Type) is
+   begin
+      null; -- TODO
+   end Remove;
+
+   
+   procedure Update (Layerer: Layerer_Type) is
+   begin
+      null; -- TODO
+   end Update;
+
+   
+   procedure Hide (Layerer: in out Layerer_Type;
+                   Layer  : Surface_Type) is
+   begin
+      null; -- TODO
+   end Hide;
+
+
+   procedure Show (Layerer: in out Layerer_Type;
+                   Layer  : Surface_Type) is
+   begin
+      null; -- TODO
+   end Show;
+
+
+
+   function Contains_Layer (Layerer: in Layerer_Type;
+                            Layer  : Surface_Type)
+                            return Boolean is
+   begin
+      return False; -- TODO
+   end Contains_Layer;
+
+
+
+   function Get_Layer_Number (Layerer: in Layerer_Type)
+                              return Natural is
+   begin
+
+      return Layerer.Layers'Length;
+
+   end Get_Layer_Number;
+
+
+   function Get_Position (Layerer: in Layerer_Type;
+                          Layer  : Surface_Type)
+                          return Positive is
+   begin
+      return 1; -- TODO
+   end Get_Position;
 
 
 end Ansi.Surfaces;

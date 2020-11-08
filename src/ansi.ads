@@ -191,7 +191,7 @@ private -----------------------------------------------------------------------
    -- information about the Surface.
    type Matrix is array (Row_Type range <>, Col_Type range <>) of Element;
    
-   -- This is the tail used to store the performed operations onto a surface,
+   -- This is the queue used to store the performed operations onto a surface,
    -- it must be updated to free it.
    type Operation_Record;
    type Operation is access Operation_Record;
@@ -220,8 +220,8 @@ private -----------------------------------------------------------------------
                                                       (others => False)),
                                    Char => Char_Type'Val(Character'Pos(' ')))));
 
-         -- Every operation performed onto the screen is stored onto a tail, so
-         -- it requires the minimum number of operations and changes when
+         -- Every operation performed onto the screen is stored onto a queue,
+         -- so it requires the minimum number of operations and changes when
          -- updating.
          Head: Operation := Null;
          Tail: Operation := Null;
@@ -229,7 +229,8 @@ private -----------------------------------------------------------------------
          -- The grid also has god a position in the main screen, the
          -- coordinates are Y and X not X and Y (because it's counted in rows
          -- and columns).
-         Row, Column: Positive := 1;
+         Row: Row_Type := 1;
+         Col: Col_Type := 1;
 
          -- Finally we add a variable to tell whether the surface has to be
          -- completely updated or not.
@@ -244,10 +245,14 @@ private -----------------------------------------------------------------------
                                        Bg_Color  => Black,
                                        Bg_Bright => False,
                                        Style     => (others => False));
+
+         -- If this is set to true this surface can't be used as a layer or
+         -- under certain circunstances. An error is raised instead.
+         Protect_It: Boolean := False;
       end record;
 
    
-   -- This procedure pushes a new row and column into the operation tail of a
+   -- This procedure pushes a new row and column into the operation queue of a
    -- surface.
    procedure Push (Surface: in out Surface_Record;
                    Cursor :        Cursor_Type);

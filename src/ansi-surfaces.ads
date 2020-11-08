@@ -38,6 +38,10 @@ package Ansi.Surfaces is
    -- FUNCTIONS FOR SURFACES --
    ----------------------------
    
+   -- This function returns a copy of a surface.
+   function Copy (Surface: Surface_Type)
+                  return Surface_Type;
+   
    -- This function is a shortcut to create surfaces without requiring to use
    -- the Surface_Record type.
    function Create (Height: Row_Type;
@@ -45,10 +49,22 @@ package Ansi.Surfaces is
                     return Surface_Type;
    pragma Inline (Create);
 
+   -- This procedure frees a surface and everything inside it.
+   procedure Free (Surface: in out Surface_Type);
+
    -- This function returns the cursor of the surface so it can be moved.
    function Get_Cursor (Surface: Surface_Type)
                         return Cursor_Type;
    pragma Inline (Get_Cursor);
+
+   -- This procedure pastes a surface onto another. It doesn't raise any error
+   -- if the surface it's pasted over is too small, but with the Ranges.
+   procedure Paste (Over   : Surface_Type;
+                    Surface: Surface_Type;
+                    Row    : Row_Type;
+                    Col    : Col_Type)
+                    with Pre => Row <= Over.Height and
+                                Col <= Over.Width;
    
    -- This procedure prints a string into a surface. If the surface is null, it
    -- points to the main surface. It raises an error if the string goes out of
@@ -73,6 +89,70 @@ package Ansi.Surfaces is
                   Row    : Row_Type     := 1;
                   Col    : Col_Type     := 1);
 
+   -- This procedure resizes a surface adding some rows up and down and columns
+   -- left and right. If the number is negative the size is reduced. The
+   -- minimum size is 1x1.
+   procedure Resize (Surface   : in out not null Surface_Type;
+                     Rows_Up   : Integer := 0;
+                     Rows_Down : Integer := 0;
+                     Cols_Left : Integer := 0;
+                     Cols_Right: Integer := 0)
+                     with Pre => (Integer(Surface.Height) +
+                                       Rows_Up + Rows_Down) > 0 and
+                                 (Integer(Surface.Width) +
+                                       Cols_Left + Cols_Right) > 0;
+
+
+   ---------------------
+   -- LAYER FUNCTIONS --
+   ---------------------
+   
+   -- This procedure adds a new layer into a layerer. If the position is 0 then
+   -- it's placed at the end.
+   procedure Add (Layerer: Layerer_Type;
+                  Layer  : Surface_Type);
+
+   -- This procedure removes a layer from the layerer.
+   procedure Remove (Layerer: Layerer_Type;
+                     Layer  : Surface_Type);
+
+
+   -- TODO: Get_Surface.
+
+   
+   -- This procedure updates the layers with the minimum number of changes
+   -- possible and prints them into the screen.
+   procedure Update (Layerer: Layerer_Type);
+
+
+   -- This procedure hides a layer inside all the layers. If the Layer isn't
+   -- found, an error is raised.
+   procedure Hide (Layerer: in out Layerer_Type;
+                   Layer  : Surface_Type);
+
+   -- This procedure shows a layer inside all the layers. The default is a
+   -- layer to be shown. If the Layer isn't found, an error is raised.
+   procedure Show (Layerer: in out Layerer_Type;
+                   Layer  : Surface_Type);
+
+
+   -- This function returns whether a layer is in the layerer.
+   function Contains_Layer (Layerer: in Layerer_Type;
+                            Layer  : Surface_Type)
+                            return Boolean;
+
+
+   -- This function returns the number of layers.
+   function Get_Layer_Number (Layerer: in Layerer_Type)
+                              return Natural;
+   pragma Inline (Get_Layer_Number);
+
+   -- This function returns the position of a layer. The layer on top is the
+   -- first one.
+   function Get_Position (Layerer: in Layerer_Type;
+                          Layer  : Surface_Type)
+                          return Positive;
+
 private
    
    type Surface_Array is array (Positive range <>) of Surface_Type;
@@ -80,14 +160,12 @@ private
 
    -- The layers are stored in an array access that can upgraded in runtime,
    -- the array contains Surface_Type_s in a given order that can be changed
-   -- with functions. There is a special surface which is Null which refers to
-   -- the main screen and which is always the first one in being displayed and
-   -- it's the one where all changes will be printed and the one that will be
-   -- printed.
+   -- with functions. The Main_Surface CAN'T be used as a layer because it's
+   -- the one where all the changes will be done. It's a protected layer.
    type Layerer_Type is tagged limited
       record
          -- The array, which by default has only one item.
-         Layers: Layer_Array := new Surface_Array(1 .. 1);
+         Layers: Layer_Array := new Surface_Array(1 .. 0);
          -- TODO: Hideable surfaces.
       end record;
 

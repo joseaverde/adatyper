@@ -33,10 +33,15 @@ package Ansi.Cursors is
    type Cursor_Type is tagged limited private;
 
 
+   -- This function creates a new cursor.
    function New_Cursor (Row: Row_Type;
                         Col: Col_Type)
                         return not null Ansi.Cursor_Type;
 
+
+   -- This procedure frees a cursor from memory.
+   procedure Free (Cursor: in out Ansi.Cursor_Type);
+   
    -----------------------
    -- CURSOR OPERATIONS --
    -----------------------

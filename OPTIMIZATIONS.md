@@ -18,3 +18,5 @@ And each element contains a character and a format (Styles, Colours)
 5. When working with layers, all layers THAT HAVE BEEN EDITED will be merged together in the order they have been placed into the Main_Surface, reducing the number of changes. Having them be printed into the Main_Surface adds control and reduces the number of print calls.
 
 6. When a surface is moved it no extra operations will be performed.
+
+7. It's better to prepare all the characters to be printed together instead of using many function calls.

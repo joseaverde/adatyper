@@ -1,10 +1,10 @@
 -------------------------------------------------------------------------------
 --                                                                           --
---                          A D A T Y P E R . G P R                          --
+--                             D E B U G . A D S                             --
 --                                                                           --
 --                              A D A T Y P E R                              --
 --                                                                           --
---                                   G P R                                   --
+--                                  S P E C                                  --
 --                                                                           --
 -------------------------------------------------------------------------------
 --     Copyright (c) 2020 José Antonio Verde Jiménez All Rights Reserved     --
@@ -26,51 +26,14 @@
 --                                                                           --
 -------------------------------------------------------------------------------
 
+-- This package contains debugging functions.
+package Debug is
 
-project AdaTyper is
+   procedure Breakpoint (Text: String   := "";
+                         Col : Positive := 1;
+                         Stop: Boolean  := False);
 
-   for Languages   use ("Ada");
-   for Source_Dirs use ("src", "src/posix");
-   for Object_Dir  use  "obj";
-   for Exec_Dir    use  "bin";
-   for Main        use ("main.adb");
-
-   package Builder is
-      for Executable ("main.adb") use "adatyper.bin";
-   end Builder;
-
-   package Compiler is
-      for Switches ("Ada") use ("-g",
-                                "-O0",
-                                "-fdata-sections",
-                                "-ffunction-sections");
-      -- -gnatws -gnatd7 -gnatv
-   end Compiler;
-
--- package Compiler is
---    for Switches ("Ada") use ("-g",        -- Use debug symbols
---                              "-O0",       -- No optimizations
---                              -- "-gnatd_F",  -- Detailed invocation information
---                              "-fdata-sections",
---                              "-ffunction-sections",
---                              --"-gnatE",    -- Dynamic elaboration
---                              --"-gnato",    --
---                              "-gnatv",    -- Verbose messages
---                              --"-gnatws",   -- Suppress warnings
---                              "-gnatd7"    -- Suppress timestamps
---                              );
--- end Compiler;
-
-   package Linker is
-      for Switches ("Ada") use ("-Wl,--gc-sections"); -- Remove unused sections
-     --                           "-flto");
-   end Linker;
-
-   --package Binder is
-   --   for Switches ("Ada") use ("-d_C"); -- Diagnose all circularities
-   --end Binder;
-
-end AdaTyper;
+end Debug;
 
 
 ---=======================-------------------------=========================---

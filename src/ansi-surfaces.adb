@@ -33,6 +33,7 @@ with Ansi.Colors;
 with Ansi.Exceptions;
 with Ansi.Styles;
 with Ansi.Text_IO;
+with Debug; use Debug; -- DEBUGING
 -- with Ada.Text_IO; DEBUGING
 
 
@@ -69,6 +70,24 @@ package body Ansi.Surfaces is
          New_Surface := new Surface_Record(Height, Width);
          New_Surface.Cursor := new Ansi.Cursors.Cursor_Type;
          New_Surface.Cursor.Set_Position(1, 1, False);
+      end return;
+
+   end Create;
+
+
+   function Create (Grid: Str_Type_Array)
+                    return Surface_Type is
+   begin
+
+      return New_Surface: Surface_Type do
+         New_Surface := Create(Grid'Length(1), Grid'Length(2));
+         New_Surface.Update_All := True;
+         for Row in New_Surface.Grid'Range(1) loop
+            for Col in New_Surface.Grid'Range(2) loop
+               New_Surface.Grid(Row, Col).Char := Grid(Positive(Row),
+                                                       Positive(Col));
+            end loop;
+         end loop;
       end return;
 
    end Create;
@@ -252,7 +271,7 @@ package body Ansi.Surfaces is
                                        Bright => Item.Fmt.Fg_Bright);
             Ansi.Colors.Put_Background(Color  => Item.Fmt.Bg_Color,
                                        Bright => Item.Fmt.Bg_Bright);
-            --Ansi.Styles.Put_Styles(Styles => Item.Fmt.Styles);
+            Ansi.Styles.Put_Style(Styles => Item.Fmt.Style);
             Ansi.Text_IO.Put(Item.Char);
             -- delay 0.01; A good effect
          end loop;
@@ -340,47 +359,388 @@ package body Ansi.Surfaces is
    -- LAYER FUNCTIONS --
    ---------------------
    
-   procedure Add (Layerer: Layerer_Type;
-                  Layer  : Surface_Type) is
+   procedure Add (Layerer : in out Layerer_Type;
+                  Layer   : Surface_Type;
+                  Position: Natural := 0) is
+      Old_Layerer: Surface_Array := Layerer.Layers.all;
+      Old_Visible: Boolean_Array := Layerer.Visible.all;
+      Old_Size : Natural := Layerer.Size;
    begin
-      null; -- TODO
+
+      -- We check if it is already there.
+      if Layerer / Layer then
+         raise Ansi.Exceptions.Already_Inside_Layerer_Issue
+         with "The surface is already inside the layerer!";
+      end if;
+      
+      -- We free the old arrays.
+      Free(Layerer.Layers);
+      Free(Layerer.Visible);
+
+      -- We allocate new ones.
+      Layerer.Layers  := new Surface_Array(1 .. Old_Size + 1);
+      Layerer.Visible := new Boolean_Array(1 .. Old_Size + 1);
+      Layerer.Size    := Old_Size + 1;
+      
+      if Position = 0 then
+         -- We update the layers.
+         Layerer.Layers(1 .. Old_Size) := Old_Layerer;
+         Layerer.Layers(Layerer.Layers'Last) := Layer;
+
+         -- We update the visibility.
+         Layerer.Visible(1 .. Old_Size) := Old_Visible;
+         Layerer.Visible(Layerer.Visible'Last) := True;
+      else
+         -- We update the layers.
+         Layerer.Layers(1 .. Position - 1) := Old_Layerer(Old_Layerer'First ..
+                                                          Old_Layerer'First +
+                                                            Position - 1);
+         Layerer.Layers(Position) := Layer;
+         Layerer.Layers(Position + 1 .. Layerer.Layers'Last) :=
+            Old_Layerer(Old_Layerer'First + Position + 1 .. Old_Layerer'Last);
+
+         -- We update the visibility.
+         Layerer.Visible(1 .. Position - 1) := Old_Visible(Old_Visible'First ..
+                                                           Old_Visible'First +
+                                                            Position - 1);
+         Layerer.Visible(Position) := True;
+         Layerer.Visible(Position + 1 .. Layerer.Visible'Last) :=
+            Old_Visible(Old_Visible'First + Position + 1 .. Old_Visible'Last);
+      end if;
+
    end Add;
 
 
-   procedure Remove (Layerer: Layerer_Type;
+   procedure Remove (Layerer: in out Layerer_Type;
                      Layer  : Surface_Type) is
    begin
-      null; -- TODO
+
+      for L in Layerer.Layers'Range loop
+         if Layerer.Layers(L) = Layer then
+            Shrink_Layerer:
+               declare
+                  Old_Size : Natural := Layerer.Layers'Length;
+                  New_Layer: Layer_Array := new Surface_Array(1 .. Old_Size-1);
+               begin
+                  New_Layer(1 .. L - 1) := Layerer.Layers(1 .. L - 1);
+                  New_Layer(L .. New_Layer'Last) := Layerer.Layers(L + 1 ..
+                                                      Layerer.Layers'Last);
+                  Free(Layerer.Layers);
+                  Layerer.Layers := New_Layer;
+               end Shrink_Layerer;
+            return;
+         end if;
+      end loop;
+
+      raise Ansi.Exceptions.Unknown_Layer_Issue
+      with "The given layer can't be removed because it isn't in the Layerer";
+
    end Remove;
+
+
+   procedure Remove (Layerer : in out Layerer_Type;
+                     Position: Positive) is
+      New_Layer: Layer_Array := new Surface_Array(1..Layerer.Layers'Length-1);
+   begin
+      New_Layer(1 .. Position - 1) := Layerer.Layers(1 .. Position - 1);
+      New_Layer(Position .. New_Layer'Last) := Layerer.Layers(Position + 1 ..
+                                                      Layerer.Layers'Last);
+      Free(Layerer.Layers);
+      Layerer.Layers := New_Layer;
+   end Remove;
+
+
+
+   function Is_In (Layerer: Layerer_Type;
+                   Layer  : Surface_Type)
+                   return Boolean is
+   begin
+
+      for L in Layerer.Layers'Range loop
+         if Layerer.Layers(L) = Layer then
+            return True;
+         end if;
+      end loop;
+
+      return False;
+
+   end Is_In;
+
 
    
    procedure Update (Layerer: Layerer_Type) is
+      Layer : Surface_Type;
+      Hidden: Element := Element'(Fmt  => Format'(Fg_Color  => White,
+                                                  Fg_Bright => False,
+                                                  Bg_Color  => Black,
+                                                  Bg_Bright => False,
+                                                  Style     =>(others=>False)),
+                                  Char => ' ');
    begin
-      null; -- TODO
+      -- We will start to go through all the Layers, checking which ones have
+      -- been updated and pass those changes to the main layer. First we clean
+      -- the space where the hidden layers are found.
+      
+      Hidden_Loop:
+      for L in Positive range 1 .. Layerer.Size loop
+--BREAKPOINT("HIDDEN_LOOP::POSITION" & L'IMAGE & " /" & LAYERER.SIZE'IMAGE);
+         Layer := Layerer.Layers(L);
+         if not Layerer.Visible(L) and Layer.Update_All then
+            -- We clean the surfaces where the layers would be.
+            Cleaner:
+               declare
+                  -- We declare the bounds of the layer.
+                  Lower_Row: Row_Type;
+                  Upper_Row: Row_Type;
+                  Lower_Col: Col_Type;
+                  Upper_Col: Col_Type;
+               begin
+                  -- We first check the layer is out of the screen.
+                  if Layer.Row > Height or Layer.Col > Width then
+                     goto Exit_Cleaner;
+                  end if;
+
+                  Lower_Row := Layer.Row;
+                  Lower_Col := Layer.Col;
+                  Upper_Row := (if Layer.Row + Layer.Height > Height then
+                                       Height
+                                else
+                                       Layer.Row + Layer.Height
+                                );
+                  Upper_Col := (if Layer.Col + Layer.Width > Width then
+                                       Width
+                                else
+                                       Layer.Col + Layer.Width
+                                );
+
+                  for Row in Row_Type range Lower_Row .. Upper_Row loop
+                     for Col in Col_Type range Lower_Col .. Upper_Col loop
+                        if Main_Surface.Grid(Row, Col) /= Hidden then
+                           Main_Surface.Grid(Row, Col) := Hidden;
+                           Main_Surface.Push(Ansi.Cursors.New_Cursor(Row,Col));
+                        end if;
+                     end loop;
+                  end loop;
+
+                  <<Exit_Cleaner>>
+               end Cleaner;
+            -- We don't have to remove the queue because it would take too much
+            -- time. It's better to remove it once it's shown again.
+         end if;
+      end loop Hidden_Loop;
+
+      Layerer_Loop:
+      for L in Positive range 1 .. Layerer.Size loop
+--BREAKPOINT("LAYERER_LOOP::POSITION" & L'IMAGE & " /" & LAYERER.SIZE'IMAGE);
+         -- We check if it has a stack or we have to update everything.
+         Layer := Layerer.Layers(L);
+         -- If it's hidden we don't do anything.
+         if not Layerer.Visible(L) then
+            goto Continue_Layerer_Loop;
+         end if;
+         if Layer.Update_All then
+            -- We update everything from the Main_Layer.
+            Update_All_Main_Layer:
+               declare
+                  -- We declare the bounds of the layer.
+                  Lower_Row: Row_Type;
+                  Upper_Row: Row_Type;
+                  Lower_Col: Col_Type;
+                  Upper_Col: Col_Type;
+
+                  -- We declare some access type for the stack.
+                  Next_Node: Operation := Layer.Head;
+                  Temp_Node: Operation;
+               begin
+                  -- We first check the layer isn't out of the screen.
+                  if Layer.Row > Height or Layer.Col > Width then
+                     goto Exit_Update_All_Main_Layer;
+                  end if;
+
+                  -- Then we start to assing the ranges.
+                  Lower_Row := Layer.Row;
+                  Lower_Col := Layer.Col;
+                  
+                  Upper_Row := (if Layer.Row + Layer.Height > Height then
+                                       Height
+                                else
+                                       Layer.Row + Layer.Height -  1 
+                               );
+                  Upper_Col := (if Layer.Col + Layer.Width > Width then
+                                       Width
+                                else
+                                       Layer.Col + Layer.Width - 1
+                               );
+--BREAKPOINT("BOUNDS SET", 4);
+--BREAKPOINT("LOWER_ROW =" & LOWER_ROW'IMAGE, 7);
+--BREAKPOINT("UPPER_ROW =" & UPPER_ROW'IMAGE, 7);
+--BREAKPOINT("LOWER_COL =" & LOWER_COL'IMAGE, 7);
+--BREAKPOINT("UPPER_COL =" & UPPER_COL'IMAGE, 7);
+--BREAKPOINT("WIDTH  =" &  MAIN_SURFACE.WIDTH'IMAGE, 7);
+--BREAKPOINT("HEIGHT =" & MAIN_SURFACE.HEIGHT'IMAGE, 7);
+--BREAKPOINT("LAYER.ROW =" & LAYER.ROW'IMAGE, 7);
+--BREAKPOINT("LAYER.COL =" & LAYER.COL'IMAGE, 7);
+                  -- We apply the changes to the Main_Surface.
+                  for Row in Row_Type range Lower_Row .. Upper_Row loop
+                     for Col in Col_Type range Lower_Col .. Upper_Col loop
+--BREAKPOINT("SET ("&ROW'IMAGE&COL'IMAGE&" )", 10);
+                        if Layer.Grid(1+Row-Layer.Row, 1+Col-Layer.Col) /=
+                           Main_Surface.Grid(Row, Col)
+                        then
+                           Main_Surface.Grid(Row, Col) := Layer.Grid
+                                                            (1+Row-Layer.Row,
+                                                             1+Col-Layer.Col);
+                           -- We push another element to the Main_Surface stack
+                           Main_Surface.Push(Ansi.Cursors.New_Cursor(Row, Col));
+--BREAKPOINT("PUSHED", 10);
+                        end if;
+                     end loop;
+                  end loop;
+--BREAKPOINT("GRID WRITTEN", 4);
+
+                  -- We finally free the stack.
+                  Layer.Update_All := False;
+                  while Next_Node /= null loop
+                     Temp_Node := Next_Node;
+                     Next_Node := Next_Node.Next;
+                     Ansi.Cursors.Free(Temp_Node.Cursor);
+                     Free(Temp_Node);
+                  end loop;
+                  Layer.Head := null;
+                  Layer.Tail := null;
+--BREAKPOINT("QUEUE FREED", 4);
+                  
+                  <<Exit_Update_All_Main_Layer>>
+               end Update_All_Main_Layer;
+
+         elsif Layer.Head /= null then
+            -- Now we have to update the other kind of updated layer.
+            -- The one that hasn't be told to be updated completely, but the
+            -- queue.
+            Update_Queue_Main_Layer:
+               declare
+                  -- We read the queue.
+                  Next_Node: Operation := Layer.Head;
+                  Temp_Node: Operation;
+                  Row: Row_Type;
+                  Col: Col_Type;
+               begin
+
+                  while Next_Node /= null loop
+                     Row := Next_Node.Cursor.Get_Row;
+                     Col := Next_Node.Cursor.Get_Col;
+
+                     -- We check it isn't out of bounds.
+                     if Row + Layer.Row > Height or Col + Layer.Col > Width
+                     then
+                        Ansi.Cursors.Free(Next_Node.Cursor);
+                        goto Position_Out_Of_Range;
+                     end if;
+
+                     -- We check if it's different from the one on the main
+                     -- surface, if so, we don't update it.
+                     if Main_Surface.Grid(Row + Layer.Row, Col + Layer.Col) /=
+                        Layer.Grid(Row, Col)
+                     then
+                        Main_Surface.Grid(Row + Layer.Row, Col + Layer.Col) :=
+                                             Layer.Grid(Row, Col);
+                        -- Also, we don't have to allocate a new cursor, we can
+                        -- use the one we already have.
+                        Main_Surface.Push(Next_Node.Cursor);
+                     else
+                        -- We update it.
+                        Ansi.Cursors.Free(Next_Node.Cursor);
+                     end if;
+                     <<Position_Out_Of_Range>>
+                     -- We free it and continue.
+                     Temp_Node := Next_Node;
+                     Next_Node := Next_Node.Next;
+                     Free(Next_Node);
+                  end loop;
+                  Layer.Head := null;
+                  Layer.Tail := null;
+
+               end Update_Queue_Main_Layer;
+         end if;
+
+         <<Continue_Layerer_Loop>>
+      end loop Layerer_Loop;
+
    end Update;
 
    
    procedure Hide (Layerer: in out Layerer_Type;
                    Layer  : Surface_Type) is
    begin
-      null; -- TODO
+
+      for I in Positive range 1 .. Layerer.Size loop
+         if Layerer.Layers(I) = Layer then
+            if Layerer.Visible(I) then
+               Layer.Update_All := True;
+               Layerer.Visible(I) := False;
+            end if;
+            return;
+         end if;
+      end loop;
+
+      raise Ansi.Exceptions.Unknown_Layer_Issue
+      with "The layer to be hidden isn't in the layerer!";
+
+   end Hide;
+
+
+   procedure Hide (Layerer : in out Layerer_Type;
+                   Position: Positive) is
+   begin
+
+      if Position > Layerer.Size then
+         raise Ansi.Exceptions.Out_Of_Bounds_Issue
+         with "The layer's position is out of the layerer's bounds!";
+      end if;
+      
+      if Layerer.Visible(Position) Then
+         Layerer.Layers(Position).Update_All := True;
+         Layerer.Visible(Position) := False;
+      end if;
+
    end Hide;
 
 
    procedure Show (Layerer: in out Layerer_Type;
                    Layer  : Surface_Type) is
    begin
-      null; -- TODO
+
+      for I in Positive range 1 .. Layerer.Size loop
+         if Layerer.Layers(I) = Layer then
+            if not Layerer.Visible(I) then
+               Layer.Update_All := True;
+               Layerer.Visible(I) := True;
+            end if;
+            return;
+         end if;
+      end loop;
+
+      raise Ansi.Exceptions.Unknown_Layer_Issue
+      with "The layer to be hidden isn't in the layerer!";
+
    end Show;
 
 
-
-   function Contains_Layer (Layerer: in Layerer_Type;
-                            Layer  : Surface_Type)
-                            return Boolean is
+   procedure Show (Layerer : in out Layerer_Type;
+                   Position: Positive) is
    begin
-      return False; -- TODO
-   end Contains_Layer;
+      
+      if Position > Layerer.Size then
+         raise Ansi.Exceptions.Out_Of_Bounds_Issue
+         with "The layer's position is out of the layerer's bounds!";
+      end if;
+
+      if not Layerer.Visible(Position) then
+         Layerer.Layers(Position).Update_All := True;
+         Layerer.Visible(Position) := True;
+      end if;
+
+   end Show;
 
 
 
@@ -388,18 +748,73 @@ package body Ansi.Surfaces is
                               return Natural is
    begin
 
-      return Layerer.Layers'Length;
+      return Layerer.Size;
 
    end Get_Layer_Number;
 
 
    function Get_Position (Layerer: in Layerer_Type;
-                          Layer  : Surface_Type)
+                          Layer  : not null Surface_Type)
                           return Positive is
    begin
-      return 1; -- TODO
+
+      for I in Positive range 1 .. Layerer.Size loop
+         if Layerer.Layers(I) = Layer then
+            return I;
+         end if;
+      end loop;
+
+      raise Ansi.Exceptions.Unknown_Layer_Issue
+      with "The given layer wasn't found in the layerer!";
+
    end Get_Position;
 
+
+   function Get_Layer (Layerer : in Layerer_Type;
+                       Position: Positive)
+                       return not null Surface_Type is
+   begin
+
+      if Position > Layerer.Size then
+         raise Ansi.Exceptions.Out_Of_Bounds_Issue
+         with "The position of the layer is out of bounds!";
+      end if;
+
+      return Layerer.Layers(Position);
+
+   end Get_Layer;
+
+
+   function Get_Visibility (Layerer: in Layerer_Type;
+                            Layer  : Surface_Type)
+                            return Boolean is
+   begin
+
+      for I in Positive range 1 .. Layerer.Size loop
+         if Layerer.Layers(I) = Layer then
+            return Layerer.Visible(I);
+         end if;
+      end loop;
+
+      raise Ansi.Exceptions.Unknown_Layer_Issue
+      with "The given layer wasn't found in the layerer!";
+
+   end Get_Visibility;
+
+
+   function Get_Visibility (Layerer : in Layerer_Type;
+                            Position: Positive)
+                            return Boolean is
+   begin
+
+      if Position > Layerer.Size then
+         raise Ansi.Exceptions.Out_Of_Bounds_Issue
+         with "The position of the layer is out of bounds!";
+      end if;
+
+      return Layerer.Visible(Position);
+
+   end Get_Visibility;
 
 end Ansi.Surfaces;
 

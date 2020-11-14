@@ -1,5 +1,6 @@
 #!/bin/bash
 
+# gnatdoc -Padatyper -b -d -l -p
 
 if [ "$1" == "compile" ]; then
    gprbuild -f -p -Padatyper || exit 1

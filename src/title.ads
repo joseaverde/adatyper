@@ -40,16 +40,74 @@ package Title is
 private
 
    -- The letters
-     Letter_Big_A: Ansi.Surface_Type := Ansi.Surfaces.Create(6, 7);
-   Letter_Small_d: Ansi.Surface_Type := Ansi.Surfaces.Create(6, 7);
-   Letter_Small_a: Ansi.Surface_Type := Ansi.Surfaces.Create(6, 7);
-     Letter_Big_T: Ansi.Surface_Type := Ansi.Surfaces.Create(6, 7);
-   Letter_Small_y: Ansi.Surface_Type := Ansi.Surfaces.Create(6, 7);
-   Letter_Small_p: Ansi.Surface_Type := Ansi.Surfaces.Create(6, 7);
-   Letter_Small_e: Ansi.Surface_Type := Ansi.Surfaces.Create(6, 7);
-   Letter_Small_r: Ansi.Surface_Type := Ansi.Surfaces.Create(6, 7);
-   Letter_Cursor : Ansi.Surface_Type := Ansi.Surfaces.Create(6, 7);
-   Letter_Space  : Ansi.Surface_Type := Ansi.Surfaces.Create(6, 7);
+     Letter_Big_A: Ansi.Surface_Type := Ansi.Surfaces.Create(("     _ ",
+                                                              "    / |",
+                                                              "   /  |",
+                                                              "  / - |",
+                                                              " / /| |",
+                                                              "/_/ |_|"));
+
+   Letter_Small_d: Ansi.Surface_Type := Ansi.Surfaces.Create(("     _ ",
+                                                              "    / |",
+                                                              "  _)  |",
+                                                              " /    |",
+                                                              "( (_) |",
+                                                              " \___/ "));
+
+   Letter_Small_a: Ansi.Surface_Type := Ansi.Surfaces.Create(("       ",
+                                                              "       ",
+                                                              "  ___  ",
+                                                              " /   \ ",
+                                                              "( (_) )",
+                                                              " \____\"));
+
+     Letter_Big_T: Ansi.Surface_Type := Ansi.Surfaces.Create((" _____ ",
+                                                              "(_   _)",
+                                                              "  | |  ",
+                                                              "  | |  ",
+                                                              "  | |  ",
+                                                              "  |_|  "));
+
+   Letter_Small_y: Ansi.Surface_Type := Ansi.Surfaces.Create(("       ",
+                                                              " _   _ ",
+                                                              "( \_/ )",
+                                                              " \   / ",
+                                                              " _) /  ",
+                                                              "(__/   "));
+
+   Letter_Small_p: Ansi.Surface_Type := Ansi.Surfaces.Create(("       ",
+                                                              "  ___  ",
+                                                              " /   \ ",
+                                                              "| (_) )",
+                                                              "|  __/ ",
+                                                              "|_(    "));
+
+   Letter_Small_e: Ansi.Surface_Type := Ansi.Surfaces.Create(("       ",
+                                                              "  ____ ",
+                                                              " / __ \",
+                                                              "/  ___/",
+                                                              "\ (___ ",
+                                                              " \____)"));
+
+   Letter_Small_r: Ansi.Surface_Type := Ansi.Surfaces.Create(("       ",
+                                                              "   ___ ",
+                                                              "/\/ __)",
+                                                              "|  /   ",
+                                                              "| |    ",
+                                                              "|_|    "));
+
+   Letter_Cursor : Ansi.Surface_Type := Ansi.Surfaces.Create(("#######",
+                                                              "#######",
+                                                              "#######",
+                                                              "#######",
+                                                              "#######",
+                                                              "#######"));
+
+
+   -- The letterer
+   Letterer: Ansi.Surfaces.Layerer_Type;
+   use type Ansi.Surfaces.Layerer_Type;
+
 end Title;
 
 

@@ -77,7 +77,7 @@ package body Ansi.Os_Utils is
    procedure Clean_Up is
       Temp: Boolean;
    begin
-
+      
       Temp := System_Command("stty echo ");
       Temp := System_Command("tput cnorm");
    -- Temp := System_Command("tput rmcup");

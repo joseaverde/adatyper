@@ -74,12 +74,13 @@ package Ansi is
 
    -- This type is used to describe the different kind of styles you can add to
    -- a terminal or console.
-   type Style_Type is (Bright, Dim, Italics, Underlined, Reversed);
+   type Style_Type is (Bright, Dim, Italics, Underlined, Slow_Blink, Reversed);
    for Style_Type use
       (Bright     => 1,
        Dim        => 2,
        Italics    => 3,
        Underlined => 4,
+       Slow_Blink => 5,
        Reversed   => 7);
    for Style_Type'Size use 3;
 
@@ -94,7 +95,7 @@ package Ansi is
    -- The type of string we will use for this program.
    type Str_Type is array (Positive range <>) of Char_Type;
 
-    
+   
    
    ---------------
    -- CONSTANTS --
@@ -112,9 +113,23 @@ package Ansi is
    Main_Cursor: Cursor_Type;
    
 
+   ----------------------------
+   -- SURFACE_TYPE FUNCTIONS --
+   ----------------------------
+
+   procedure Set_Position (Surface: Surface_Type;
+                           Row    : Row_Type;
+                           Col    : Col_Type);
+   pragma Inline (Set_Position);
+
+
    ---------------
    -- FUNCTIONS --
    ---------------
+   
+   -- This procedure clears the screen.
+   procedure Clear;
+   pragma Inline (Clear);
 
    -- This function returns the height of the screen.
    function Get_Height return Row_Type;
@@ -165,7 +180,7 @@ private -----------------------------------------------------------------------
          Fg_Bright at 0 range 3 .. 3;
          Bg_Color  at 0 range 4 .. 6;
          Bg_Bright at 0 range 7 .. 7;
-         Style     at 1 range 0 .. 4;
+         Style     at 1 range 0 .. Style_Array'Length - 1;
       end record;
    for Format'Size use 2 * System.Storage_Unit;
    pragma Pack (Format);

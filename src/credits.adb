@@ -28,6 +28,7 @@
 
 with Ada.Command_Line;
 with Ada.Text_IO;
+-- with Ansi;
 
 
 package body Credits is
@@ -55,6 +56,8 @@ package body Credits is
       P("");
       P("      Warm your fingers up and press any key to continue...");
       Ada.Text_IO.Get_Immediate(C);
+      Ada.Text_IO.Put_Line(ASCII.ESC & "[2J");
+      -- Ansi.Clear;
    end Startup_Notice;
 
 end Credits;

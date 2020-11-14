@@ -14,3 +14,4 @@
  * Functions to get the character in certain position.
  * Scrolling.
  * Check `tput smcup' and `tput rmcup'
+ * Make all types Controlled types. And add garbage collection.

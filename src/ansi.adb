@@ -26,7 +26,7 @@
 --                                                                           --
 -------------------------------------------------------------------------------
 
-with  Ada.Text_IO;
+with  Ada.Text_IO;   -- TODO: Replace with Ansi.Text_IO;
 with Ansi.Cursors;
 with Ansi.Exceptions;
 with Ansi.Os_Utils;
@@ -38,6 +38,43 @@ pragma Elaborate (Ansi.Surfaces);
 
 
 package body Ansi is
+
+   ----------------------------
+   -- SURFACE_TYPE FUNCTIONS --
+   ----------------------------
+
+   procedure Set_Position (Surface: Surface_Type;
+                           Row    : Row_Type;
+                           Col    : Col_Type) is
+   begin
+      
+      if Surface = Main_Surface then
+         raise Ansi.Exceptions.Invalid_Surface_Issue
+         with "The surface is protected!";
+      end if;
+
+      Surface.Row := Row;
+      Surface.Col := Col;
+      Surface.Update_All := True;
+
+   end Set_Position;
+
+
+   -----------------------
+   -- PACKAGE FUNCTIONS --
+   -----------------------
+
+   procedure Clear is
+      Str: String(1 .. Positive(Height) * Positive(Width)) := (others => ' ');
+   begin
+
+      -- TODO: Change Ada.Text_IO to Ansi.Text_IO
+      Main_Cursor.Set_Position(1, 1, True);
+      Ada.Text_IO.Put_Line(ASCII.ESC & "[0m");
+      Ada.Text_IO.Put_Line(Str);
+      Main_Cursor.Set_Position(1, 1, True);
+
+   end Clear;
 
    
    function Get_Height return Row_Type is
@@ -107,14 +144,16 @@ package body Ansi is
       Op: Operation := new Operation_Record;
    begin
 
-      Op.Next := Surface.Head;
-      Op.Cursor := new Ansi.Cursors.Cursor_Type;
-      Op.Cursor.Set_Position(Surface.Cursor, False);
-
+      Op.Cursor := Cursor;
       if Surface.Tail = null then
          Surface.Tail := Op;
+         Surface.Head := Op;
+      else
+         Surface.Tail.Next := Op;
+         Surface.Tail := Op;
       end if;
-      Surface.Head := Op;
+     -- Op.Cursor := new Ansi.Cursors.Cursor_Type;
+     -- Op.Cursor.Set_Position(Surface.Cursor, False);
 
    end Push;
 
@@ -137,7 +176,7 @@ begin
    Main_Surface := Ansi.Surfaces.Create(Height, Width);
    Main_Cursor := new Cursors.Cursor_Type;
 
-   Ansi.Surfaces.Put(Main_Surface, 1, 1);
+   -- Ansi.Surfaces.Put(Main_Surface, 1, 1);
    Main_Surface.Protect_It := True;
    Main_Cursor.Set_Position(1, 1);
    Main_Surface.Cursor := Main_Cursor;

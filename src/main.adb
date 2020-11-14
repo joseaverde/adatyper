@@ -40,106 +40,19 @@ with Title;
 -- This is the main function of the program, it returns an natural nuber with
 -- the error code if any occurs.
 function Main return Natural is
+
    procedure Debug (N: Natural) is
    begin
       Ada.Text_IO.Put_Line("DEBUG:"&N'Image);
    end Debug;
 
-   My_Surface : Ansi.Surface_Type := Ansi.Surfaces.Create(10, 20);
-   Red_Surf   : Ansi.Surface_Type := Ansi.Surfaces.Create(10, 10);
-   Small_Green: Ansi.Surface_Type := Ansi.Surfaces.Create(5, 5);
-   Col_Blue   : Ansi.Surface_Type := Ansi.Surfaces.Create(12, 1);
-
 begin
 
-   Ansi.Colors.Set_Background (Surface  => Col_Blue,
-                               Color    => Ansi.Blue,
-                               Bright   => True,
-                               From_Row => 1,
-                               To_Row   => 12,
-                               From_Col => 1,
-                               To_Col   => 1);
 
-   Ansi.Colors.Set_Background (Surface  => Small_Green,
-                               Color    => Ansi.Green,
-                               Bright   => False,
-                               From_Row => 1,
-                               To_Row   => 5,
-                               From_Col => 1,
-                               To_Col   => 5);
-   Ansi.Colors.Set_Background (Surface  => Red_Surf,
-                               Color    => Ansi.Red,
-                               Bright   => True,
-                               From_Row => 1,
-                               To_Row   => 10,
-                               From_Col => 1,
-                               To_Col   => 10);
-
-   Ansi.Surfaces.Get_Cursor(My_Surface).Set_Position(1, 1, False);
-   Ansi.Surfaces.Put("##########", My_Surface);
-   Ansi.Colors.Set_Cursor_Foreground (Surface => My_Surface,
-                                      Color   => Ansi.Yellow,
-                                      Bright  => False);
-   Ansi.Colors.Set_Cursor_Background (Surface => My_Surface,
-                                      Color   => Ansi.Black,
-                                      Bright  => True);
-
-   Ansi.Colors.Set_Foreground (Surface  => My_Surface,
-                               Color    => Ansi.Red,
-                               Bright   => True,
-                               From_Row => 4,
-                               To_Row   => 10,
-                               From_Col => 4,
-                               To_Col   => 10);
-   Ansi.Colors.Set_Background (Surface  => My_Surface,
-                               Color    => Ansi.Cyan,
-                               Bright   => False,
-                               From_Row => 1,
-                               To_Row   => 6,
-                               From_Col => 1,
-                               To_Col   => 6);
-
-   Ansi.Surfaces.Get_Cursor(My_Surface).Set_Position(5, 1, False);
-   Ansi.Surfaces.Put("Hola mundo", My_Surface);
-   Ansi.Surfaces.Get_Cursor(My_Surface).Set_Position(7, 2, False);
-   Ansi.Surfaces.Put("Hello World", My_Surface);
-
-   Ansi.Colors.Set_Foreground (Surface => My_Surface,
-                               Color   => Ansi.Magenta,
-                               Bright  => True,
-                               Row     => 5,
-                               Col     => 1);
-
-   declare
-      MC: Ansi.Color_Type;
-      BR: Boolean;
-   begin
-      Ansi.Colors.Get_Foreground(Surface => My_Surface,
-                                 Color   => MC,
-                                 Bright  => BR,
-                                 Row     => 1,
-                                 Col     => 4);
-  --    Ada.Text_IO.Put("COLOUR AT ROW_1 COL_4 = " &
-  --                    MC'Image & "::" & BR'Image);
-      Ansi.Colors.Get_Background(Surface => My_Surface,
-                                 Color   => MC,
-                                 Bright  => BR,
-                                 Row     => 1,
-                                 Col     => 4);
---      Ada.Text_IO.Put_Line(" ; " & MC'Image & "::" & BR'Image);
-   end;
-
-   Ansi.Surfaces.Put(My_Surface, 10, 10);
-   Ansi.Surfaces.Put(Red_Surf, 1, 1);
-   Ansi.Surfaces.Put(Small_Green, 2, 2);
-   Ansi.Surfaces.Put(Col_Blue, 4, 4);
-   Ansi.Surfaces.Put(Ansi.Get_Main_Surface, 1, 1);
-
+--  Ansi.Finalize;
+   Credits.Startup_Notice;
    Title.Main_Title;
-
-   -- Credits.Startup_Notice;
-   -- Credits.Start_UP
-   
+-- Credits.Start_UP
    
    Ansi.Finalize;
    return 0;

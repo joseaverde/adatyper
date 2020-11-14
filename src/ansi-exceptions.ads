@@ -32,10 +32,14 @@ package Ansi.Exceptions is
 
    -- Exceptions A.K.A issues --
    
+   -- TODO: Add more comments.
    -- Raised when trying to print something out of bounds.
-   Out_Of_Bounds_Issue      : exception;
-   Windows_Size_Issue       : exception;
-   Initialization_Issue     : exception;
+   Already_Inside_Layerer_Issue  : exception;
+   Initialization_Issue          : exception;
+   Invalid_Surface_Issue         : exception;
+   Out_Of_Bounds_Issue           : exception;
+   Unknown_Layer_Issue           : exception;
+   Windows_Size_Issue            : exception;
 
 end Ansi.Exceptions;
 

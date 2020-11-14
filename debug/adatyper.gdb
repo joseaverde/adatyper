@@ -4,4 +4,8 @@
 
 # break ansi-text_io.adb:56
 
-break ansi-cursors.adb:170
+# break ansi-cursors.adb:170
+
+break ansi-surfaces.adb:483
+break ansi-surfaces.adb:530
+break ansi-surfaces.adb:656

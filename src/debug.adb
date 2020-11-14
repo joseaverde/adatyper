@@ -1,10 +1,10 @@
 -------------------------------------------------------------------------------
 --                                                                           --
---                          A D A T Y P E R . G P R                          --
+--                             D E B U G . A D B                             --
 --                                                                           --
 --                              A D A T Y P E R                              --
 --                                                                           --
---                                   G P R                                   --
+--                                  B O D Y                                  --
 --                                                                           --
 -------------------------------------------------------------------------------
 --     Copyright (c) 2020 José Antonio Verde Jiménez All Rights Reserved     --
@@ -26,51 +26,31 @@
 --                                                                           --
 -------------------------------------------------------------------------------
 
+with Ada.Text_IO;
 
-project AdaTyper is
+package body Debug is
 
-   for Languages   use ("Ada");
-   for Source_Dirs use ("src", "src/posix");
-   for Object_Dir  use  "obj";
-   for Exec_Dir    use  "bin";
-   for Main        use ("main.adb");
+   procedure Breakpoint (Text: String   := "";
+                         Col : Positive := 1;
+                         Stop: Boolean  := False) is
+      Char: Character;
+   begin
+      
+      Ada.Text_IO.Set_Col(File => Ada.Text_IO.Standard_Error,
+                          To   => Ada.Text_IO.Count(Col));
+      Ada.Text_IO.Put_Line(File => Ada.Text_IO.Standard_Error,
+                           Item => ASCII.ESC & "[94m[DEBUG] " &
+                                   ASCII.ESC & "[0m" &
+                                   ASCII.ESC & "[2m" & Text   &
+                                   ASCII.ESC & "[0m");
 
-   package Builder is
-      for Executable ("main.adb") use "adatyper.bin";
-   end Builder;
+      if Stop then
+         Ada.Text_IO.Get_Immediate(Char);
+      end if;
 
-   package Compiler is
-      for Switches ("Ada") use ("-g",
-                                "-O0",
-                                "-fdata-sections",
-                                "-ffunction-sections");
-      -- -gnatws -gnatd7 -gnatv
-   end Compiler;
+   end Breakpoint;
 
--- package Compiler is
---    for Switches ("Ada") use ("-g",        -- Use debug symbols
---                              "-O0",       -- No optimizations
---                              -- "-gnatd_F",  -- Detailed invocation information
---                              "-fdata-sections",
---                              "-ffunction-sections",
---                              --"-gnatE",    -- Dynamic elaboration
---                              --"-gnato",    --
---                              "-gnatv",    -- Verbose messages
---                              --"-gnatws",   -- Suppress warnings
---                              "-gnatd7"    -- Suppress timestamps
---                              );
--- end Compiler;
-
-   package Linker is
-      for Switches ("Ada") use ("-Wl,--gc-sections"); -- Remove unused sections
-     --                           "-flto");
-   end Linker;
-
-   --package Binder is
-   --   for Switches ("Ada") use ("-d_C"); -- Diagnose all circularities
-   --end Binder;
-
-end AdaTyper;
+end Debug;
 
 
 ---=======================-------------------------=========================---

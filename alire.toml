@@ -1,0 +1,60 @@
+notes = "Pre release"
+
+# The name of the crate this release belongs to.
+name = "adatyper"
+
+# A one-line description about the package.
+description = "Adatyper is a typing learning game written in Ada."
+
+# A long description about the package.
+long-description = "Adatyper is a programme aimed to teach how to type in a computer while having fun. It will have many different games and a teaching tool. It's all written with ANSI Escape Sequences and aimed to be runned in a terminal. It doesn't have any dependency and it's completely free and open-source!"
+
+# The version of the package.
+version = "0.0.3"
+
+
+# The authors, maintainer and maintainers' logins.
+authors = ["José Antonio Verde Jiménez"]
+maintainers = ["José Antonio Verde Jiménez <joseaverde@pm.me>"]
+maintainers-logins = ["joseaverde"]
+
+
+# Information about the package's licence.
+licenses = ["GPL 3.0"]
+website = "https://github.com/joseaverde/adatyper"
+tags = ["game", "learn", "typing", "ansi"]
+
+
+# Information about package's inside.
+project-files = ["adatyper.gpr"]
+executables = ["adatyper"]
+
+# We forbid the compilation in windows so far.
+[available.'case(os)']
+'linux' = true
+'windows' = false
+'...' = true
+
+
+# Map of the name of external variables in the .gpr project file.
+[gpr-externals]
+ADATYPER_COMPILE_CHECKS   = ["enabled", "disabled"]
+ADATYPER_RUNTIME_CHECKS   = ["enabled", "disabled"]
+ADATYPER_STYLE_CHECKS     = ["enabled", "disabled"] 
+ADATYPER_CONTRACTS        = ["enabled", "disabled"]
+ADATYPER_BUILD_MODE       = ["debug", "optimize"]
+ADATYPER_OPERATING_SYSTEM = ["linux", "windows"]
+
+
+# How to build it depending on the operating system.
+[gpr-set-externals.'case(os)']
+'linux' = { ADATYPER_OPERATING_SYSTEM = "linux" }
+'windows' = { ADATYPER_OPERATING_SYSTEM = "windows" }
+'...' = { ADATYPER_OPERATING_SYSTEM = "linux" }
+
+
+# Actions to do before compiling.
+# [[actions.'case(os)'.linux]]
+# type = post-fetch  pre-build post-build test
+# command = <command>
+

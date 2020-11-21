@@ -15,3 +15,6 @@ windows
 # I forgot, we also ignore log files.
 *.log
 logs
+
+# We also ignore tests for now.
+tests

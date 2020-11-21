@@ -26,49 +26,152 @@
 --                                                                           --
 -------------------------------------------------------------------------------
 
-
+-- This file is inspired by the alire gpr file template.
 project AdaTyper is
+   
+   --------------
+   -- EXTERNAL --
+   --------------
+   -- These are variables set by the user.
+   
+   type OS_Kind is ("linux", "windows");
+   Operating_System : Os_Kind := External ("ADATYPER_OPERATING_SYSTEM",
+                                           "linux");
 
-   for Languages   use ("Ada");
-   for Source_Dirs use ("src", "src/posix");
-   for Object_Dir  use  "obj";
-   for Exec_Dir    use  "bin";
-   for Main        use ("main.adb");
+   type Enabled_Kind is ("enabled", "disabled");
+   Compile_Checks   : Enabled_Kind := External ("ADATYPER_COMPILE_CHECKS",
+                                                "disabled");
+   Runtime_Checks   : Enabled_Kind := External ("ADATYPER_RUNTIME_CHECKS",
+                                                "enabled");
+   Style_Checks     : Enabled_Kind := External ("ADATYPER_STYLE_CHECKS",
+                                                "disabled");
+   Contracts_Checks : Enabled_Kind := External ("ADATYPER_CONTRACTS",
+                                                "enabled");
+
+   type Build_Kind is ("debug", "optimize");
+   Build_Mode : Build_Kind := External ("ADATYPER_BUILD_MODE", "debug");
+
+
+   -------------
+   -- PROJECT --
+   -------------
+
+   -- The only language used in this project (so far) is Ada. Except for some
+   -- bash files.
+   for Languages           use ("Ada");
+
+   -- The source directories depend on the operating system, because there are
+   -- to get the size of the terminal some C functions are used.
+   case Operating_System is
+      when "windows" =>
+         for Source_Dirs   use ("src", "src/posix"); -- TODO: Change
+      when others =>
+         for Source_Dirs   use ("src", "src/posix");
+   end case;
+
+   -- The object directory where all the objects, ali and temporary files will
+   -- be stored.
+   for Object_Dir          use  "obj";
+
+   -- The directory where the executable will be found.
+   for Exec_Dir            use  "bin";
+
+   -- The files that will be converted into executables.
+   for Main                use ("main.adb");
+
+   -- This tells gprbuild to build missing directories.
+   for Create_Missing_Dirs use "True";
+
+
+   
+   --------------
+   -- SWITCHES --
+   --------------
+   -- Depending on the options we select some switches.
+
+   Compile_Checks_Switches := ();
+   case Compile_Checks is
+      when "enabled" =>
+         Compile_Checks_Switches :=
+            ("-gnatwa",    -- All warnings
+             "-gnatVa",    -- All validity checks
+             "-gnatwe");   -- All warnings as errors
+      when others =>
+         null;
+   end case;
+
+   Runtime_Checks_Switches := ();
+   case Runtime_Checks is
+      when "enabled" =>
+         null;
+      when others =>
+         Runtime_Checks_Switches :=
+            ("-gnatp");    -- Suppress checks
+   end case;
+
+   Style_Checks_Switches := ();
+   case Style_Checks is
+      when "enabled" =>
+         Style_Checks_Switches :=
+            ("-gnatyg",    -- GNAT Style Checks
+             "-gnaty-d",   -- Disable no DOS line terminators
+             "-gnatyM79",  -- Maximum line length
+             "-gnatyO");   -- Overriding subprograms explicitly marked as such
+      when others =>
+         null;
+   end case;
+
+   Contracts_Switches := ();
+   case Contracts_Checks is
+      when "enabled" =>
+         Contracts_Switches :=
+            ("-gnata");     -- Enable assertions and contracts
+      when others =>
+         null;
+   end case;
+
+   Build_Switches := ();
+   case Build_Mode is
+      when "optimize" =>
+         Build_Switches :=
+            ("-O3",              -- Optimization
+             "-gnatn");          -- Enable inlining
+      when "debug" =>
+         Build_Switches :=
+            ("-g",         -- Debug info
+             "-Og");       -- No optimizations
+   end case;
+
+   
+   --------------
+   -- PACKAGES --
+   --------------
+   -- Finally we wrap everything up and apply the changes.
 
    package Builder is
-      for Executable ("main.adb") use "adatyper.bin";
+      -- We change the name of the main executable.
+      for Executable ("main.adb") use "adatyper";
    end Builder;
 
-   package Compiler is
-      for Switches ("Ada") use ("-g",
-                                "-O0",
-                                "-fdata-sections",
-                                "-ffunction-sections");
-      -- -gnatws -gnatd7 -gnatv
-   end Compiler;
 
--- package Compiler is
---    for Switches ("Ada") use ("-g",        -- Use debug symbols
---                              "-O0",       -- No optimizations
---                              -- "-gnatd_F",  -- Detailed invocation information
---                              "-fdata-sections",
---                              "-ffunction-sections",
---                              --"-gnatE",    -- Dynamic elaboration
---                              --"-gnato",    --
---                              "-gnatv",    -- Verbose messages
---                              --"-gnatws",   -- Suppress warnings
---                              "-gnatd7"    -- Suppress timestamps
---                              );
--- end Compiler;
+   package Compiler is
+      for Switches ("Ada") use
+         Compile_Checks_Switches &
+         Build_Switches          &
+         Runtime_Checks_Switches &
+         Style_Checks_Switches   &
+         Contracts_Switches      &
+         ("-gnatQ"); -- Don't quit. Generate ALI and tree files even if there
+                     -- are illegalities.
+   end Compiler;
 
    package Linker is
       for Switches ("Ada") use ("-Wl,--gc-sections"); -- Remove unused sections
-     --                           "-flto");
    end Linker;
 
-   --package Binder is
-   --   for Switches ("Ada") use ("-d_C"); -- Diagnose all circularities
-   --end Binder;
+   package Binder is
+      for Switches ("Ada") use ("-Es"); -- Symbolic traceback.
+   end Binder;
 
 end AdaTyper;
 

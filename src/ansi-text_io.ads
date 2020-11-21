@@ -30,6 +30,10 @@
 -- This package contains input and output functions.
 package Ansi.Text_IO is
    
+   -- This procedure flushes the Standard Output.
+   procedure Flush;
+   pragma Inline (Flush);
+
    -- This procedure prints a character onto the screen.
    procedure Put (Item: Char_Type);
    

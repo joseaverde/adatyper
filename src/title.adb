@@ -70,7 +70,7 @@ package body Title is
 
       for P in Positive range 1 .. 8 loop
          Letterer.Show(P);
-         delay Sleep;
+        -- delay Sleep;
          Letterer.Update;
          Ansi.Surfaces.Put(Ansi.Get_Main_Surface);
       end loop;
@@ -104,7 +104,7 @@ begin
    Ansi.Colors.Set_Foreground(Letter_Cursor , Ansi.White, True);
 
    -- We change some styles.
-   Ansi.Styles.Set_Style(Letter_Big_A, Ansi.Slow_Blink);
+   Ansi.Styles.Set_Style(Letter_Big_A, Ansi.Reversed);
 
    -- We add them to the letterer.
    Letterer.Add(  Letter_Big_A);

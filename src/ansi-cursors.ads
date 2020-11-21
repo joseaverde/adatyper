@@ -46,6 +46,14 @@ package Ansi.Cursors is
    -- CURSOR OPERATIONS --
    -----------------------
    
+   -- This function changes the position of the cursor and returns the escape
+   -- sequence to feed the stdout.
+   function Set_Position (Cursor : in out Cursor_Type;
+                          New_Row: Row_Type;
+                          New_Col: Col_Type)
+                          return Str_Type;
+
+   
    -- This procedure changes the position of the cursor to another.
    procedure Set_Position (Cursor : in out Cursor_Type;
                            New_Row: Row_Type;
@@ -120,11 +128,6 @@ private
          Row: Row_Type;
          Col: Col_Type;
       end record;
-   
-   -- This function transforms a number into a string.
-   function To_String (N: Positive)
-                       return Str_Type;
-   pragma Pure_Function (To_String);
    
 end Ansi.Cursors;
 

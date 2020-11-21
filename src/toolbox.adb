@@ -1,6 +1,6 @@
 -------------------------------------------------------------------------------
 --                                                                           --
---                      A N S I - T E X T _ I O . A D B                      --
+--                           T O O L B O X . A D B                           --
 --                                                                           --
 --                              A D A T Y P E R                              --
 --                                                                           --
@@ -26,59 +26,32 @@
 --                                                                           --
 -------------------------------------------------------------------------------
 
-with Ada.Wide_Text_IO;
-with Ansi.Cursors;
+package body Toolbox is
 
-package body Ansi.Text_IO is
-
-   procedure Flush is
+   function To_String (Number: Positive)
+                       return Str_Type is
+      Size: Natural := 1;
    begin
-
-      Ada.Wide_Text_IO.Flush(File => Ada.Wide_Text_IO.Standard_Output);
-
-   end Flush;
-
-
-   procedure Put (Item: Char_Type) is
-   begin
-
-      Ada.Wide_Text_IO.Put(Wide_Character(Item));
-      Main_Cursor.Move_Right(1, False);
       
-      -- If we have reached the maximum width, we move to the next line, no
-      -- error is raised. We suppose the Width is up-to-date, because checking
-      -- for the width everytime a character is printed is very expensive.
-      if Main_Cursor.Get_Col > Width then
-         Main_Cursor.Move_Down;
-         Main_Cursor.Set_Col(1);
-      end if;
-
-   end Put;
-
-   
-
-   procedure Put (Item: Str_Type) is
-   begin
-
-      for Char of Item loop
-         Ansi.Text_IO.Put(Char);
-       --  Ada.Wide_Text_IO.Put(Wide_Character(Char));
+      while Number / 10 ** Size /= 0 loop
+         Size := Size + 1;
       end loop;
 
-   end Put;
+      Create_String:
+         declare
+            Str: Str_Type (1 .. Size);
+         begin
+            for I in Natural range 1 .. Size loop
+               Str(Size + 1 - I) := Char_Type'Val(
+                                       (Number / 10**(I-1)) mod 10 + 48);
+            end loop;
 
+            return Str;
+         end Create_String;
+               
+   end To_String;
 
-
-   procedure Put_Ansi_Sequence (Item: Str_Type) is
-   begin
-
-      for Char of Item loop
-         Ada.Wide_Text_IO.Put(Wide_Character(Char));
-      end loop;
-
-   end Put_Ansi_Sequence;
-
-end Ansi.Text_IO;
+end Toolbox;
 
 
 ---=======================-------------------------=========================---

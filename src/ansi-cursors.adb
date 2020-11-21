@@ -30,32 +30,13 @@
 with Ada.Text_IO;
 with Ansi.Text_IO;
 with Ansi.Exceptions;
+with Toolbox; use Toolbox;
 
 package body Ansi.Cursors is
 
    procedure Put_Ansi_Sequence (Item: Str_Type)
       renames Ansi.Text_IO.Put_Ansi_Sequence;
    
-  
-
-   function To_String (N: Positive)
-                       return Str_Type is
-      C: String  := N'Image;
-      S: Str_Type (1 .. C'Length);
-      L: Natural := 0;
-   begin
-
-      for I of C loop
-         if I /= ' ' then
-            S(S'First + L) := Char_Type'Val(Character'Pos(I));
-            L := L + 1;
-         end if;
-      end loop;
-
-      return S(S'First .. S'First + L - 1);
-
-   end To_String;
-
 
    ----------------------------------------------------------------------------
    
@@ -83,7 +64,21 @@ package body Ansi.Cursors is
    -----------------------
    -- CURSOR OPERATIONS --
    -----------------------
-   
+ 
+   function Set_Position (Cursor : in out Cursor_Type;
+                          New_Row: Row_Type;
+                          New_Col: Col_Type)
+                          return Str_Type is
+   begin
+
+      Cursor.Row := New_Row;
+      Cursor.Col := New_Col;
+
+      return ESC & To_String(Positive(New_Row)) & ";" &
+                   To_String(Positive(New_Col)) & "H";
+
+   end Set_Position;
+
    
    procedure Set_Position (Cursor : in out Cursor_Type;
                            New_Row: Row_Type;

@@ -34,6 +34,22 @@ package Ansi.Colors is
    -- SURFACE OPERATIONS --
    ------------------------
 
+   -- This function generates the escape code for the foreground colour.
+   -- Only the number, if the escape code is "ESC[32m", then 32 is returned.
+   function Gen_Foreground (Color : Color_Type;
+                            Bright: Boolean)
+                            return Str_Type;
+   pragma Pure_Function (Gen_Foreground);
+   pragma Inline (Gen_Foreground);
+
+   -- This function generates the escape code number for the background colour.
+   function Gen_Background (Color : Color_Type;
+                            Bright: Boolean)
+                            return Str_Type;
+   pragma Pure_Function (Gen_Foreground);
+   pragma Inline (Gen_Foreground);
+
+
    -- This procedure returns the foreground colour in a certain position of the
    -- surface.
    procedure Get_Foreground (Surface: in  not null Surface_Type;

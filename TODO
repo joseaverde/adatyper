@@ -15,3 +15,7 @@
  * Scrolling.
  * Check `tput smcup' and `tput rmcup'
  * Make all types Controlled types. And add garbage collection.
+ * Add own pool to stack.
+ * In functions with repeated code, use procedures inide them with global
+   variables and constants to reduce duplication related problems. Also, inline
+   them.

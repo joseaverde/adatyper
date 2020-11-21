@@ -23,4 +23,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - Finished Styles and Colours
 - Added some tests
 - Fixed some major bugs
+- Completed Surfaces (only some features have to be implemented)
+- Optimized update time
+- Added title screen
 

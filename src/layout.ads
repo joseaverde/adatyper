@@ -1,10 +1,10 @@
 -------------------------------------------------------------------------------
 --                                                                           --
---                      A N S I - T E X T _ I O . A D B                      --
+--                            L A Y O U T . A D S                            --
 --                                                                           --
 --                              A D A T Y P E R                              --
 --                                                                           --
---                                  B O D Y                                  --
+--                                  S P E C                                  --
 --                                                                           --
 -------------------------------------------------------------------------------
 --     Copyright (c) 2020 José Antonio Verde Jiménez All Rights Reserved     --
@@ -26,59 +26,9 @@
 --                                                                           --
 -------------------------------------------------------------------------------
 
-with Ada.Wide_Text_IO;
-with Ansi.Cursors;
+package is
 
-package body Ansi.Text_IO is
-
-   procedure Flush is
-   begin
-
-      Ada.Wide_Text_IO.Flush(File => Ada.Wide_Text_IO.Standard_Output);
-
-   end Flush;
-
-
-   procedure Put (Item: Char_Type) is
-   begin
-
-      Ada.Wide_Text_IO.Put(Wide_Character(Item));
-      Main_Cursor.Move_Right(1, False);
-      
-      -- If we have reached the maximum width, we move to the next line, no
-      -- error is raised. We suppose the Width is up-to-date, because checking
-      -- for the width everytime a character is printed is very expensive.
-      if Main_Cursor.Get_Col > Width then
-         Main_Cursor.Move_Down;
-         Main_Cursor.Set_Col(1);
-      end if;
-
-   end Put;
-
-   
-
-   procedure Put (Item: Str_Type) is
-   begin
-
-      for Char of Item loop
-         Ansi.Text_IO.Put(Char);
-       --  Ada.Wide_Text_IO.Put(Wide_Character(Char));
-      end loop;
-
-   end Put;
-
-
-
-   procedure Put_Ansi_Sequence (Item: Str_Type) is
-   begin
-
-      for Char of Item loop
-         Ada.Wide_Text_IO.Put(Wide_Character(Char));
-      end loop;
-
-   end Put_Ansi_Sequence;
-
-end Ansi.Text_IO;
+end ;
 
 
 ---=======================-------------------------=========================---

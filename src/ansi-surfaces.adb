@@ -201,53 +201,8 @@ package body Ansi.Surfaces is
       
    end Put;
    
+
    
-   -- FIXED!!!
-   -- XXX: Bug found, when printing the surface the last row is somehow printed
-   -- onto the first row at least when printing into the first row. There is no
-   -- problem with columns.
-   --
-   -- When printing a 5x5 there is no problem, though.
-   --
-   -- TESTS: 1) Test 9x9, 8x8, and over 10x10, 11x11. If it only happens with
-   --           two digit numbers, then it's the problem of the function that
-   --           converts the numbers into strings. (Even thought the number of
-   --           columns seems right) [DONE]
-   --
-   --           REPLICATION FOUND: The problem happens when the number of rows
-   --           is over 10, which then turns into 9 (independently from the
-   --           intended number of rows)
-   --           It seems to be caused from the To_String | the range of the
-   --           function | the ANSI itself.
-   --
-   --
-   --        2) Test it without moving a line down. [DONE]
-   --           
-   --           When the line doesn't move down, it's all written in the same
-   --           line, so it's seems it's not the problem of ANSI.
-   --
-   --
-   --        3) Test to write the escape sequences into a file or to write
-   --           them without the escape. [DONE]
-   --
-   --           It's unreadable.
-   --
-   -- POSIBLE CAUSES: Maybe is the fault of the terminal emulator or the ANSI
-   --                 escape sequences. In that case, (knowing that it only
-   --                 happens in the first row) would be to either increase the
-   --                 number of rows of the matrix by one.
-   --
-   -- POSIBLE SOLUTIONS: Instead of using numbers use the range of the grid
-   --                    (matrix) instead. [DONE]
-   --
-   --                    The problem still occurs.
-   --
-   -- BUG CAUSE FOUND: After tinkering with Python3 and doing the same, it
-   -- doesn't seem to be a problem of ANSI or the program itself. The bug is
-   -- found in the Ansi.Cursors package To_String function, that doesn't
-   -- return the first cypher of the number. That's why 10 overflows to 0,
-   -- 11 to 1 and 12 to 2.
-   --
    procedure Put (Surface: Surface_Type := null;
                   Row    : Row_Type := 1;
                   Col    : Col_Type := 1) is
@@ -255,32 +210,160 @@ package body Ansi.Surfaces is
                               Main_Surface
                              else
                               Surface);
-      Item: Element;
+      Item    : Element;
+      Last_Fmt: Format := Surface.Cursor_Fmt;
+      
+      -- We set up the buffer that contains:
+      -- ESC[<Fg_Color>;<Bg_Color>;<Style1>;<Style2>;...m
+      NUL: CONSTANT Char_Type := Char_Type'Val(0);
+      Buffer  : Str_Type (1 .. 2 + 2+1 + 3+1 + Style_Array'Length*3 + 1) :=
+         (1                                => ESC(ESC'First),
+          2                                => ESC(ESC'Last),
+          2+2+1+3+1+Style_Array'Length*3+1 => 'm',
+          others                           => NUL);
+
+      -- This type is used to store changes.
+      Fg_Changes: Boolean := False;
+      Bg_Changes: Boolean := False;
+      Changes   : Boolean := False;
+
+      -- This is the memory chunk.
+      Chunk : Str_Type(1 .. 1024);
+      Length: Natural := 1;
+
+      procedure Push (Str: Str_Type);
+      pragma Inline (Push);
+      procedure Push (Str: Str_Type) is
+      begin
+         if Length + Str'Length > Chunk'Length then
+            Ansi.Text_IO.Put_Ansi_Sequence(Chunk(1 .. Length - 1));
+            Length := 1;
+         end if;
+         Chunk(Length .. Length + Str'Length - 1) := Str;
+         Length := Length + Str'Length;
+      end Push;
+
+
+      procedure Compare_Item is
+      begin
+         -- We check which parts of the format have changed.
+         -- First the foreground colour; the colour and the brightness come in
+         -- the same pack, so if one of them has changed, we must update both.
+         if Item.Fmt.Fg_Color  /= Last_Fmt.Fg_Color or else
+            Item.Fmt.Fg_Bright /= Last_Fmt.Fg_Bright
+         then
+            -- We update the new Last_Fmt.
+            Last_Fmt.Fg_Color  := Item.Fmt.Fg_Color;
+            Last_Fmt.Fg_Bright := Item.Fmt.Fg_Bright;
+            Buffer(3 .. 4) := Ansi.Colors.Gen_Foreground(
+                                       Color  => Last_Fmt.Fg_Color,
+                                       Bright => Last_Fmt.Fg_Bright);
+            Buffer(5) := ';';
+            Fg_Changes := True;
+            Changes := True;
+         end if;
+      end Compare_Item;
+
+      procedure Update_Changes is
+      begin
+         -- We then check if there has been any changes, if so we print
+         -- the escape sequence and set it back to 0.
+         if Changes then
+            -- We remove the last colomn.
+            if Bg_Changes then
+               Buffer(9) := NUL;
+            elsif Fg_Changes then
+               Buffer(5) := NUL;
+            end if;
+
+            Changes := False;
+            Bg_Changes := False;
+            Fg_Changes := False;
+
+            Push(Buffer & Item.Char);
+
+            -- We finally default some parts of the buffer , to make it
+            -- easier for the terminal emulator not to have so many
+            -- sequences to convert.
+            for I in Positive range 3 .. Buffer'Last - 1 loop
+               Buffer(I) := NUL;
+            end loop;
+         else
+            Push(Item.Char & "");
+         end if;
+      end Update_Changes;
+
+
+      
+      Node: Operation := Surface.Head;
+      Next: Operation;
+
    begin
 
-      Main_Cursor.Set_Position(Row, Col);
-      for Y in Surf.Grid'Range(1) loop
-         for X in Surf.Grid'Range(2) loop
-            Item := Surf.Grid(Y, X);
-            -- TODO: Optimize it, checking if the last colour used was the same
-            -- as the colour now and if so change the colour. Even though this
-            -- function won't be used because the layers will give a more
-            -- optimized version, but it's good to have it for debugging in
-            -- early stages.
-            Ansi.Colors.Put_Foreground(Color  => Item.Fmt.Fg_Color,
-                                       Bright => Item.Fmt.Fg_Bright);
-            Ansi.Colors.Put_Background(Color  => Item.Fmt.Bg_Color,
-                                       Bright => Item.Fmt.Bg_Bright);
-            Ansi.Styles.Put_Style(Styles => Item.Fmt.Style);
-            Ansi.Text_IO.Put(Item.Char);
-            -- delay 0.01; A good effect
+      -- We first see two possible scenaries, the first one is a screen that is
+      -- completely when the Update_All attribute is set to true. The second
+      -- one is to check the stack for any possible changes.
+
+      -- UPDATE ALL --
+     -- Surf.Update_All := True;
+      if Surf.Update_All then
+         -- We set the cursor to the top left corner of the screen and start
+         -- writting from there. We also write chunks of memory instead of
+         -- single calls to the functions, because they are too expensive.
+         Main_Cursor.Set_Position(Row, Col);
+         for Y in Surf.Grid'Range(1) loop
+--BREAKPOINT("Y =" & Y'Image, 1, True);
+            for X in Surf.Grid'Range(2) loop
+               -- We get the item.
+               Item := Surf.Grid(Y, X);
+               
+               -- We compare it
+               Compare_Item;
+
+               -- We update the changes.
+               Update_Changes;
+               
+            end loop;
+            -- We move the cursor to the next line.
+            Push(Main_Cursor.Set_Position(Row + Y, Col));
          end loop;
-         -- This one is faster because the other two will call the To_String
-         -- function three times.
-         Main_Cursor.Set_Position(Row + Y, Col);
-         -- Main_Cursor.Move_Down;
-         -- Main_Cursor.Set_Col(Col);
-      end loop;
+         -- We then print the last buffer.
+         Ansi.Text_IO.Put_Ansi_Sequence(Chunk(1 .. Length - 1));
+         -- And we finally remove log of applied changes to the surface.
+         -- TODO: Free stack
+         Surface.Update_All := False;
+
+      else
+-- BREAKPOINT("BREAK IT DOWN!", 3, True);
+         Main_Loop:
+            while Node /= null loop
+               Next := Node.Next;
+               -- We compare this and the last cell.
+               Item := Surf.Grid(Node.Cursor.Get_Row,
+                                 Node.Cursor.Get_Col);
+
+               -- We compare the item.
+               Compare_Item;
+
+               -- We jump to the new position.
+               Push(Main_Cursor.Set_Position(Node.Cursor.Get_Row,
+                                             Node.Cursor.Get_Col));
+               
+               -- We update the changes.
+               Update_Changes;
+
+               -- TODO: We free them
+               Ansi.Cursors.Free(Node.Cursor);
+               Free(Node);
+               Node := Next;
+            end loop Main_Loop;
+         -- We flush the file.
+         Ansi.Text_IO.Put_Ansi_Sequence(Chunk(1 .. Length - 1));
+         -- Ansi.Text_IO.Flush;
+         Surf.Head := null;
+         Surf.Tail := null;
+      end if;
+
 
    end Put;
 
@@ -468,6 +551,8 @@ package body Ansi.Surfaces is
 
 
    
+   -- TODO: Forbid to overwrite main cells for under layers, start with top
+   -- layer.
    procedure Update (Layerer: Layerer_Type) is
       Layer : Surface_Type;
       Hidden: Element := Element'(Fmt  => Format'(Fg_Color  => White,

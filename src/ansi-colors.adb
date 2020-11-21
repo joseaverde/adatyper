@@ -40,6 +40,34 @@ package body Ansi.Colors is
    -- SURFACE OPERATIONS --
    ------------------------
 
+   function Gen_Foreground (Color : Color_Type;
+                            Bright: Boolean)
+                            return Str_Type is
+   begin
+
+      return (if Bright then
+                  '9'
+              else
+                  '3'
+              ) & Char_Type'Val(ZERO + Color'Enum_Rep);
+      
+   end Gen_Foreground;
+
+
+   function Gen_Background (Color : Color_Type;
+                            Bright: Boolean)
+                            return Str_Type is
+   begin
+
+      return (if Bright then
+                  "10"
+              else
+                  "4") & Char_Type'Val(ZERO + Color'Enum_Rep);
+
+   end Gen_Background;
+
+ 
+
    procedure Get_Foreground (Surface: in  not null Surface_Type;
                              Color  : out Color_Type;
                              Bright : out Boolean;
@@ -81,13 +109,7 @@ package body Ansi.Colors is
                              Bright: Boolean) is
    begin
 
-      Ansi.Text_IO.Put_Ansi_Sequence(ESC &
-                                     (if Bright then
-                                       "9"
-                                      else
-                                       "3") &
-                                     Char_Type'Val(ZERO + Color'Enum_Rep) &
-                                     "m");
+      Ansi.Text_IO.Put_Ansi_Sequence(ESC & Gen_Foreground(Color,Bright) & "m");
 
    end Put_Foreground;
 
@@ -96,13 +118,7 @@ package body Ansi.Colors is
                              Bright: Boolean) is
    begin
 
-      Ansi.Text_IO.Put_Ansi_Sequence(ESC &
-                                     (if Bright then
-                                       "10"
-                                      else
-                                       "4") &
-                                     Char_Type'Val(ZERO + Color'Enum_Rep) &
-                                     "m");
+      Ansi.Text_IO.Put_Ansi_Sequence(ESC & Gen_Background(Color,Bright) & "m");
 
    end Put_Background;
 

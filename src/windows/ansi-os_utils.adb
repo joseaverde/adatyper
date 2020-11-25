@@ -1,11 +1,11 @@
 -------------------------------------------------------------------------------
 --                                                                           --
 --                     A N S I - O S _ U T I L S . A D B                     --
---                                 P O S I X                                 --
+--                               W I N D O W S                               --
 --                                                                           --
 --                              A D A T Y P E R                              --
 --                                                                           --
---                                  S P E C                                  --
+--                                  B O D Y                                  --
 --                                                                           --
 -------------------------------------------------------------------------------
 --     Copyright (c) 2020 José Antonio Verde Jiménez All Rights Reserved     --
@@ -27,90 +27,48 @@
 --                                                                           --
 -------------------------------------------------------------------------------
 
-with Ansi.Exceptions;
 with Ansi.Text_IO;
 
 
 package body Ansi.Os_Utils is
 
-   ------------
-   -- SYSTEM --
-   ------------
-
-   function System_Command (Cmd: String)
-                            return Boolean is
-   begin
-
-      return C_System(Interfaces.C.To_C(Cmd)) = 0;
-
-   end System_Command;
-
-
-   --------------
-   -- TERMINAL --
-   --------------
-
    procedure Prepare is
+      procedure Set_Up_Console;
+      pragma Import (C, Set_Up_Console, "setupConsole");
    begin
-
-      -- We add many new lines in order not to overwrite what is already
+   
+      Set_Up_Console;
+      -- We add many new lines in order not to overwrite what has already been
       -- written.
       for Row in Row_Type range 1 .. Height loop
          Ansi.Text_IO.Put_Ansi_Sequence("" & Char_Type'Val(10));
       end loop;
 
-   -- if not System_Command("tput smcup") or
-      if not System_Command("stty -echo") or
-         not System_Command("tput civis") or
-      not True then
-
-         Clean_Up;
-         raise Ansi.Exceptions.Initialization_Issue
-         with "Couldn't prepare the terminal!";
-
-      end if;
-
+      -- TODO Add errors and complete it.
+      
    end Prepare;
 
 
    procedure Clean_Up is
-      Temp: Boolean;
+      procedure Restore_Console;
+      pragma Import (C, Restore_Console, "restoreConsole");
    begin
-      
-      Temp := System_Command("stty echo ");
-      Temp := System_Command("tput cnorm");
-   -- Temp := System_Command("tput rmcup");
 
-   end Clean_Up;
+      Restore_Console;
    
-   -----------
-   -- IOCTL --
-   -----------
+   end Clean_Up;
 
+   
+   -- TODO
    function Update_Terminal_Size return Boolean is
-      Ws        : Winsize;
-      New_Height: Row_Type;
-      New_Width : Col_Type;
-      Temp_Int  : Interfaces.C.int;
    begin
 
-      Temp_Int := Ioctl(Fd      => 1,  -- File descriptor = 1 (Standard output)
-                        Request => TIOCGWINSZ,
-                        Struct  => Ws);
-
-      New_Height := Row_Type(Ws.ws_row);
-      New_Width  := Col_Type(Ws.ws_col);
-
-      if New_Height /= Height or New_Width /= Width then
-         Height := New_Height;
-         Width  := New_Width;
-         return True;
-      end if;
+      Height := 24;
+      Width  := 80;
 
       return False;
 
    end Update_Terminal_Size;
-
 
 end Ansi.Os_Utils;
 

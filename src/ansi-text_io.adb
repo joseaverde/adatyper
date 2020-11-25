@@ -28,13 +28,17 @@
 
 with Ada.Wide_Text_IO;
 with Ansi.Cursors;
+with Ansi.Exceptions;
+with Debug; use Debug;
 
 package body Ansi.Text_IO is
+
+   package Ada_Text_IO renames Ada.Wide_Text_IO;
 
    procedure Flush is
    begin
 
-      Ada.Wide_Text_IO.Flush(File => Ada.Wide_Text_IO.Standard_Output);
+      Ada_Text_IO.Flush(File => Ada.Wide_Text_IO.Standard_Output);
 
    end Flush;
 
@@ -42,7 +46,7 @@ package body Ansi.Text_IO is
    procedure Put (Item: Char_Type) is
    begin
 
-      Ada.Wide_Text_IO.Put(Wide_Character(Item));
+      Ada_Text_IO.Put(Wide_Character(Item));
       Main_Cursor.Move_Right(1, False);
       
       -- If we have reached the maximum width, we move to the next line, no
@@ -73,10 +77,84 @@ package body Ansi.Text_IO is
    begin
 
       for Char of Item loop
-         Ada.Wide_Text_IO.Put(Wide_Character(Char));
+         Ada_Text_IO.Put(Wide_Character(Char));
       end loop;
 
    end Put_Ansi_Sequence;
+
+
+   function Get_Input (Surface: Surface_Type := null)
+                       return Str_Type is
+   begin
+
+      return "TODO";
+
+   end Get_Input;
+
+
+   ESCAPE: CONSTANT Char_Type := Char_Type'Val(Character'Pos(ASCII.ESC));
+   function Get_Key (Key: out Key_Type)
+                     return Boolean is
+      Buffer   : Char_Type;
+      Available: Boolean;
+   begin
+      
+      Ada_Text_IO.Get_Immediate(Item      => Buffer,
+                                Available => Available);
+
+      if Available then
+         if Buffer = ESCAPE then
+            -- TODO: Finish this.
+            Key.Kind := Special;
+         else
+            Key.Char := Buffer;
+            Key.Kind := Ordinary;
+         end if;
+         return True;
+
+      else
+         return False;
+      end if;
+
+   end Get_Key;
+
+
+   function Get_Char (Key: in Key_Type)
+                      return Char_Type is
+   begin
+
+      if Key.Kind /= Ordinary then
+         raise Ansi.Exceptions.Wrong_Kind_Of_Key_Issue
+         with "The pressed key is a character!";
+      end if;
+
+      return Key.Char;
+
+   end Get_Char;
+
+
+   function Get_Code (Key: in Key_Type)
+                      return Special_Key_Code is
+   begin
+
+      if Key.Kind /= Special then
+         raise Ansi.Exceptions.Wrong_Kind_Of_Key_Issue
+         with "The pressed key is a special key!";
+      end if;
+
+      return Key.Code;
+
+   end Get_Code;
+
+
+   function Get_Kind (Key: in Key_Type)
+                      return Key_Kind is
+   begin
+
+      return Key.Kind;
+
+   end Get_Kind;
+
 
 end Ansi.Text_IO;
 

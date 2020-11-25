@@ -39,7 +39,9 @@ package Ansi.Exceptions is
    Invalid_Surface_Issue         : exception;
    Out_Of_Bounds_Issue           : exception;
    Unknown_Layer_Issue           : exception;
+   Using_Null_Surface_Issue      : exception;
    Windows_Size_Issue            : exception;
+   Wrong_Kind_Of_Key_Issue       : exception;
 
 end Ansi.Exceptions;
 

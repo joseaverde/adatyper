@@ -44,7 +44,7 @@ ADATYPER_STYLE_CHECKS     = ["enabled", "disabled"]
 ADATYPER_CONTRACTS        = ["enabled", "disabled"]
 ADATYPER_BUILD_MODE       = ["debug", "optimize"]
 ADATYPER_OPERATING_SYSTEM = ["linux", "windows"]
-
+ADATYPER_ALIRE_BUILT      = ["on", "off"]
 
 # How to build it depending on the operating system.
 [gpr-set-externals.'case(os)']
@@ -53,8 +53,15 @@ ADATYPER_OPERATING_SYSTEM = ["linux", "windows"]
 '...' = { ADATYPER_OPERATING_SYSTEM = "linux" }
 
 
+[gpr-set-externals]
+ADATYPER_ALIRE_BUILT = "on"
+
+
 # Actions to do before compiling.
 # [[actions.'case(os)'.linux]]
 # type = post-fetch  pre-build post-build test
 # command = <command>
 
+[[actions.'case(os)'.linux]]
+type = "test"
+command = ["gprbuild -p -Ptests/tests.gpr -XADATYPER_TESTS OPERATING_SYSTEM=linux"]

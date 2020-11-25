@@ -1,17 +1,8 @@
 (Remember to Free the operation's cursor as it's an access type.)
 
- * Create Input functions (Get_Immediate)
- * Procedures to move the layers, to merge them and so on.
- * Remove all the Ada.Text_IO;
- * Set_Background (Overwrite := False)
  * Raise Out_Of_Bounds_Issue in colours package.
  * Check for null surface in colours package.
   (The same for styles)
- * Not using Ada.Text_IO because of flushing, look at streams or sequential_io
-   Also use Ada.Integer_Text_IO (Or the generic one) to print integer.
-   Check whether the printf or write functions are faster.
- * Change the move function before the loop in Ansi.Surfaces:Put(3)
- * Functions to get the character in certain position.
  * Scrolling.
  * Check `tput smcup' and `tput rmcup'
  * Make all types Controlled types. And add garbage collection.
@@ -19,3 +10,6 @@
  * In functions with repeated code, use procedures inide them with global
    variables and constants to reduce duplication related problems. Also, inline
    them.
+ * TODO TODO comments.
+ * Update styles in the Put function of Ansi.Surfaces
+ * Check whats wrong with the command prompt

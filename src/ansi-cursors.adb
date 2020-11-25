@@ -27,7 +27,6 @@
 -------------------------------------------------------------------------------
 
 
-with Ada.Text_IO;
 with Ansi.Text_IO;
 with Ansi.Exceptions;
 with Toolbox; use Toolbox;

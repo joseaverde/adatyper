@@ -44,7 +44,7 @@ project AdaTyper is
    Runtime_Checks   : Enabled_Kind := External ("ADATYPER_RUNTIME_CHECKS",
                                                 "enabled");
    Style_Checks     : Enabled_Kind := External ("ADATYPER_STYLE_CHECKS",
-                                                "disabled");
+                                                "enabled");
    Contracts_Checks : Enabled_Kind := External ("ADATYPER_CONTRACTS",
                                                 "enabled");
 
@@ -52,29 +52,48 @@ project AdaTyper is
    Build_Mode : Build_Kind := External ("ADATYPER_BUILD_MODE", "debug");
 
 
+   type On_Off_Kind is ("on", "off");
+   Alire_Built      : On_Off_Kind  := External ("ADATYPER_ALIRE_BUILT",
+                                                "off");
+
    -------------
    -- PROJECT --
    -------------
 
    -- The only language used in this project (so far) is Ada. Except for some
-   -- bash files.
-   for Languages           use ("Ada");
+   -- bash files. We also use a driver written in C for windows.
+   case Operating_System is
+      when "windows" =>
+         for Languages     use ("Ada", "C");
+      when others =>
+         for Languages     use ("Ada");
+   end case;
 
    -- The source directories depend on the operating system, because there are
    -- to get the size of the terminal some C functions are used.
+   Prefix := "";
    case Operating_System is
       when "windows" =>
-         for Source_Dirs   use ("src", "src/posix"); -- TODO: Change
+         for Source_Dirs   use ("src", "src\windows");
+         Prefix := "alire\build\";
       when others =>
          for Source_Dirs   use ("src", "src/posix");
+         Prefix := "alire/build/";
+   end case;
+
+   case Alire_Built is
+      when "on" =>
+         Prefix := "";
+      when others =>
+         null;
    end case;
 
    -- The object directory where all the objects, ali and temporary files will
    -- be stored.
-   for Object_Dir          use  "obj";
+   for Object_Dir          use  Prefix & "obj-" & Operating_System;
 
    -- The directory where the executable will be found.
-   for Exec_Dir            use  "bin";
+   for Exec_Dir            use  Prefix & "bin";
 
    -- The files that will be converted into executables.
    for Main                use ("main.adb");
@@ -94,6 +113,9 @@ project AdaTyper is
       when "enabled" =>
          Compile_Checks_Switches :=
             ("-gnatwa",    -- All warnings
+             "-gnatwM",    -- Remove the warning for assigned but not used
+                           -- because many functions return things that aren't
+                           -- needed at all.
              "-gnatVa",    -- All validity checks
              "-gnatwe");   -- All warnings as errors
       when others =>
@@ -112,11 +134,15 @@ project AdaTyper is
    Style_Checks_Switches := ();
    case Style_Checks is
       when "enabled" =>
+         -- TODO: Fill this.
          Style_Checks_Switches :=
-            ("-gnatyg",    -- GNAT Style Checks
-             "-gnaty-d",   -- Disable no DOS line terminators
-             "-gnatyM79",  -- Maximum line length
-             "-gnatyO");   -- Overriding subprograms explicitly marked as such
+            ("-gnaty3"  &  -- Check indentation
+             "a"        &  -- Check attribute casing 
+            "");
+        --    ("-gnatyg",    -- GNAT Style Checks
+        --     "-gnaty-d",   -- Disable no DOS line terminators
+        --    "-gnatyM79",  -- Maximum line length
+        --    "-gnatyO");   -- Overriding subprograms explicitly marked as such
       when others =>
          null;
    end case;
@@ -139,7 +165,23 @@ project AdaTyper is
       when "debug" =>
          Build_Switches :=
             ("-g",         -- Debug info
-             "-Og");       -- No optimizations
+             "-Og",        -- No optimizations
+             "-gnatv",     -- Verbose mode. Full error output with source lines
+                           -- to stdout.
+             "-gnatf",     -- Full errors. Verbose details, all undefined
+                           -- references.
+             "-gnatd7");   -- Suppress timestamps.
+   end case;
+
+
+   Linker_Switches := ();
+   case Operating_System is
+      when "windows" =>
+         Linker_Switches :=
+            ("-Lexternal",
+             "-lANSI32");
+      when others =>
+         null;
    end case;
 
    
@@ -166,12 +208,20 @@ project AdaTyper is
    end Compiler;
 
    package Linker is
-      for Switches ("Ada") use ("-Wl,--gc-sections"); -- Remove unused sections
+      for Switches ("Ada") use
+         Linker_Switches &
+         ("-Wl,--gc-sections"); -- Remove unused sections
    end Linker;
 
    package Binder is
       for Switches ("Ada") use ("-Es"); -- Symbolic traceback.
    end Binder;
+
+   package Documentation is
+      -- To build the documentation:
+      --    `gnatdoc -bpdlwPadatyper --enable-build'
+      for Documentation_Dir use Prefix & "docs";
+   end Documentation;
 
 end AdaTyper;
 

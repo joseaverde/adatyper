@@ -64,6 +64,12 @@ package Ansi.Surfaces is
    -- This procedure frees a surface and everything inside it.
    procedure Free (Surface: in out Surface_Type);
 
+   -- This function returns the character in a certain position.
+   function Get_Char (Surface: Surface_Type;
+                      Row    : Row_Type;
+                      Col    : Col_Type)
+                      return Char_Type;
+
    -- This function returns the cursor of the surface so it can be moved.
    function Get_Cursor (Surface: Surface_Type)
                         return Cursor_Type;
@@ -100,6 +106,13 @@ package Ansi.Surfaces is
    procedure Put (Surface: Surface_Type := null;
                   Row    : Row_Type     := 1;
                   Col    : Col_Type     := 1);
+
+   -- This procedure reads a string in a certain position.
+   function Read (Surface: Surface_Type;
+                  Row    : Row_Type;
+                  Col    : Col_Type;
+                  Length : Positive)
+                  return Str_Type;
 
    -- This procedure resizes a surface adding some rows up and down and columns
    -- left and right. If the number is negative the size is reduced. The
@@ -207,7 +220,13 @@ package Ansi.Surfaces is
                             return Boolean;
    pragma Inline (Get_Visibility);
 
-                          -- TODO: Move Move_Above Move_Bellow
+   procedure Move_Layer (Layerer: in Layerer_Type;
+                         From   : Positive;
+                         To     : Positive);
+   procedure Move_Layer (Layerer: in Layerer_Type;
+                         Layer  : Surface_Type;
+                         To     : Positive);
+
 
 private
    

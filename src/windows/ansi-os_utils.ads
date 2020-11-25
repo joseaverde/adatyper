@@ -1,7 +1,7 @@
 -------------------------------------------------------------------------------
 --                                                                           --
---                     A N S I - O S _ U T I L S . A D B                     --
---                                 P O S I X                                 --
+--                     A N S I - O S _ U T I L S . A D S                     --
+--                               W I N D O W S                               --
 --                                                                           --
 --                              A D A T Y P E R                              --
 --                                                                           --
@@ -27,89 +27,29 @@
 --                                                                           --
 -------------------------------------------------------------------------------
 
-with Ansi.Exceptions;
-with Ansi.Text_IO;
+with Interfaces.C;
 
+-- This package contains some os specific functions from C in the Windows
+-- operating system.
+private package Ansi.Os_Utils is
 
-package body Ansi.Os_Utils is
+   -------------
+   -- CONSOLE --
+   -------------
 
-   ------------
-   -- SYSTEM --
-   ------------
+   -- This procedure prepares the console.
+   procedure Prepare;
 
-   function System_Command (Cmd: String)
-                            return Boolean is
-   begin
-
-      return C_System(Interfaces.C.To_C(Cmd)) = 0;
-
-   end System_Command;
-
-
-   --------------
-   -- TERMINAL --
-   --------------
-
-   procedure Prepare is
-   begin
-
-      -- We add many new lines in order not to overwrite what is already
-      -- written.
-      for Row in Row_Type range 1 .. Height loop
-         Ansi.Text_IO.Put_Ansi_Sequence("" & Char_Type'Val(10));
-      end loop;
-
-   -- if not System_Command("tput smcup") or
-      if not System_Command("stty -echo") or
-         not System_Command("tput civis") or
-      not True then
-
-         Clean_Up;
-         raise Ansi.Exceptions.Initialization_Issue
-         with "Couldn't prepare the terminal!";
-
-      end if;
-
-   end Prepare;
-
-
-   procedure Clean_Up is
-      Temp: Boolean;
-   begin
-      
-      Temp := System_Command("stty echo ");
-      Temp := System_Command("tput cnorm");
-   -- Temp := System_Command("tput rmcup");
-
-   end Clean_Up;
+   -- This procedure cleans up and restores the console.
+   procedure Clean_Up;
    
-   -----------
-   -- IOCTL --
-   -----------
-
-   function Update_Terminal_Size return Boolean is
-      Ws        : Winsize;
-      New_Height: Row_Type;
-      New_Width : Col_Type;
-      Temp_Int  : Interfaces.C.int;
-   begin
-
-      Temp_Int := Ioctl(Fd      => 1,  -- File descriptor = 1 (Standard output)
-                        Request => TIOCGWINSZ,
-                        Struct  => Ws);
-
-      New_Height := Row_Type(Ws.ws_row);
-      New_Width  := Col_Type(Ws.ws_col);
-
-      if New_Height /= Height or New_Width /= Width then
-         Height := New_Height;
-         Width  := New_Width;
-         return True;
-      end if;
-
-      return False;
-
-   end Update_Terminal_Size;
+   ---------------
+   -- WINDOWS.H --
+   ---------------
+   
+   -- This function updates the terminal size.
+   function Update_Terminal_Size return Boolean;
+   pragma Inline (Update_Terminal_Size);
 
 
 end Ansi.Os_Utils;

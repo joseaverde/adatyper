@@ -31,7 +31,6 @@ with Ansi.Cursors;
 with Ansi.Exceptions;
 with Ansi.Styles;
 with Ansi.Text_IO;
-with Ada.Text_IO; --DEBUG
 
 package body Title is
 

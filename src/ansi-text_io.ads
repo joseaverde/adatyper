@@ -42,6 +42,52 @@ package Ansi.Text_IO is
 
    -- This procedure prints an Ansi Sequence without moving the cursor.
    procedure Put_Ansi_Sequence (Item: Str_Type);
+   
+   
+   -- The special keys are the arrow keys...
+   type Special_Key_Code is (ARROW_UP, ARROW_DOWN, ARROW_LEFT, ARROW_RIGHT);
+
+   -- The key kind is the kind of key that has been pressed.
+   type Key_Kind is (Ordinary, Special, Long);
+
+   -- This type is used to return which key has been pressed.
+   type Key_Type is tagged private;
+
+   -- This function waits for the user to write its input which is stored in
+   -- both the surface in the returned variable. If it's null, it's not written
+   function Get_Input (Surface: Surface_Type := null)
+                       return Str_Type;
+
+   -- This function returns whether a new input key has been pressed, if so the
+   -- Key parameter is changed.
+   function Get_Key (Key: out Key_Type)
+                     return Boolean;
+
+   -- Returns the character value of a key, if it wasn't a character key, an
+   -- error is raised.
+   function Get_Char (Key: in Key_Type)
+                      return Char_Type;
+   pragma Inline (Get_Char);
+
+   -- Returns the special key code of a pressed ley, if it wasn't a character
+   -- key an error is raised.
+   function Get_Code (Key: in Key_Type)
+                      return Special_Key_Code;
+   pragma Inline (Get_Code);
+
+   -- Returns the kind of key a key is.
+   function Get_Kind (Key: in Key_Type)
+                      return Key_Kind;
+   pragma Inline (Get_Kind);
+
+private
+
+   type Key_Type is tagged
+      record
+         Char: Char_Type;
+         Code: Special_Key_Code;
+         Kind: Key_Kind;
+      end record;
 
 
 end Ansi.Text_IO;

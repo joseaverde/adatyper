@@ -1,11 +1,10 @@
 -------------------------------------------------------------------------------
 --                                                                           --
---                     A N S I - O S _ U T I L S . A D B                     --
---                                 P O S I X                                 --
+--                         T E S T _ A N S I . A D B                         --
 --                                                                           --
 --                              A D A T Y P E R                              --
 --                                                                           --
---                                  S P E C                                  --
+--                                  M A I N                                  --
 --                                                                           --
 -------------------------------------------------------------------------------
 --     Copyright (c) 2020 José Antonio Verde Jiménez All Rights Reserved     --
@@ -27,93 +26,44 @@
 --                                                                           --
 -------------------------------------------------------------------------------
 
-with Ansi.Exceptions;
-with Ansi.Text_IO;
+with Ansi;
+with Tests;
 
+function Test_Ansi return Natural is
 
-package body Ansi.Os_Utils is
-
-   ------------
-   -- SYSTEM --
-   ------------
-
-   function System_Command (Cmd: String)
-                            return Boolean is
-   begin
-
-      return C_System(Interfaces.C.To_C(Cmd)) = 0;
-
-   end System_Command;
-
-
-   --------------
-   -- TERMINAL --
-   --------------
-
-   procedure Prepare is
-   begin
-
-      -- We add many new lines in order not to overwrite what is already
-      -- written.
-      for Row in Row_Type range 1 .. Height loop
-         Ansi.Text_IO.Put_Ansi_Sequence("" & Char_Type'Val(10));
-      end loop;
-
-   -- if not System_Command("tput smcup") or
-      if not System_Command("stty -echo") or
-         not System_Command("tput civis") or
-      not True then
-
-         Clean_Up;
-         raise Ansi.Exceptions.Initialization_Issue
-         with "Couldn't prepare the terminal!";
-
-      end if;
-
-   end Prepare;
-
-
-   procedure Clean_Up is
-      Temp: Boolean;
-   begin
-      
-      Temp := System_Command("stty echo ");
-      Temp := System_Command("tput cnorm");
-   -- Temp := System_Command("tput rmcup");
-
-   end Clean_Up;
+   use type Ansi.Row_Type;
+   use type Ansi.Col_Type;
    
-   -----------
-   -- IOCTL --
-   -----------
+   Row    : Ansi.Row_Type := 2;
+   Col    : Ansi.Col_Type := 3;
+   Cursor : Ansi.Cursor_Type;
+   Surface: Ansi.Surface_Type (10, 10);
+   Color  : Ansi.Color_Type;
+   Style  : Ansi.Style_Type;
+   Styles : Ansi.Style_Array;
+   Char   : Ansi.Char_Type;
+   Str    : Ansi.Str_Type (1 .. 10);
 
-   function Update_Terminal_Size return Boolean is
-      Ws        : Winsize;
-      New_Height: Row_Type;
-      New_Width : Col_Type;
-      Temp_Int  : Interfaces.C.int;
-   begin
+begin
 
-      Temp_Int := Ioctl(Fd      => 1,  -- File descriptor = 1 (Standard output)
-                        Request => TIOCGWINSZ,
-                        Struct  => Ws);
+   -- Testing setting the position.
+   Ansi.Set_Position (Surface => Surface,
+                      Row     => Row,
+                      Col     => Col);
 
-      New_Height := Row_Type(Ws.ws_row);
-      New_Width  := Col_Type(Ws.ws_col);
+   Ansi.Clear;
 
-      if New_Height /= Height or New_Width /= Width then
-         Height := New_Height;
-         Width  := New_Width;
-         return True;
-      end if;
+   Ansi.Finalize;
+   Tests.Finalize;
 
-      return False;
+   return 0;
 
-   end Update_Terminal_Size;
+exception
+   when Error: others =>
+      Tests.Error(Error);
+      return 255;
 
-
-end Ansi.Os_Utils;
-
+end Test_Ansi;
 
 ---=======================-------------------------=========================---
 --=======================-- E N D   O F   F I L E --=========================--

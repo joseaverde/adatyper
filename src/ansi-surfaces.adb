@@ -34,7 +34,6 @@ with Ansi.Exceptions;
 with Ansi.Styles;
 with Ansi.Text_IO;
 with Debug; use Debug; -- DEBUGING
--- with Ada.Text_IO; DEBUGING
 
 
 package body Ansi.Surfaces is
@@ -117,6 +116,17 @@ package body Ansi.Surfaces is
    end Free;
 
 
+   function Get_Char (Surface: Surface_Type;
+                      Row    : Row_Type;
+                      Col    : Col_Type)
+                      return Char_Type is
+   begin
+
+      return 'T'; -- TODO;
+
+   end Get_Char;
+
+
 
    function Get_Cursor (Surface: Surface_Type)
                         return Cursor_Type is
@@ -154,6 +164,18 @@ package body Ansi.Surfaces is
       end loop;
 
    end Paste;
+
+
+   function Read (Surface: Surface_Type;
+                  Row    : Row_Type;
+                  Col    : Col_Type;
+                  Length : Positive)
+                  return Str_Type is
+   begin
+
+      return "TODO";
+
+   end Read;
 
 
    procedure Put (Item   : Str_Type;
@@ -900,6 +922,26 @@ package body Ansi.Surfaces is
       return Layerer.Visible(Position);
 
    end Get_Visibility;
+
+
+   procedure Move_Layer (Layerer: Layerer_Type;
+                         From   : Positive;
+                         To     : Positive) is
+   begin
+
+      null; -- TODO
+
+   end Move_Layer;
+
+
+   procedure Move_Layer (Layerer: Layerer_Type;
+                         Layer  : Surface_Type;
+                         To     : Positive) is
+   begin
+
+      null; -- TODO
+
+   end Move_Layer;
 
 end Ansi.Surfaces;
 

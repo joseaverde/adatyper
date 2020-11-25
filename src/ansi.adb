@@ -26,7 +26,7 @@
 --                                                                           --
 -------------------------------------------------------------------------------
 
-with  Ada.Text_IO;   -- TODO: Replace with Ansi.Text_IO;
+with  Ada.Text_IO;
 with Ansi.Cursors;
 with Ansi.Exceptions;
 with Ansi.Os_Utils;
@@ -51,6 +51,9 @@ package body Ansi is
       if Surface = Main_Surface then
          raise Ansi.Exceptions.Invalid_Surface_Issue
          with "The surface is protected!";
+      elsif Surface = null then
+         raise Ansi.Exceptions.Using_Null_Surface_Issue
+         with "The surface is null!";
       end if;
 
       Surface.Row := Row;
@@ -65,10 +68,10 @@ package body Ansi is
    -----------------------
 
    procedure Clear is
-      Str: String(1 .. Positive(Height) * Positive(Width)) := (others => ' ');
+      Str: CONSTANT String(1 .. Positive(Height) * Positive(Width)) :=
+                                                      (others => ' ');
    begin
 
-      -- TODO: Change Ada.Text_IO to Ansi.Text_IO
       Main_Cursor.Set_Position(1, 1, True);
       Ada.Text_IO.Put_Line(ASCII.ESC & "[0m");
       Ada.Text_IO.Put_Line(Str);
@@ -128,9 +131,8 @@ package body Ansi is
       Ansi.Os_Utils.Clean_Up;
       Main_Cursor.Set_Position(Height - 1, Width - 1);
       Ada.Text_IO.Put_Line(ASCII.ESC & "[0m");
+      Ada.Text_IO.Put("Press any key to continue...");
       Ada.Text_IO.Get_Immediate(Tmp);
-     -- Ada.Text_IO.Put_Line("Height:"&Height'Image & " ;; " &
-     --                      "Width:"&Width'Image);
 
    end Finalize;
 
@@ -141,7 +143,7 @@ package body Ansi is
    
    procedure Push (Surface: in out Surface_Record;
                    Cursor :        Cursor_Type) is
-      Op: Operation := new Operation_Record;
+      Op: CONSTANT Operation := new Operation_Record;
    begin
 
       Op.Cursor := Cursor;

@@ -29,22 +29,23 @@
 with Ada.Exceptions;
 with Ada.Text_IO;
 with Ansi;
-with Ansi.Colors;
-with Ansi.Cursors;
-with Ansi.Styles;
-with Ansi.Surfaces;
+-- with Ansi.Colors;
+-- with Ansi.Cursors;
+-- with Ansi.Styles;
+-- with Ansi.Surfaces;
+-- with Ansi.Text_IO;
 with Credits;
-with System;
+-- with System;
 with Title;
 
 -- This is the main function of the program, it returns an natural nuber with
 -- the error code if any occurs.
 function Main return Natural is
 
-   procedure Debug (N: Natural) is
-   begin
-      Ada.Text_IO.Put_Line("DEBUG:"&N'Image);
-   end Debug;
+-- procedure Debug (N: Natural) is
+-- begin
+--    Ada.Text_IO.Put_Line("DEBUG:"&N'Image);
+-- end Debug;
 
 begin
 
@@ -53,11 +54,12 @@ begin
    Credits.Startup_Notice;
    Title.Main_Title;
 -- Credits.Start_UP
-   
+
    Ansi.Finalize;
    return 0;
 
 exception
+
    when Error: others =>
       Ansi.Finalize;
       Ada.Text_IO.Put_Line(File => Ada.Text_IO.Standard_Error,

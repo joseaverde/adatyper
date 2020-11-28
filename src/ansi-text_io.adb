@@ -29,7 +29,7 @@
 with Ada.Wide_Text_IO;
 with Ansi.Cursors;
 with Ansi.Exceptions;
-with Debug; use Debug;
+-- with Debug; use Debug;
 
 package body Ansi.Text_IO is
 
@@ -66,7 +66,6 @@ package body Ansi.Text_IO is
 
       for Char of Item loop
          Ansi.Text_IO.Put(Char);
-       --  Ada.Wide_Text_IO.Put(Wide_Character(Char));
       end loop;
 
    end Put;
@@ -85,9 +84,13 @@ package body Ansi.Text_IO is
 
    function Get_Input (Surface: Surface_Type := null)
                        return Str_Type is
+      Surf: CONSTANT Surface_Type := (if Surface = null then
+                                          Main_Surface
+                                      else
+                                          Surface);
    begin
 
-      return "TODO";
+      return Surf.Grid(1, 1).Char & "";   -- TODO
 
    end Get_Input;
 

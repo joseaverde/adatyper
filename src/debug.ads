@@ -26,9 +26,31 @@
 --                                                                           --
 -------------------------------------------------------------------------------
 
+-- @summary
 -- This package contains debugging functions.
+--
+-- @description
+-- This package contains debugging functions because it's hard to use a
+-- debugger in this kind of pseudographical interfaces where there are too much
+-- things printed onto the screen.
+--
 package Debug is
 
+   --
+   -- This procedure adds a kind of breakpoint with information about what is
+   -- happening in that part of the code and ultimately wait for a character to
+   -- be pressed to continue the code, this way, it's much more controlled.
+   --
+   -- @param Text
+   -- The text to be printed onto the screen when the breakpoint is reached.
+   --
+   -- @param Col
+   -- The column to write the text (a.k.a, tabulation). 1 is the left margin.
+   --
+   -- @param Stop
+   -- If this parameter is True, then the programme waits for the developer
+   -- input of any character to continue.
+   --
    procedure Breakpoint (Text: String   := "";
                          Col : Positive := 1;
                          Stop: Boolean  := False);

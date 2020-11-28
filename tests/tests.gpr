@@ -50,7 +50,7 @@ project Tests is
    end case;
    for Object_Dir          use  "obj";
    for Exec_Dir            use  "bin";
-   for Main                use ("test_ansi.adb");
+   for Main                use ("test_ansi.adb", "papa.adb");
    for Create_Missing_Dirs use "True";
 
 

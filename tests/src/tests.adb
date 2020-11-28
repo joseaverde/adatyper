@@ -27,6 +27,8 @@
 -------------------------------------------------------------------------------
 
 with Ansi;
+with Ada.IO_EXCEPTIONS;
+with Ada.Task_Identification; use Ada.Task_Identification;
 
 package body Tests is
 
@@ -42,6 +44,20 @@ package body Tests is
       if Ada.Text_IO.Is_Open(File => File) then
          Ada.Text_IO.Close(File => File);
       end if;
+
+   end Error;
+
+
+   procedure Error (Item: String) is
+   begin
+
+      Ansi.Finalize;
+      Ada.Text_IO.Put_Line(File => Ada.Text_IO.Standard_Error,
+                           Item => Item);
+      if Ada.Text_IO.Is_Open(File => File) then
+         Ada.Text_IO.Close(File => File);
+      end if;
+      Abort_Task(Current_Task);
 
    end Error;
 
@@ -69,6 +85,10 @@ begin
    Ada.Text_IO.Create(File => File,
                       Mode => Ada.Text_IO.Out_File,
                       Name => "logs/temp.log");
+
+exception
+   when ADA.IO_EXCEPTIONS.NAME_ERROR =>
+      null;
 
 end Tests;
 

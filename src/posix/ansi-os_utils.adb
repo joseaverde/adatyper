@@ -87,10 +87,8 @@ package body Ansi.Os_Utils is
    -- IOCTL --
    -----------
 
-   function Update_Terminal_Size return Boolean is
+   procedure Update_Terminal_Size is
       Ws        : Winsize;
-      New_Height: Row_Type;
-      New_Width : Col_Type;
       Temp_Int  : Interfaces.C.int;
    begin
 
@@ -98,16 +96,8 @@ package body Ansi.Os_Utils is
                         Request => TIOCGWINSZ,
                         Struct  => Ws);
 
-      New_Height := Row_Type(Ws.ws_row);
-      New_Width  := Col_Type(Ws.ws_col);
-
-      if New_Height /= Height or New_Width /= Width then
-         Height := New_Height;
-         Width  := New_Width;
-         return True;
-      end if;
-
-      return False;
+      Height := Row_Type(Ws.ws_row);
+      Width  := Col_Type(Ws.ws_col);
 
    end Update_Terminal_Size;
 

@@ -124,7 +124,7 @@ package body Ansi.Colors is
 
 
 
-   procedure Set_Foreground (Surface: out not null Surface_Type;
+   procedure Set_Foreground (Surface: in not null Surface_Type;
                              Color  : Color_Type;
                              Bright : Boolean;
                              Row    : Row_Type;
@@ -149,7 +149,7 @@ package body Ansi.Colors is
    end Set_Foreground;
 
 
-   procedure Set_Background (Surface: out not null Surface_Type;
+   procedure Set_Background (Surface: in not null Surface_Type;
                              Color  : Color_Type;
                              Bright : Boolean;
                              Row    : Row_Type;
@@ -175,7 +175,7 @@ package body Ansi.Colors is
 
 
 
-   procedure Set_Foreground (Surface : out not null Surface_Type;
+   procedure Set_Foreground (Surface : in not null Surface_Type;
                              Color   : Color_Type;
                              Bright  : Boolean;
                              From_Row: Row_Type;
@@ -202,7 +202,7 @@ package body Ansi.Colors is
    end Set_Foreground;
 
 
-   procedure Set_Background (Surface : out not null Surface_Type;
+   procedure Set_Background (Surface : in not null Surface_Type;
                              Color   : Color_Type;
                              Bright  : Boolean;
                              From_Row: Row_Type;
@@ -229,7 +229,7 @@ package body Ansi.Colors is
    end Set_Background;
 
 
-   procedure Set_Foreground (Surface: out not null Surface_Type;
+   procedure Set_Foreground (Surface: not null Surface_Type;
                              Color  : Color_Type;
                              Bright : Boolean) is
    begin
@@ -246,7 +246,7 @@ package body Ansi.Colors is
    end Set_Foreground;
    
 
-   procedure Set_Background (Surface: out not null Surface_Type;
+   procedure Set_Background (Surface: not null Surface_Type;
                              Color  : Color_Type;
                              Bright : Boolean) is
    begin
@@ -292,7 +292,7 @@ package body Ansi.Colors is
 
 
 
-   procedure Set_Cursor_Foreground (Surface: out not null Surface_Type;
+   procedure Set_Cursor_Foreground (Surface: not null Surface_Type;
                                     Color  : Color_Type;
                                     Bright : Boolean) is
    begin
@@ -303,7 +303,7 @@ package body Ansi.Colors is
    end Set_Cursor_Foreground;
 
 
-   procedure Set_Cursor_Background (Surface: out not null Surface_Type;
+   procedure Set_Cursor_Background (Surface: not null Surface_Type;
                                     Color  : Color_Type;
                                     Bright : Boolean) is
    begin

@@ -40,7 +40,7 @@ package Title is
 private
 
    -- The letters
-     Letter_Big_A: Ansi.Surface_Type := Ansi.Surfaces.Create(("     _ ",
+   Letter_Big_A:   Ansi.Surface_Type := Ansi.Surfaces.Create(("     _ ",
                                                               "    / |",
                                                               "   /  |",
                                                               "  / - |",
@@ -61,7 +61,7 @@ private
                                                               "( (_) )",
                                                               " \____\"));
 
-     Letter_Big_T: Ansi.Surface_Type := Ansi.Surfaces.Create((" _____ ",
+   Letter_Big_T  : Ansi.Surface_Type := Ansi.Surfaces.Create((" _____ ",
                                                               "(_   _)",
                                                               "  | |  ",
                                                               "  | |  ",
@@ -106,7 +106,6 @@ private
 
    -- The letterer
    Letterer: Ansi.Surfaces.Layerer_Type;
-   use type Ansi.Surfaces.Layerer_Type;
 
 end Title;
 

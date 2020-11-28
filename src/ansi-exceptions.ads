@@ -27,20 +27,39 @@
 -------------------------------------------------------------------------------
 
 
+-- @summary
 -- This package contains exceptions.
+--
+-- @description
+-- This package contains all the exceptions shared by the Ansi package tree.
+--
 package Ansi.Exceptions is
 
    -- Exceptions A.K.A issues --
    
-   -- TODO: Add more comments.
-   -- Raised when trying to print something out of bounds.
+   -- This issue is raised when trying to print something out of bounds.
    Already_Inside_Layerer_Issue  : exception;
+
+   -- This issue is raised when the terminal or the console couldn't be
+   -- initiated.
    Initialization_Issue          : exception;
+
+   -- This issue is raised when a invalid surface is given.
    Invalid_Surface_Issue         : exception;
+
+   -- This issue is raised when a value or a position is out of bounds.
    Out_Of_Bounds_Issue           : exception;
+   
+   -- This issue is raised when a unknown layer is given to the layerer.
    Unknown_Layer_Issue           : exception;
+
+   -- This issue is raised when a null surface is used.
    Using_Null_Surface_Issue      : exception;
+
+   -- This issue is raised when trying to resize a surface to a wrong size.
    Windows_Size_Issue            : exception;
+
+   -- This issue is raised when trying to get a wrong type from a key.
    Wrong_Kind_Of_Key_Issue       : exception;
 
 end Ansi.Exceptions;

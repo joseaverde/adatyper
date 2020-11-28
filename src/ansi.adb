@@ -26,11 +26,11 @@
 --                                                                           --
 -------------------------------------------------------------------------------
 
-with  Ada.Text_IO;
-with Ansi.Cursors;
-with Ansi.Exceptions;
-with Ansi.Os_Utils;
-with Ansi.Surfaces;
+with   Ada.Text_IO;
+with  Ansi.Cursors;
+with  Ansi.Exceptions;
+with  Ansi.Os_Utils;
+with  Ansi.Surfaces;
 
 pragma Elaborate (Ansi.Cursors);
 pragma Elaborate (Ansi.Os_Utils);
@@ -107,21 +107,20 @@ package body Ansi is
 
 
 
-   -- TODO: Implement this once the surface package has been finished.
    procedure Update_Main_Surface is
+      Ch_Height: constant Integer := Integer(Height) -
+                                          Integer(Main_Surface.Height);
+      Ch_Width : constant Integer := Integer(Width)  -
+                                          Integer(Main_Surface.Width);
    begin
 
-      NULL;
+      -- We first resize the main surface.
+      Ansi.Surfaces.Resize(Surface    => Main_Surface,
+                           Rows_Down  => Ch_Height,
+                           Cols_Right => Ch_Width);
 
    end Update_Main_Surface;
 
-
-   function Update_Terminal_Size return Boolean is
-   begin
-
-      return Ansi.Os_Utils.Update_Terminal_Size;
-
-   end Update_Terminal_Size;
 
 
    procedure Finalize is
@@ -160,16 +159,30 @@ package body Ansi is
    end Push;
 
 
+   protected body Event_Handler is
+
+      procedure Update_Terminal_Size is
+      begin
+
+         Ansi.Os_Utils.Update_Terminal_Size;
+         Update_Main_Surface;
+         Has_Resized := True;
+
+      end Update_Terminal_Size;
+
+   end Event_Handler;
+
 
 -------------------------------------------------------------------------------
 -- elaboration ----------------------------------------------------------------
 -------------------------------------------------------------------------------
 
-   Temp_Boolean: Boolean;
 begin
 
    -- We initialize the package.
-   Temp_Boolean := Update_Terminal_Size;
+   
+   -- We first update the terminal size.
+   Ansi.Os_Utils.Update_Terminal_Size;
 
    -- We prepare the screen.
    Ansi.Os_Utils.Prepare;

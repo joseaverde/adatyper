@@ -40,9 +40,9 @@ project AdaTyper is
 
    type Enabled_Kind is ("enabled", "disabled");
    Compile_Checks   : Enabled_Kind := External ("ADATYPER_COMPILE_CHECKS",
-                                                "disabled");
-   Runtime_Checks   : Enabled_Kind := External ("ADATYPER_RUNTIME_CHECKS",
                                                 "enabled");
+   Runtime_Checks   : Enabled_Kind := External ("ADATYPER_RUNTIME_CHECKS",
+                                                "disabled");
    Style_Checks     : Enabled_Kind := External ("ADATYPER_STYLE_CHECKS",
                                                 "enabled");
    Contracts_Checks : Enabled_Kind := External ("ADATYPER_CONTRACTS",
@@ -219,7 +219,7 @@ project AdaTyper is
 
    package Documentation is
       -- To build the documentation:
-      --    `gnatdoc -bpdlwPadatyper --enable-build'
+      --    `gnatdoc -bplwPadatyper --enable-build'
       for Documentation_Dir use Prefix & "docs";
    end Documentation;
 

@@ -26,11 +26,13 @@
 --                                                                           --
 -------------------------------------------------------------------------------
 
+private with Ada.Interrupts;
+private with Ada.Interrupts.Names;
 private with Ada.Unchecked_Deallocation;
 limited with Ansi.Cursors;
 private with System;
 
-
+--
 -- @summary
 -- This package contains everything used to work with Ansi Escape Code
 -- Sequences. Once it is imported it sets up the terminal or the console. It
@@ -49,7 +51,6 @@ private with System;
 --
 package Ansi is
    
-
    -----------
    -- TYPES --
    -----------
@@ -228,7 +229,6 @@ package Ansi is
    procedure Set_Position (Surface: Surface_Type;
                            Row    : Row_Type;
                            Col    : Col_Type);
-   -- XXX: We don't inline it yet: pragma Inline (Set_Position);
 
 
    ---------------
@@ -269,16 +269,6 @@ package Ansi is
    
    -- This procedure updates the main surface if it has been resized.
    procedure Update_Main_Surface;
-
-   --
-   -- This function updates the terminal size. This function uses special
-   -- functions depending on the operating system.
-   --
-   -- @return
-   -- It returns true if either the Height, the Width or both have changed.
-   --
-   function Update_Terminal_Size return Boolean;
-   pragma Inline (Update_Terminal_Size);
 
    -- This procedure restores the old terminal.
    procedure Finalize;
@@ -481,7 +471,34 @@ private
 
    -- The width of the screen.
    Width : Col_Type := 1;
+
+   -- This variable is true, when the screen has been resized.
+   Has_Resized: Boolean;
+
+
+   -------------
+   -- SIGNALS --
+   -------------
+   -- This part contains the signal handlers in the package.
    
+   --
+   -- This protected `something' contains functions that occur when a specific
+   -- signal or interruption is given. The Ansi.Text_IO package is called and
+   -- given the signal to give it to the user.
+   --
+   protected Event_Handler is
+      -- 
+      -- This procedure updates the terminal size. This function uses special
+      -- functions depending on the operating system. It also resizes the main
+      -- surface. This function is raised automatically every time a signal
+      -- SIGWINCH is raised.
+      --
+      procedure Update_Terminal_Size;
+      pragma Interrupt_Handler (Update_Terminal_Size);
+      pragma Attach_Handler (Update_Terminal_Size,
+                             Ada.Interrupts.Names.SIGWINCH);
+   end Event_Handler;
+
 end Ansi;
 
 

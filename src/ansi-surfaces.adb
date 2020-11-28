@@ -27,13 +27,12 @@
 -------------------------------------------------------------------------------
 
 
-with Ada .Unchecked_Deallocation;
 with Ansi.Cursors;
 with Ansi.Colors;
 with Ansi.Exceptions;
-with Ansi.Styles;
+-- with Ansi.Styles;
 with Ansi.Text_IO;
-with Debug; use Debug; -- DEBUGING
+-- with Debug; use Debug; -- DEBUGING
 
 
 package body Ansi.Surfaces is
@@ -45,15 +44,18 @@ package body Ansi.Surfaces is
 
    function Copy (Surface: Surface_Type)
                   return Surface_Type is
-      Copied_Surface: Surface_Type := Create(Height => Surface.Height,
-                                             Width  => Surface.Width);
+      Copied_Surface: CONSTANT Surface_Type := Create(Height => Surface.Height,
+                                                      Width  => Surface.Width);
    begin
 
       Copied_Surface.Grid := Surface.Grid;
       Copied_Surface.Update_All := True;
       Copied_Surface.Cursor.Set_Position(Surface.Cursor, False);
       Copied_Surface.Cursor_Fmt := Surface.Cursor_Fmt;
-      Copied_Surface.Protect_It := Surface.Protect_It;
+
+      -- The new surface isn't protected because it's a copy. For example the
+      -- user can copy the main surface, into
+      Copied_Surface.Protect_It := False;
 
       return Copied_Surface;
 
@@ -122,10 +124,14 @@ package body Ansi.Surfaces is
                       return Char_Type is
    begin
 
-      return 'T'; -- TODO;
+      if Row > Surface.Height or Col > Surface.Width then
+         raise Ansi.Exceptions.Out_Of_Bounds_Issue
+         with "Index out of bounds!";
+      end if;
+
+      return Surface.Grid(Row, Col).Char;
 
    end Get_Char;
-
 
 
    function Get_Cursor (Surface: Surface_Type)
@@ -141,14 +147,14 @@ package body Ansi.Surfaces is
                     Surface: Surface_Type;
                     Row    : Row_Type;
                     Col    : Col_Type) is
-      To_Row: Row_Type := (if Over.Height - Row < Surface.Height then
-                              Over.Height
-                           else
-                              Row + Surface.Height);
-      To_Col: Col_Type := (if Over.Width - Col < Surface.Width then
-                              Over.Width
-                           else
-                              Col + Surface.Width);
+      To_Row: CONSTANT Row_Type := (if Over.Height - Row < Surface.Height then
+                                       Over.Height
+                                    else
+                                       Row + Surface.Height);
+      To_Col: CONSTANT Col_Type := (if Over.Width - Col < Surface.Width then
+                                       Over.Width
+                                    else
+                                       Col + Surface.Width);
    begin
 
       if Row > Over.Height or Col > Over.Width then
@@ -164,18 +170,6 @@ package body Ansi.Surfaces is
       end loop;
 
    end Paste;
-
-
-   function Read (Surface: Surface_Type;
-                  Row    : Row_Type;
-                  Col    : Col_Type;
-                  Length : Positive)
-                  return Str_Type is
-   begin
-
-      return "TODO";
-
-   end Read;
 
 
    procedure Put (Item   : Str_Type;
@@ -200,13 +194,13 @@ package body Ansi.Surfaces is
    procedure Put (Item   : Char_Type;
                   Surface: Surface_Type := null;
                   Feed   : Boolean      := False) is
-      Surf: Surface_Type := (if Surface = null then
-                              Main_Surface
-                             else
-                              Surface);
+      Surf: CONSTANT Surface_Type := (if Surface = null then
+                                          Main_Surface
+                                      else
+                                          Surface);
    begin
       
-      if Surf.Cursor.Get_Col > Col_Type(Surf.Width) then
+      if Surf.Cursor.Get_Col > Surf.Width then
          if Feed then
             Surf.Cursor.Set_Position(Surf.Cursor.Get_Row + 1, 1, False);
          else
@@ -228,10 +222,10 @@ package body Ansi.Surfaces is
    procedure Put (Surface: Surface_Type := null;
                   Row    : Row_Type := 1;
                   Col    : Col_Type := 1) is
-      Surf: Surface_Type := (if Surface = null then
-                              Main_Surface
-                             else
-                              Surface);
+      Surf: CONSTANT Surface_Type := (if Surface = null then
+                                       Main_Surface
+                                      else
+                                       Surface);
       Item    : Element;
       Last_Fmt: Format := Surface.Cursor_Fmt;
       
@@ -321,13 +315,21 @@ package body Ansi.Surfaces is
       Next: Operation;
 
    begin
+      -- TODO: Add styles
+      
+      -- We wait for the Update lock to be lifted.
+      while Lock loop
+         null;
+      end loop;
+
+      -- We lock the main surface.
+      Lock := True;
 
       -- We first see two possible scenaries, the first one is a screen that is
       -- completely when the Update_All attribute is set to true. The second
       -- one is to check the stack for any possible changes.
 
       -- UPDATE ALL --
-     -- Surf.Update_All := True;
       if Surf.Update_All then
          -- We set the cursor to the top left corner of the screen and start
          -- writting from there. We also write chunks of memory instead of
@@ -386,8 +388,28 @@ package body Ansi.Surfaces is
          Surf.Tail := null;
       end if;
 
+      -- We unlock the Main_Surface.
+      Lock := False;
 
    end Put;
+
+
+   function Read (Surface: Surface_Type;
+                  Row    : Row_Type;
+                  Col    : Col_Type;
+                  Length : Positive)
+                  return Str_Type is
+   begin
+
+      if Positive(Row) = Positive(Col) then
+         return "TODO";
+      elsif Positive(Surface.Width) = Length then
+         return "TODO";
+      else
+         return "TODO";
+      end if;
+
+   end Read;
 
 
    procedure Resize (Surface   : in out not null Surface_Type;
@@ -402,23 +424,23 @@ package body Ansi.Surfaces is
                                              Col_Type(Cols_Right + Cols_Left));
 
       -- We first declare the bounds of the old surface that will be copied.
-      Surface_Up  : Row_Type := (if Rows_Up < 0 then
-                                    Row_Type(abs Rows_Up)
-                                 else
-                                    Surface.Grid'First(1));
-      Surface_Down: Row_Type := (if Rows_Down < 0 then
-                                    Row_Type(abs Rows_Down)
-                                 else
-                                    Surface.Grid'Last(1));
+      Surface_Up  : CONSTANT Row_Type := (if Rows_Up < 0 then
+                                             Row_Type(abs Rows_Up)
+                                          else
+                                             Surface.Grid'First(1));
+      Surface_Down: CONSTANT Row_Type := (if Rows_Down < 0 then
+                                             Row_Type(abs Rows_Down)
+                                          else
+                                             Surface.Grid'Last(1));
 
-      Surface_Left : Col_Type := (if Cols_Left < 0 then
-                                    Col_Type(abs Cols_Left)
-                                  else
-                                    Surface.Grid'First(2));
-      Surface_Right: Col_Type := (if Cols_RIght < 0 then
-                                    Col_Type(abs Cols_Right)
-                                  else
-                                    Surface.Grid'Last(2));
+      Surface_Left : CONSTANT Col_Type := (if Cols_Left < 0 then
+                                             Col_Type(abs Cols_Left)
+                                           else
+                                             Surface.Grid'First(2));
+      Surface_Right: CONSTANT Col_Type := (if Cols_RIght < 0 then
+                                             Col_Type(abs Cols_Right)
+                                           else
+                                             Surface.Grid'Last(2));
 
    begin
 
@@ -467,15 +489,21 @@ package body Ansi.Surfaces is
    procedure Add (Layerer : in out Layerer_Type;
                   Layer   : Surface_Type;
                   Position: Natural := 0) is
-      Old_Layerer: Surface_Array := Layerer.Layers.all;
-      Old_Visible: Boolean_Array := Layerer.Visible.all;
-      Old_Size : Natural := Layerer.Size;
+      Old_Layerer: CONSTANT Surface_Array := Layerer.Layers.all;
+      Old_Visible: CONSTANT Boolean_Array := Layerer.Visible.all;
+      Old_Size   : CONSTANT Natural       := Layerer.Size;
    begin
 
       -- We check if it is already there.
       if Layerer / Layer then
          raise Ansi.Exceptions.Already_Inside_Layerer_Issue
          with "The surface is already inside the layerer!";
+      end if;
+
+      -- We also check if it's inside the range.
+      if Position > Old_Size + 1 then
+         raise Ansi.Exceptions.Out_Of_Bounds_Issue
+         with "Trying to add a layer out of bounds!";
       end if;
       
       -- We free the old arrays.
@@ -524,8 +552,9 @@ package body Ansi.Surfaces is
          if Layerer.Layers(L) = Layer then
             Shrink_Layerer:
                declare
-                  Old_Size : Natural := Layerer.Layers'Length;
-                  New_Layer: Layer_Array := new Surface_Array(1 .. Old_Size-1);
+                  Old_Size : CONSTANT Natural := Layerer.Layers'Length;
+                  New_Layer: CONSTANT Layer_Array := new
+                                             Surface_Array(1 .. Old_Size-1);
                begin
                   New_Layer(1 .. L - 1) := Layerer.Layers(1 .. L - 1);
                   New_Layer(L .. New_Layer'Last) := Layerer.Layers(L + 1 ..
@@ -538,7 +567,7 @@ package body Ansi.Surfaces is
       end loop;
 
       raise Ansi.Exceptions.Unknown_Layer_Issue
-      with "The given layer can't be removed because it isn't in the Layerer";
+      with "The given layer can't be removed because it isn't in the Layerer!";
 
    end Remove;
 
@@ -547,11 +576,19 @@ package body Ansi.Surfaces is
                      Position: Positive) is
       New_Layer: Layer_Array := new Surface_Array(1..Layerer.Layers'Length-1);
    begin
+
+      if Position > New_Layer'Last then
+         Free(New_Layer);
+         raise Ansi.Exceptions.Out_Of_Bounds_Issue
+         with "Trying to remove a layer out of bounds!";
+      end if;
+
       New_Layer(1 .. Position - 1) := Layerer.Layers(1 .. Position - 1);
       New_Layer(Position .. New_Layer'Last) := Layerer.Layers(Position + 1 ..
                                                       Layerer.Layers'Last);
       Free(Layerer.Layers);
       Layerer.Layers := New_Layer;
+
    end Remove;
 
 
@@ -577,16 +614,23 @@ package body Ansi.Surfaces is
    -- layer.
    procedure Update (Layerer: Layerer_Type) is
       Layer : Surface_Type;
-      Hidden: Element := Element'(Fmt  => Format'(Fg_Color  => White,
-                                                  Fg_Bright => False,
-                                                  Bg_Color  => Black,
-                                                  Bg_Bright => False,
-                                                  Style     =>(others=>False)),
-                                  Char => ' ');
+      Hidden: CONSTANT Element := Element'(Fmt  => Format'(Fg_Color  => White,
+                                                           Fg_Bright => False,
+                                                           Bg_Color  => Black,
+                                                           Bg_Bright => False,
+                                                           Style     =>
+                                                            (others => False)),
+                                           Char => ' ');
    begin
+
+      while Lock loop
+         null;
+      end loop;
+      Lock := True;
+
       -- We will start to go through all the Layers, checking which ones have
       -- been updated and pass those changes to the main layer. First we clean
-      -- the space where the hidden layers are found.
+      -- the espace where the hidden layers are found.
       
       Hidden_Loop:
       for L in Positive range 1 .. Layerer.Size loop
@@ -772,6 +816,8 @@ package body Ansi.Surfaces is
 
          <<Continue_Layerer_Loop>>
       end loop Layerer_Loop;
+
+      Lock := False;
 
    end Update;
 

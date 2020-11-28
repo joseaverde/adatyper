@@ -28,11 +28,25 @@
 
 with Ansi; use Ansi;
 
+--
+-- @summary
 -- This package contains functions common to all the project.
+--
+-- @description
+-- Toolbox is a toolbox of functions that are used in all the project.
+--
 package Toolbox is
 
+   --
    -- This procedure converts a positive number into a string, and the results
    -- are stored in a caché to speed up the execution.
+   --
+   -- @param Number
+   -- The number we are trying to convert to a string.
+   --
+   -- @return
+   -- The string representation of the number.
+   --
    function To_String (Number: Positive)
                        return Str_Type;
    pragma Pure_Function (To_String);

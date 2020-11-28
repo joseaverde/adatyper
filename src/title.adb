@@ -27,24 +27,20 @@
 -------------------------------------------------------------------------------
 
 with Ansi.Colors;
-with Ansi.Cursors;
 with Ansi.Exceptions;
 with Ansi.Styles;
-with Ansi.Text_IO;
 
 package body Title is
 
    use type Ansi.Col_Type;
-   use type Ansi.Row_Type;
-   use type Ansi.Surfaces.Layerer_Type;
+   -- use type Ansi.Row_Type;
 
    procedure Main_Title is
 
       Left: Ansi.Col_Type;
       Top : Ansi.Row_Type;
 
-      Cursor_Pos: Natural := 0;
-      Sleep     : Duration := 1.0;
+   -- Sleep     : Duration := 1.0;
 
       procedure Update_Positions is
       begin
@@ -69,7 +65,7 @@ package body Title is
 
       for P in Positive range 1 .. 8 loop
          Letterer.Show(P);
-        -- delay Sleep;
+      -- delay Sleep;
          Letterer.Update;
          Ansi.Surfaces.Put(Ansi.Get_Main_Surface);
       end loop;

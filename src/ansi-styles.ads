@@ -51,28 +51,28 @@ package Ansi.Styles is
 
 
    -- This procedure sets a style array in a cell of the surface.
-   procedure Set_Style (Surface: out not null Surface_Type;
+   procedure Set_Style (Surface: in not null Surface_Type;
                         Styles : Style_Array;
                         Row    : Row_Type;
                         Col    : Col_Type);
    pragma Inline (Set_Style);
 
    -- This procedure sets a style to true in a cell of the surface.
-   procedure Set_Style (Surface: out not null Surface_Type;
+   procedure Set_Style (Surface: in not null Surface_Type;
                         Style  : Style_Type;
                         Row    : Row_Type;
                         Col    : Col_Type);
 
    -- This procedure removes a style (sets it to false) in a cell of the
    -- surface.
-   procedure Remove_Style (Surface: out not null Surface_Type;
+   procedure Remove_Style (Surface: in not null Surface_Type;
                            Style  : Style_Type;
                            Row    : Row_Type;
                            Col    : Col_Type);
 
 
    -- This procedure sets a style array in a block from the surface.
-   procedure Set_Style (Surface : out not null Surface_Type;
+   procedure Set_Style (Surface : in not null Surface_Type;
                         Styles  : Style_Array;
                         From_Row: Row_Type;
                         From_Col: Col_Type;
@@ -80,7 +80,7 @@ package Ansi.Styles is
                         To_Col  : Col_Type);
 
    -- This procedure sets a style to true in a block from the surface.
-   procedure Set_Style (Surface : out not null Surface_Type;
+   procedure Set_Style (Surface: in not null Surface_Type;
                         Style   : Style_Type;
                         From_Row: Row_Type;
                         From_Col: Col_Type;
@@ -88,7 +88,7 @@ package Ansi.Styles is
                         To_Col  : Col_Type);
 
    -- This procedure removes a style from a block of the surface.
-   procedure Remove_Style (Surface : out not null Surface_Type;
+   procedure Remove_Style (Surface: in not null Surface_Type;
                            Style   : Style_Type;
                            From_Row: Row_Type;
                            From_Col: Col_Type;
@@ -97,15 +97,15 @@ package Ansi.Styles is
 
 
    -- This procedure sets a style array for all the surface.
-   procedure Set_Style (Surface: out not null Surface_Type;
+   procedure Set_Style (Surface: in not null Surface_Type;
                         Styles : Style_Array);
 
    -- This procedure sets a style to true in all cells of the surface.
-   procedure Set_Style (Surface: out not null Surface_Type;
+   procedure Set_Style (Surface: in not null Surface_Type;
                         Style  : Style_Type);
 
    -- This procedure removes a style from all cells of the surface.
-   procedure Remove_Style (Surface: out not null Surface_Type;
+   procedure Remove_Style (Surface: in not null Surface_Type;
                            Style  : Style_Type);
 
 
@@ -120,17 +120,17 @@ package Ansi.Styles is
 
    -- This procedure changes the default styles of the cursor to an array of
    -- them.
-   procedure Set_Cursor_Style (Surface: out not null Surface_Type;
+   procedure Set_Cursor_Style (Surface: in not null Surface_Type;
                                Styles : in  Style_Array);
    pragma Inline (Set_Cursor_Style);
 
    -- This procedure changes a default style of the cursor to true.
-   procedure Set_Cursor_Style (Surface: out not null Surface_Type;
+   procedure Set_Cursor_Style (Surface: in not null Surface_Type;
                                Style  : in  Style_Type);
    pragma Inline (Set_Cursor_Style);
 
    -- This procedure removes a default style of the cursor.
-   procedure Remove_Cursor_Style (Surface: out not null Surface_Type;
+   procedure Remove_Cursor_Style (Surface: in not null Surface_Type;
                                   Style  : in  Style_Type);
    pragma Inline (Remove_Cursor_Style);
 

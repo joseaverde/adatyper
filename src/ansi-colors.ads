@@ -46,8 +46,8 @@ package Ansi.Colors is
    function Gen_Background (Color : Color_Type;
                             Bright: Boolean)
                             return Str_Type;
-   pragma Pure_Function (Gen_Foreground);
-   pragma Inline (Gen_Foreground);
+   pragma Pure_Function (Gen_Background);
+   pragma Inline (Gen_Background);
 
 
    -- This procedure returns the foreground colour in a certain position of the
@@ -80,14 +80,14 @@ package Ansi.Colors is
    pragma Inline (Put_Background);
 
    -- This procedure sets a foreground colour in a cell of the surface.
-   procedure Set_Foreground (Surface: out not null Surface_Type;
+   procedure Set_Foreground (Surface: in not null Surface_Type;
                              Color  : Color_Type;
                              Bright : Boolean;
                              Row    : Row_Type;
                              Col    : Col_Type);
 
    -- This procedure sets a background colour in a cell of the surface.
-   procedure Set_Background (Surface: out not null Surface_Type;
+   procedure Set_Background (Surface: in not null Surface_Type;
                              Color  : Color_Type;
                              Bright : Boolean;
                              Row    : Row_Type;
@@ -95,7 +95,7 @@ package Ansi.Colors is
 
    -- This procedure sets a foreground colour in a block of cells from the
    -- surface.
-   procedure Set_Foreground (Surface : out not null Surface_Type;
+   procedure Set_Foreground (Surface : in not null Surface_Type;
                              Color   : Color_Type;
                              Bright  : Boolean;
                              From_Row: Row_Type;
@@ -105,7 +105,7 @@ package Ansi.Colors is
 
    -- This procedure sets a background colour in a block of cells from the
    -- surface.
-   procedure Set_Background (Surface : out not null Surface_Type;
+   procedure Set_Background (Surface : in not null Surface_Type;
                              Color   : Color_Type;
                              Bright  : Boolean;
                              From_Row: Row_Type;
@@ -114,12 +114,12 @@ package Ansi.Colors is
                              To_Col  : Col_Type);
 
    -- This procedure sets the foreground colour of a whole surface.
-   procedure Set_Foreground (Surface: out not null Surface_Type;
+   procedure Set_Foreground (Surface: not null Surface_Type;
                              Color  : Color_Type;
                              Bright : Boolean);
    
    -- This procedure sets the background colour of a whole surface.
-   procedure Set_Background (Surface: out not null Surface_Type;
+   procedure Set_Background (Surface: not null Surface_Type;
                              Color  : Color_Type;
                              Bright : Boolean);
 
@@ -141,13 +141,13 @@ package Ansi.Colors is
    pragma Inline (Get_Cursor_Background);
 
    -- This procedure changes the default foreground colour for the cursor.
-   procedure Set_Cursor_Foreground (Surface: out not null Surface_Type;
+   procedure Set_Cursor_Foreground (Surface: not null Surface_Type;
                                     Color  : Color_Type;
                                     Bright : Boolean);
    pragma Inline (Set_Cursor_Foreground);
 
    -- This procedure changes the default background colour for the cursor.
-   procedure Set_Cursor_Background (Surface: out not null Surface_Type;
+   procedure Set_Cursor_Background (Surface: not null Surface_Type;
                                     Color  : Color_Type;
                                     Bright : Boolean);
    pragma Inline (Set_Cursor_Background);

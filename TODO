@@ -13,3 +13,4 @@
  * TODO TODO comments.
  * Update styles in the Put function of Ansi.Surfaces
  * Check whats wrong with the command prompt
+ * Add Put and Put_Str functions to Ansi.Text_IO;

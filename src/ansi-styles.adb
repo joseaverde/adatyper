@@ -94,7 +94,7 @@ package body Ansi.Styles is
 
 
 
-   procedure Set_Style (Surface: out not null Surface_Type;
+   procedure Set_Style (Surface: in not null Surface_Type;
                         Styles : Style_Array;
                         Row    : Row_Type;
                         Col    : Col_Type) is
@@ -113,7 +113,7 @@ package body Ansi.Styles is
    end Set_Style;
 
 
-   procedure Set_Style (Surface: out not null Surface_Type;
+   procedure Set_Style (Surface: in not null Surface_Type;
                         Style  : Style_Type;
                         Row    : Row_Type;
                         Col    : Col_Type) is
@@ -132,7 +132,7 @@ package body Ansi.Styles is
    end Set_Style;
 
 
-   procedure Remove_Style (Surface: out not null Surface_Type;
+   procedure Remove_Style (Surface: in not null Surface_Type;
                            Style  : Style_Type;
                            Row    : Row_Type;
                            Col    : Col_Type) is
@@ -152,7 +152,7 @@ package body Ansi.Styles is
 
 
 
-   procedure Set_Style (Surface : out not null Surface_Type;
+   procedure Set_Style (Surface : in not null Surface_Type;
                         Styles  : Style_Array;
                         From_Row: Row_Type;
                         From_Col: Col_Type;
@@ -176,7 +176,7 @@ package body Ansi.Styles is
 
    end Set_Style;
 
-   procedure Set_Style (Surface : out not null Surface_Type;
+   procedure Set_Style (Surface : in not null Surface_Type;
                         Style   : Style_Type;
                         From_Row: Row_Type;
                         From_Col: Col_Type;
@@ -201,7 +201,7 @@ package body Ansi.Styles is
    end Set_Style;
 
 
-   procedure Remove_Style (Surface : out not null Surface_Type;
+   procedure Remove_Style (Surface : in not null Surface_Type;
                            Style   : Style_Type;
                            From_Row: Row_Type;
                            From_Col: Col_Type;
@@ -227,7 +227,7 @@ package body Ansi.Styles is
 
 
 
-   procedure Set_Style (Surface: out not null Surface_Type;
+   procedure Set_Style (Surface: in not null Surface_Type;
                         Styles : Style_Array) is
    begin
 
@@ -242,7 +242,7 @@ package body Ansi.Styles is
    end Set_Style;
 
 
-   procedure Set_Style (Surface: out not null Surface_Type;
+   procedure Set_Style (Surface: in not null Surface_Type;
                         Style  : Style_Type) is
    begin
 
@@ -257,7 +257,7 @@ package body Ansi.Styles is
    end Set_Style;
 
 
-   procedure Remove_Style (Surface: out not null Surface_Type;
+   procedure Remove_Style (Surface: in not null Surface_Type;
                            Style  : Style_Type) is
    begin
 
@@ -287,7 +287,7 @@ package body Ansi.Styles is
    end Get_Cursor_Style;
 
 
-   procedure Set_Cursor_Style (Surface: out not null Surface_Type;
+   procedure Set_Cursor_Style (Surface: in not null Surface_Type;
                                Styles : in  Style_Array) is
    begin
 
@@ -296,7 +296,7 @@ package body Ansi.Styles is
    end Set_Cursor_Style;
 
 
-   procedure Set_Cursor_Style (Surface: out not null Surface_Type;
+   procedure Set_Cursor_Style (Surface: in not null Surface_Type;
                                Style  : in  Style_Type) is
    begin
 
@@ -305,7 +305,7 @@ package body Ansi.Styles is
    end Set_Cursor_Style;
 
 
-   procedure Remove_Cursor_Style (Surface: out not null Surface_Type;
+   procedure Remove_Cursor_Style (Surface: in not null Surface_Type;
                                   Style  : in  Style_Type) is
    begin
 

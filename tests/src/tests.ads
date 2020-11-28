@@ -36,6 +36,8 @@ package Tests is
    -- This procedure is runned everytime an unhandled exception is caught.
    procedure Error (Err: Ada.Exceptions.Exception_Occurrence);
 
+   procedure Error (Item: String);
+
    -- This procedure finalizes this package.
    procedure Finalize;
 

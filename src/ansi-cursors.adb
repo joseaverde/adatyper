@@ -37,7 +37,9 @@ package body Ansi.Cursors is
       renames Ansi.Text_IO.Put_Ansi_Sequence;
    
 
-   ----------------------------------------------------------------------------
+   --------------------------------------
+   -- CURSOR CREATION AND DEALLOCATION --
+   --------------------------------------
    
    function New_Cursor (Row: Row_Type;
                         Col: Col_Type)
@@ -58,6 +60,7 @@ package body Ansi.Cursors is
       Deallocate(Cursor);
 
    end Free;
+
 
 
    -----------------------

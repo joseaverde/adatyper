@@ -44,7 +44,10 @@ function Test_Ansi return Natural is
    Char   : Ansi.Char_Type;
    Str    : Ansi.Str_Type (1 .. 10);
 
+   Status : Boolean;
+
 begin
+
 
    -- Testing setting the position.
    Ansi.Set_Position (Surface => Surface,

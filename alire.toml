@@ -42,15 +42,16 @@ ADATYPER_COMPILE_CHECKS   = ["enabled", "disabled"]
 ADATYPER_RUNTIME_CHECKS   = ["enabled", "disabled"]
 ADATYPER_STYLE_CHECKS     = ["enabled", "disabled"] 
 ADATYPER_CONTRACTS        = ["enabled", "disabled"]
+ADATYPER_ANSI_COMPLIANT   = ["enabled", "disabled"]
 ADATYPER_BUILD_MODE       = ["debug", "optimize"]
 ADATYPER_OPERATING_SYSTEM = ["linux", "windows"]
 ADATYPER_ALIRE_BUILT      = ["on", "off"]
 
 # How to build it depending on the operating system.
 [gpr-set-externals.'case(os)']
-'linux' = { ADATYPER_OPERATING_SYSTEM = "linux" }
-'windows' = { ADATYPER_OPERATING_SYSTEM = "windows" }
-'...' = { ADATYPER_OPERATING_SYSTEM = "linux" }
+'linux' = { ADATYPER_OPERATING_SYSTEM = "linux", ADATYPER_ANSI_COMPLIANT   = "enabled" }
+'windows' = { ADATYPER_OPERATING_SYSTEM = "windows", ADATYPER_ANSI_COMPLIANT   = "disabled" }
+'...' = { ADATYPER_OPERATING_SYSTEM = "linux", ADATYPER_ANSI_COMPLIANT   = "enabled" }
 
 
 [gpr-set-externals]

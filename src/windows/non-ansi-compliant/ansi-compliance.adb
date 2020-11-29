@@ -1,7 +1,6 @@
 -------------------------------------------------------------------------------
 --                                                                           --
---                     A N S I - O S _ U T I L S . A D B                     --
---                               W I N D O W S                               --
+--                   A N S I . C O M P L I A N C E . A D B                   --
 --                                                                           --
 --                              A D A T Y P E R                              --
 --                                                                           --
@@ -27,48 +26,91 @@
 --                                                                           --
 -------------------------------------------------------------------------------
 
-with Ansi.Text_IO;
+with Interfaces;
 
 
-package body Ansi.Os_Utils is
+package body Ansi.Compliance is
 
-   procedure Prepare is
-      procedure Set_Up_Console;
-      pragma Import (C, Set_Up_Console, "setupConsole");
+   -- TODO: Is_Ansi_Compliant := False
+
+   Last_Format: Format := Format'(Fg_Color  => White,
+                                  Fg_Bright => False,
+                                  Bg_Color  => Black,
+                                  Bg_Bright => False,
+                                  Style     => (others => False));
+
+   -- This procedure sets the console's colour and attributes (styles)
+   procedure Set_Windows_Console_Color_With_Attributes is
+      type WORD is new Interfaces.Unsigned_16;
+      Color: CONSTANT WORD := 1;
+      -- TODO Finish
+
+      procedure C_Driver_Set_Windows_Console_Color_With_Attributes(C: WORD);
+      pragma Import (C, C_Driver_Set_Windows_Console_Color_With_Attributes,
+                     "setWindowsConsoleColorWithAttributes");
    begin
-   
-      Set_Up_Console;
-      -- We add many new lines in order not to overwrite what has already been
-      -- written.
-      for Row in Row_Type range 1 .. Height loop
-         Ansi.Text_IO.Put_Ansi_Sequence("" & Char_Type'Val(10));
-      end loop;
+ 
+      C_Driver_Set_Windows_Console_Color_With_Attributes(Color);
 
-      -- TODO Add errors and complete it.
-      
-   end Prepare;
+   end Set_Windows_Console_Color_With_Attributes;
 
-
-   procedure Clean_Up is
-      procedure Restore_Console;
-      pragma Import (C, Restore_Console, "restoreConsole");
-   begin
-
-      Restore_Console;
-   
-   end Clean_Up;
 
    
-   -- TODO
-   procedure Update_Terminal_Size is
+   function Gen_Foreground (Color : Color_Type;
+                            Bright: Boolean)
+                            return Str_Type is
    begin
 
-      Height := 24;
-      Width  := 80;
+      Last_Format.Fg_Color  := Color;
+      Last_Format.Fg_Bright := Bright;
 
-   end Update_Terminal_Size;
+      Set_Windows_Console_Color_With_Attributes;
 
-end Ansi.Os_Utils;
+      return "";
+
+   end Gen_Foreground;
+
+
+   function Gen_Background (Color : Color_Type;
+                            Bright: Boolean)
+                            return Str_Type is
+   begin
+
+      Last_Format.Bg_Color  := Color;
+      Last_Format.Bg_Bright := Bright;
+
+      Set_Windows_Console_Color_With_Attributes;
+
+      return "";
+
+   end Gen_Background;
+
+
+
+   procedure Put_Foreground (Color : Color_Type;
+                             Bright: Boolean) is
+   begin
+
+      Last_Format.Fg_Color  := Color;
+      Last_Format.Fg_Bright := Bright;
+
+      Set_Windows_Console_Color_With_Attributes;
+
+   end Put_Foreground;
+
+
+   procedure Put_Background (Color : Color_Type;
+                             Bright: Boolean) is
+   begin
+
+      Last_Format.Bg_Color  := Color;
+      Last_Format.Bg_Bright := Bright;
+
+      Set_Windows_Console_Color_With_Attributes;
+
+   end Put_Background;
+
+end Ansi.Compliance;
 
 
 ---=======================-------------------------=========================---

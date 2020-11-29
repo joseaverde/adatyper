@@ -1,7 +1,7 @@
 -------------------------------------------------------------------------------
 --                                                                           --
---                     A N S I - O S _ U T I L S . A D S                     --
---                               W I N D O W S                               --
+--                         C O N S T A N T S . A D S                         --
+--                                 P O S I X                                 --
 --                                                                           --
 --                              A D A T Y P E R                              --
 --                                                                           --
@@ -27,29 +27,25 @@
 --                                                                           --
 -------------------------------------------------------------------------------
 
--- This package contains some os specific functions from C in the Windows
--- operating system.
-private package Ansi.Os_Utils is
+with Ada.Interrupts;
+with Ada.Interrupts.Names;
 
-   -------------
-   -- CONSOLE --
-   -------------
+--
+-- @summary
+-- This package contains system specific constants.
+--
+-- @description
+-- This package contains posix specific constants that are only available here,
+-- for example, the SIGWINCH signal is used to handle when the terminal has
+-- been resized, which isn't available by default on windows.
+--
+package Constants is
 
-   -- This procedure prepares the console.
-   procedure Prepare;
+   -- This is signal is given when the terminal has been resized.
+   SIGWINCH: CONSTANT Ada.Interrupts.Interrupt_ID :=
+                                                Ada.Interrupts.Names.SIGWINCH;
 
-   -- This procedure cleans up and restores the console.
-   procedure Clean_Up;
-   
-   ---------------
-   -- WINDOWS.H --
-   ---------------
-   
-   -- This function updates the terminal size.
-   procedure Update_Terminal_Size;
-   pragma Inline (Update_Terminal_Size);
-
-end Ansi.Os_Utils;
+end Constants;
 
 
 ---=======================-------------------------=========================---

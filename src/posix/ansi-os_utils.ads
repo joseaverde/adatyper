@@ -147,7 +147,6 @@ private package Ansi.Os_Utils is
    procedure Update_Terminal_Size;
    pragma Inline (Update_Terminal_Size);
 
-
 end Ansi.Os_Utils;
 
 

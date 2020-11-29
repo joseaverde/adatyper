@@ -47,6 +47,8 @@ project AdaTyper is
                                                 "enabled");
    Contracts_Checks : Enabled_Kind := External ("ADATYPER_CONTRACTS",
                                                 "enabled");
+   Ansi_Compliant   : Enabled_Kind := External ("ADATYPER_ANSI_COMPLIANCE",
+                                                "enabled");
 
    type Build_Kind is ("debug", "optimize");
    Build_Mode : Build_Kind := External ("ADATYPER_BUILD_MODE", "debug");
@@ -69,15 +71,41 @@ project AdaTyper is
          for Languages     use ("Ada");
    end case;
 
+   -- Ansi compliance, there are different kind of compilations depending
+   -- whether it's compiled to an ansi-compliant or non-ansi-compliant terminal
+   -- or console.
+   Ansi_Dir := "";
+   case Operating_System is
+      when "windows" =>
+         case Ansi_Compliant is
+            when "enabled" =>
+               Ansi_Dir := "src\posix\ansi-compliant";
+            when others =>
+               Ansi_Dir := "src\windows\non-ansi-compliant";
+            end case;
+      when others =>
+         case Ansi_Compliant is
+            when "enabled" =>
+               Ansi_Dir := "src/posix/ansi-compliant";
+            when others =>
+               Ansi_Dir := "Posix non-ansi-compliant terminal are not " &
+                           "supported";
+         end case;
+   end case;
+
    -- The source directories depend on the operating system, because there are
    -- to get the size of the terminal some C functions are used.
    Prefix := "";
    case Operating_System is
       when "windows" =>
-         for Source_Dirs   use ("src", "src\windows");
+         for Source_Dirs   use ("src",
+                                "src\windows",
+                                Ansi_Dir);
          Prefix := "alire\build\";
       when others =>
-         for Source_Dirs   use ("src", "src/posix");
+         for Source_Dirs   use ("src",
+                                "src/posix",
+                                Ansi_Dir);
          Prefix := "alire/build/";
    end case;
 
@@ -207,11 +235,13 @@ project AdaTyper is
                      -- are illegalities.
    end Compiler;
 
+
    package Linker is
       for Switches ("Ada") use
          Linker_Switches &
          ("-Wl,--gc-sections"); -- Remove unused sections
    end Linker;
+
 
    package Binder is
       for Switches ("Ada") use ("-Es"); -- Symbolic traceback.
@@ -222,6 +252,63 @@ project AdaTyper is
       --    `gnatdoc -bplwPadatyper --enable-build'
       for Documentation_Dir use Prefix & "docs";
    end Documentation;
+
+
+   package Naming is
+      -- The file names are in lower case.
+      for Casing use "lowercase";
+
+      -- This tells to replace the dashes `-' in names with dots when using dot
+      -- notation, e.g:
+      --    parent-child.adb -> Parent.Child
+      for Dot_Replacement use "-";
+      
+      -- The specification files' extension is `.ads'.
+      for Spec_Suffix ("Ada") use ".ads";
+
+      -- The implementation files' extension is `.adb'.
+      for Body_Suffix ("Ada") use ".adb";
+
+      -- The suffix for separate units (subunits).
+      for Separate_Suffix use ".separate.adb";
+   end Naming;
+
+
+   package Installer is
+      -- The artifacts are a set of files that are required to be installed but
+      -- doesn't belong to the source files, like data files.
+   -- for Artifatcs use ("");
+
+      -- These are the same as the Artifacts, but when one of them is missing,
+      -- instead of displaying a warning and error is reported.
+   -- for Required_Artifacts use ("");
+
+      -- The place of the executable.
+      for Exec_Subdir use "bin";
+
+      -- The mode of installation.
+      case Build_Mode is
+         when "debug" =>
+            for Mode use "dev";
+         when others =>
+            for Mode use "usage";
+      end case;
+
+      -- The installation name.
+      for Install_Name use "adatyper";
+
+      -- This is the default installation directory.
+      for Prefix use ("alire/opt");
+
+      -- Another option that isn't in this package and must be passed by the
+      -- user to `gprinstall' is:
+      --
+      --    * Prefix (--prefix): The aboslute/relative path where the files
+      --                         will be installed.
+      --
+      -- Check `gprinstall --help' for more information. This is not required,
+      -- though.
+   end Installer;
 
 end AdaTyper;
 

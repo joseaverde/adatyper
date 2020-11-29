@@ -1,11 +1,11 @@
 -------------------------------------------------------------------------------
 --                                                                           --
---                     A N S I - O S _ U T I L S . A D S                     --
---                               W I N D O W S                               --
+--                   A N S I - C O M P L I A N C E . A D B                   --
+--                        A N S I - C O M P L I A N T                        --
 --                                                                           --
 --                              A D A T Y P E R                              --
 --                                                                           --
---                                  S P E C                                  --
+--                                  B O D Y                                  --
 --                                                                           --
 -------------------------------------------------------------------------------
 --     Copyright (c) 2020 José Antonio Verde Jiménez All Rights Reserved     --
@@ -27,29 +27,64 @@
 --                                                                           --
 -------------------------------------------------------------------------------
 
--- This package contains some os specific functions from C in the Windows
--- operating system.
-private package Ansi.Os_Utils is
+with Ansi.Text_IO;
 
-   -------------
-   -- CONSOLE --
-   -------------
 
-   -- This procedure prepares the console.
-   procedure Prepare;
+package body Ansi.Compliance is
 
-   -- This procedure cleans up and restores the console.
-   procedure Clean_Up;
+
+   ZERO: CONSTANT Natural := Character'Pos('0');
+
+   -----------------------
+   -- COLOUR OPERATIONS --
+   -----------------------
+
+   function Gen_Foreground (Color : Color_Type;
+                            Bright: Boolean)
+                            return Str_Type is
+   begin
+
+      return (if Bright then
+                  '9'
+              else
+                  '3'
+              ) & Char_Type'Val(ZERO + Color'Enum_Rep);
+
+   end Gen_Foreground;
+
+
+   function Gen_Background (Color : Color_Type;
+                            Bright: Boolean)
+                            return Str_Type is
+   begin
+
+      return (if Bright then
+                  "10"
+              else
+                  "4") & Char_Type'Val(ZERO + Color'Enum_Rep);
+
+   end Gen_Background;
+
+
+
+   procedure Put_Foreground (Color : Color_Type;
+                             Bright: Boolean) is
+   begin
+
+      Ansi.Text_IO.Put_Ansi_Sequence(ESC & Gen_Foreground(Color,Bright) & "m");
+
+   end Put_Foreground;
+
    
-   ---------------
-   -- WINDOWS.H --
-   ---------------
-   
-   -- This function updates the terminal size.
-   procedure Update_Terminal_Size;
-   pragma Inline (Update_Terminal_Size);
+   procedure Put_Background (Color : Color_Type;
+                             Bright: Boolean) is
+   begin
 
-end Ansi.Os_Utils;
+      Ansi.Text_IO.Put_Ansi_Sequence(ESC & Gen_Background(Color,Bright) & "m");
+
+   end Put_Background;
+
+end Ansi.Compliance;
 
 
 ---=======================-------------------------=========================---

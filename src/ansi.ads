@@ -26,9 +26,8 @@
 --                                                                           --
 -------------------------------------------------------------------------------
 
-private with Ada.Interrupts;
-private with Ada.Interrupts.Names;
 private with Ada.Unchecked_Deallocation;
+private with Constants;
 limited with Ansi.Cursors;
 private with System;
 
@@ -495,8 +494,7 @@ private
       --
       procedure Update_Terminal_Size;
       pragma Interrupt_Handler (Update_Terminal_Size);
-      pragma Attach_Handler (Update_Terminal_Size,
-                             Ada.Interrupts.Names.SIGWINCH);
+      pragma Attach_Handler (Update_Terminal_Size, Constants.SIGWINCH);
    end Event_Handler;
 
 end Ansi;

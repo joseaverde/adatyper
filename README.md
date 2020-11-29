@@ -29,12 +29,14 @@ If you are running Windows run it with the following flags:
 These are the external variables you can use (they are introduced in gprbuild
 with -X<VARIABLE>=<Value>
 
- * **ADATYPER_COMPILE_CHECKS**   (enabled/disabled [default=disabled]): Disable it for now, because there are some warnings that are harmless but I need to shut up.
+ * **ADATYPER_COMPILE_CHECKS**   (enabled/disabled [default=enabled])
  * **ADATYPER_RUNTIME_CHECKS**   (enabled/disabled [default=enabled]): It's better not to disable this, it's safer to have it enabled.
  * **ADATYPER_STYLE_CHECKS**     (enabled/disabled [default=disabled]): Please, don't enable this, I don't care about style checks maybe in the future I will change it. But if you try to compile it with this enabled keep in mind it's not going to compile.
  * **ADATYPER_CONTRACTS**        (enabled/disabled [default=enabled]): It's up to you to enable or disable this, but it's better to have it enabled.
  * **ADATYPER_BUILD_MODE**       (debug/optimize [default=debug]): Change this if you want to optimize it.
  * **ADATYPER_OPERATING_SYSTEM** (linux/windows [default=linux]): It's not going to compile in Windows if you don't change this.
+
+ * **ADATYPER_ANSI_COMPLIANCE** (enabled/disabled [default=enabled]): If you are compiling for an ansi-compliant terminal enable it, otherwise disable it. The lastest versions of Windows 10 have an ansi-compliant console, but older versions don't. There is no way to compile for a non-ansi-compliant posix system.
 
 To compile it with alire just run:
 > alr build <Options>

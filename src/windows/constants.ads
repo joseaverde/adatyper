@@ -1,6 +1,6 @@
 -------------------------------------------------------------------------------
 --                                                                           --
---                     A N S I - O S _ U T I L S . A D S                     --
+--                         C O N S T A N T S . A D S                         --
 --                               W I N D O W S                               --
 --                                                                           --
 --                              A D A T Y P E R                              --
@@ -27,29 +27,24 @@
 --                                                                           --
 -------------------------------------------------------------------------------
 
--- This package contains some os specific functions from C in the Windows
--- operating system.
-private package Ansi.Os_Utils is
+with Ada.Interrupts;
+with Ada.Interrupts.Names;
 
-   -------------
-   -- CONSOLE --
-   -------------
+--
+-- @summary
+-- This package contains system specific constants.
+--
+-- @description
+-- This package contains constants which are available in linux but not in
+-- windows like the signal when the console has been resized.
+--
+package Constants is
 
-   -- This procedure prepares the console.
-   procedure Prepare;
+   -- TODO: Find the windows console resized signal.
+   SIGWINCH: CONSTANT Ada.Interrupts.Interrupt_ID :=
+                                                   Ada.Interrupts.Names.SIGFPE;
 
-   -- This procedure cleans up and restores the console.
-   procedure Clean_Up;
-   
-   ---------------
-   -- WINDOWS.H --
-   ---------------
-   
-   -- This function updates the terminal size.
-   procedure Update_Terminal_Size;
-   pragma Inline (Update_Terminal_Size);
-
-end Ansi.Os_Utils;
+end Constants;
 
 
 ---=======================-------------------------=========================---

@@ -26,15 +26,12 @@
 --                                                                           --
 -------------------------------------------------------------------------------
 
+with Ansi.Compliance;
 with Ansi.Cursors;
 with Ansi.Exceptions;
-with Ansi.Text_IO;
 
 
 package body Ansi.Colors is
-
-   ZERO: CONSTANT Natural := Character'Pos('0');
-   -- TODO: Get Constraint_Error and raise Out_Bound_Error;
 
    ------------------------
    -- SURFACE OPERATIONS --
@@ -45,11 +42,8 @@ package body Ansi.Colors is
                             return Str_Type is
    begin
 
-      return (if Bright then
-                  '9'
-              else
-                  '3'
-              ) & Char_Type'Val(ZERO + Color'Enum_Rep);
+      return Ansi.Compliance.Gen_Foreground(Color  => Color,
+                                            Bright => Bright);
       
    end Gen_Foreground;
 
@@ -59,10 +53,8 @@ package body Ansi.Colors is
                             return Str_Type is
    begin
 
-      return (if Bright then
-                  "10"
-              else
-                  "4") & Char_Type'Val(ZERO + Color'Enum_Rep);
+      return Ansi.Compliance.Gen_Background(Color  => Color,
+                                            Bright => Bright);
 
    end Gen_Background;
 
@@ -74,14 +66,14 @@ package body Ansi.Colors is
                              Row    :     Row_Type;
                              Col    :     Col_Type) is
    begin
+
+      if Row > Surface.Height or Col > Surface.Width then
+         raise Ansi.Exceptions.Out_Of_Bounds_Issue
+         with "Index out of range!";
+      end if;
       
       Color  := Surface.Grid(Row, Col).Fmt.Fg_Color;
       Bright := Surface.Grid(Row, Col).Fmt.Fg_Bright;
-
-   exception
-      when Constraint_Error =>
-         raise Ansi.Exceptions.Out_Of_Bounds_Issue
-         with "Index out of range!";
 
    end Get_Foreground;
 
@@ -92,14 +84,14 @@ package body Ansi.Colors is
                              Row    :     Row_Type;
                              Col    :     Col_Type) is
    begin
+      
+      if Row > Surface.Height or Col > Surface.Width then
+         raise Ansi.Exceptions.Out_Of_Bounds_Issue
+         with "Index out of range!";
+      end if;
 
       Color  := Surface.Grid(Row, Col).Fmt.Bg_Color;
       Bright := Surface.Grid(Row, Col).Fmt.Bg_Bright;
-
-   exception
-      when Constraint_Error =>
-         raise Ansi.Exceptions.Out_Of_Bounds_Issue
-         with "Index out of range!";
 
    end Get_Background;
 
@@ -109,7 +101,8 @@ package body Ansi.Colors is
                              Bright: Boolean) is
    begin
 
-      Ansi.Text_IO.Put_Ansi_Sequence(ESC & Gen_Foreground(Color,Bright) & "m");
+      Ansi.Compliance.Put_Foreground(Color  => Color,
+                                     Bright => Bright);
 
    end Put_Foreground;
 
@@ -118,7 +111,8 @@ package body Ansi.Colors is
                              Bright: Boolean) is
    begin
 
-      Ansi.Text_IO.Put_Ansi_Sequence(ESC & Gen_Background(Color,Bright) & "m");
+      Ansi.Compliance.Put_Background(Color  => Color,
+                                     Bright => Bright);
 
    end Put_Background;
 
@@ -130,6 +124,11 @@ package body Ansi.Colors is
                              Row    : Row_Type;
                              Col    : Col_Type) is
    begin
+
+      if Row > Surface.Height or Col > Surface.Width then
+         raise Ansi.Exceptions.Out_Of_Bounds_Issue
+         with "Index out of range!";
+      end if;
       
       -- We check whether we are overwriting the colour.
       if Surface.Grid(Row, Col).Fmt.Fg_Color  /= Color  or
@@ -141,11 +140,6 @@ package body Ansi.Colors is
          Surface.Push(Ansi.Cursors.New_Cursor(Row, Col));
       end if;
 
-   exception
-      when Constraint_Error =>
-         raise Ansi.Exceptions.Out_Of_Bounds_Issue
-         with "Index out of range!";
-
    end Set_Foreground;
 
 
@@ -156,6 +150,11 @@ package body Ansi.Colors is
                              Col    : Col_Type) is
    begin
       
+      if Row > Surface.Height or Col > Surface.Width then
+         raise Ansi.Exceptions.Out_Of_Bounds_Issue
+         with "Index out of range!";
+      end if;
+
       -- We check if we are overwriting the colour.
       if Surface.Grid(Row, Col).Fmt.Bg_Color  /= Color or
          Surface.Grid(Row, Col).Fmt.Bg_Bright /= Bright
@@ -165,11 +164,6 @@ package body Ansi.Colors is
          Surface.Grid(Row, Col).Fmt.Bg_Bright := Bright;
          Surface.Push(Ansi.Cursors.New_Cursor(Row, Col));
       end if;
-
-   exception
-      when Constraint_Error =>
-         raise Ansi.Exceptions.Out_Of_Bounds_Issue
-         with "Index out of range!";
 
    end Set_Background;
 
@@ -184,9 +178,15 @@ package body Ansi.Colors is
                              To_Col  : Col_Type) is
    begin
 
-      if To_Row > Surface.Height or To_Col > Surface.Width then
+      if From_Row > Surface.Height or From_Col > Surface.Width then
          raise Ansi.Exceptions.Out_Of_Bounds_Issue
-         with "Range out of bounds!";
+         with "`From' index out of bounds!";
+      elsif To_Row > Surface.Height or To_Col > Surface.Width then
+         raise Ansi.Exceptions.Out_Of_Bounds_Issue
+         with "`To' index out of bounds!";
+      elsif From_Row > To_Row or From_Col > To_Col then
+         raise Ansi.Exceptions.Out_Of_Bounds_Issue
+         with "Invalid range!";
       end if;
 
       for Row in Row_Type range From_Row .. To_Row loop
@@ -211,9 +211,15 @@ package body Ansi.Colors is
                              To_Col  : Col_Type) is
    begin
 
-      if To_Row > Surface.Height or To_Col > Surface.Width then
+      if From_Row > Surface.Height or From_Col > Surface.Width then
          raise Ansi.Exceptions.Out_Of_Bounds_Issue
-         with "Range out of bounds!";
+         with "`From' index out of bounds!";
+      elsif To_Row > Surface.Height or To_Col > Surface.Width then
+         raise Ansi.Exceptions.Out_Of_Bounds_Issue
+         with "`To' index out of bounds!";
+      elsif From_Row > To_Row or From_Col > To_Col then
+         raise Ansi.Exceptions.Out_Of_Bounds_Issue
+         with "Invalid range!";
       end if;
 
       for Row in Row_Type range From_Row .. To_Row loop

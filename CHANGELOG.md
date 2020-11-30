@@ -15,6 +15,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ### Fixed
 - Fixed the format of this changelog.
 - Fixed Put(3) procedure in Ansi.Surfaces and added style printing too.
+- Fixed native support for older Windows consoles.
 
 ### Removed
 - Removed the inlining of many of the functions and procedures throughout the package.

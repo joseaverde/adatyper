@@ -26,8 +26,12 @@
 --                                                                           --
 -------------------------------------------------------------------------------
 
-
+--
+-- @summary
 -- This package contains procedures to work with styles.
+--
+-- @description
+--
 package Ansi.Styles is
    
    ------------------------

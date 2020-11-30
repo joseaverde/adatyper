@@ -31,7 +31,7 @@ with Interfaces;
 
 package body Ansi.Compliance is
 
-   -- TODO: Is_Ansi_Compliant := False
+   type WORD is new Interfaces.Unsigned_16;
 
    Last_Format: Format := Format'(Fg_Color  => White,
                                   Fg_Bright => False,
@@ -39,11 +39,45 @@ package body Ansi.Compliance is
                                   Bg_Bright => False,
                                   Style     => (others => False));
 
+   ---------------
+   -- CONSTANTS --
+   ---------------
+
+   ATTRIBUTE_ZERO          : CONSTANT := 16#0000#;
+   FOREGROUND_INTENSITY    : CONSTANT := 16#0008#;
+   BACKGROUND_INTENSITY    : CONSTANT := 16#0080#;
+   COMMON_LVB_REVERSE_VIDEO: CONSTANT := 16#4000#;
+   COMMON_LVB_UNDERSCORE   : CONSTANT := 16#8000#;
+
+   Windows_Conversion: CONSTANT array (Color_Type'Range) of WORD :=
+      (Black   => 2#0000#,
+       Red     => 2#0100#,
+       Green   => 2#0010#,
+       Yellow  => 2#0110#,
+       Blue    => 2#0001#,
+       Magenta => 2#0101#,
+       Cyan    => 2#0011#,
+       White   => 2#0111#);
+
+
+   -----------------------
+   -- COLORS OPERATIONS --
+   -----------------------
+
    -- This procedure sets the console's colour and attributes (styles)
    procedure Set_Windows_Console_Color_With_Attributes is
-      type WORD is new Interfaces.Unsigned_16;
-      Color: CONSTANT WORD := 1;
-      -- TODO Finish
+      Color: CONSTANT WORD :=
+         Windows_Conversion(Last_Format.Fg_Color) +
+         Windows_Conversion(Last_Format.Bg_Color) * 16 +
+         (if Last_Format.Style(Bright) or Last_Format.Fg_Bright then
+                                        FOREGROUND_INTENSITY
+          else                          ATTRIBUTE_ZERO) +
+         (if Last_Format.Bg_Bright then BACKGROUND_INTENSITY
+          else                          ATTRIBUTE_ZERO) +
+         (if Last_Format.Style(Underlined) then COMMON_LVB_UNDERSCORE
+          else                                  ATTRIBUTE_ZERO) +
+         (if Last_Format.Style(Reversed)   then COMMON_LVB_REVERSE_VIDEO
+          else                                  ATTRIBUTE_ZERO);
 
       procedure C_Driver_Set_Windows_Console_Color_With_Attributes(C: WORD);
       pragma Import (C, C_Driver_Set_Windows_Console_Color_With_Attributes,
@@ -109,6 +143,26 @@ package body Ansi.Compliance is
       Set_Windows_Console_Color_With_Attributes;
 
    end Put_Background;
+
+
+   -----------------------
+   -- FORMAT OPERATIONS --
+   -----------------------
+
+   procedure Put_Format (Fmt: Format) is
+   begin
+
+      if Last_Format /= Fmt then
+         Last_Format := Fmt;
+         Set_Windows_Console_Color_With_Attributes;
+      end if;
+
+   end Put_Format;
+
+
+begin
+
+   Is_Ansi_Compliant := False;
 
 end Ansi.Compliance;
 

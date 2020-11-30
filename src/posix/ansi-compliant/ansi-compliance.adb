@@ -84,6 +84,22 @@ package body Ansi.Compliance is
 
    end Put_Background;
 
+
+   -----------------------
+   -- FORMAT OPERATIONS --
+   -----------------------
+   
+   procedure Put_Format (Fmt: Format) is
+   begin
+
+      null;
+
+   end Put_Format;
+
+begin
+
+   Is_Ansi_Compliant := True;
+
 end Ansi.Compliance;
 
 

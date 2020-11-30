@@ -26,8 +26,15 @@
 --                                                                           --
 -------------------------------------------------------------------------------
 
-
+--
+-- @summary
 -- This package contains the functions and procedures to work with colours.
+--
+-- @description
+-- This package is used to colourise a little bit the output with Ansi Escape
+-- Sequences which is what this library is all about. The implementation is
+-- separated because colourising in windows it's different than in linux.
+--
 package Ansi.Colors is
 
    ------------------------

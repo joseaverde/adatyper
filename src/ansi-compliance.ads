@@ -45,6 +45,8 @@
 --
 private package Ansi.Compliance is
 
+   pragma Elaborate_Body (Ansi.Compliance);
+
    ------------------------
    -- COLOURS OPERATIONS --
    ------------------------
@@ -125,9 +127,30 @@ private package Ansi.Compliance is
    -- STYLE OPERATIONS --
    ----------------------
    
+
+   -----------------------
+   -- FORMAT OPERATIONS --
+   -----------------------
+   -- This part is only important for Windows because it makes it faster.
+
+   --
+   -- This procedure puts a full format into the console, the format is a
+   -- private type only available in this package's private part.
+   --
+   -- @param Format
+   -- The format.
+   --
+   procedure Put_Format (Fmt: Format);
+   pragma Inline (Put_Format);
+
+   
    -----------------------
    -- CURSOR OPERATIONS --
    -----------------------
+   
+
+   -- This variable tells whether the terminal or the console is ansi-compliant
+   Is_Ansi_Compliant: Boolean;
 
 end Ansi.Compliance;
 

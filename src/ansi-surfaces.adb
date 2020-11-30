@@ -27,8 +27,9 @@
 -------------------------------------------------------------------------------
 
 
-with Ansi.Cursors;
+with Ansi.Compliance;
 with Ansi.Colors;
+with Ansi.Cursors;
 with Ansi.Exceptions;
 -- with Ansi.Styles;
 with Ansi.Text_IO;
@@ -247,13 +248,21 @@ package body Ansi.Surfaces is
       Chunk : Str_Type(1 .. 1024);
       Length: Natural := 1;
 
+
+      procedure Pop;
+      pragma Inline (Pop);
+      procedure Pop is
+      begin
+         Ansi.Text_IO.Put_Ansi_Sequence(Chunk(1 .. Length - 1));
+         Length := 1;
+      end Pop;
+
       procedure Push (Str: Str_Type);
       pragma Inline (Push);
       procedure Push (Str: Str_Type) is
       begin
          if Length + Str'Length > Chunk'Length then
-            Ansi.Text_IO.Put_Ansi_Sequence(Chunk(1 .. Length - 1));
-            Length := 1;
+            Pop;
          end if;
          Chunk(Length .. Length + Str'Length - 1) := Str;
          Length := Length + Str'Length;
@@ -265,26 +274,33 @@ package body Ansi.Surfaces is
          -- We check which parts of the format have changed.
          -- First the foreground colour; the colour and the brightness come in
          -- the same pack, so if one of them has changed, we must update both.
+         -- Also if it isn't ansi-compliant
          if Item.Fmt.Fg_Color  /= Last_Fmt.Fg_Color or else
             Item.Fmt.Fg_Bright /= Last_Fmt.Fg_Bright
          then
             -- We update the new Last_Fmt.
             Last_Fmt.Fg_Color  := Item.Fmt.Fg_Color;
             Last_Fmt.Fg_Bright := Item.Fmt.Fg_Bright;
-            Buffer(3 .. 4) := Ansi.Colors.Gen_Foreground(
-                                       Color  => Last_Fmt.Fg_Color,
-                                       Bright => Last_Fmt.Fg_Bright);
-            Buffer(5) := ';';
+
+            -- We add it to the buffer if it is Ansi compliant.
+            if Ansi.Compliance.Is_Ansi_Compliant then
+               Buffer(3 .. 4) := Ansi.Colors.Gen_Foreground(
+                                          Color  => Last_Fmt.Fg_Color,
+                                          Bright => Last_Fmt.Fg_Bright);
+               Buffer(5) := ';';
+            end if;
+
             Fg_Changes := True;
             Changes := True;
          end if;
+         -- TODO: Add styles. elsif ...
       end Compare_Item;
 
       procedure Update_Changes is
       begin
          -- We then check if there has been any changes, if so we print
          -- the escape sequence and set it back to 0.
-         if Changes then
+         if Changes and Ansi.Compliance.Is_Ansi_Compliant then
             -- We remove the last colomn.
             if Bg_Changes then
                Buffer(9) := NUL;
@@ -298,12 +314,18 @@ package body Ansi.Surfaces is
 
             Push(Buffer & Item.Char);
 
-            -- We finally default some parts of the buffer , to make it
+            -- We finally default some parts of the buffer, to make it
             -- easier for the terminal emulator not to have so many
             -- sequences to convert.
             for I in Positive range 3 .. Buffer'Last - 1 loop
                Buffer(I) := NUL;
             end loop;
+         -- In non-ansi-compliant systems we print the buffer and change the
+         -- format.
+         elsif Changes and not Ansi.Compliance.Is_Ansi_Compliant then
+            Push(Item.Char & "");
+            Ansi.Compliance.Put_Format(Last_Fmt);
+            Pop;
          else
             Push(Item.Char & "");
          end if;
@@ -349,10 +371,14 @@ package body Ansi.Surfaces is
                
             end loop;
             -- We move the cursor to the next line.
-            Push(Main_Cursor.Set_Position(Row + Y, Col));
+            if Ansi.Compliance.Is_Ansi_Compliant then
+               Push(Main_Cursor.Set_Position(Row + Y, Col));
+            else
+               null; -- TODO
+            end if;
          end loop;
          -- We then print the last buffer.
-         Ansi.Text_IO.Put_Ansi_Sequence(Chunk(1 .. Length - 1));
+         Pop;
          -- And we finally remove log of applied changes to the surface.
          -- TODO: Free stack
          Surface.Update_All := False;
@@ -370,8 +396,12 @@ package body Ansi.Surfaces is
                Compare_Item;
 
                -- We jump to the new position.
-               Push(Main_Cursor.Set_Position(Node.Cursor.Get_Row,
-                                             Node.Cursor.Get_Col));
+               if Ansi.Compliance.Is_Ansi_Compliant then
+                  Push(Main_Cursor.Set_Position(Node.Cursor.Get_Row,
+                                                Node.Cursor.Get_Col));
+               else
+                  null; -- TODO
+               end if;
                
                -- We update the changes.
                Update_Changes;
@@ -382,7 +412,7 @@ package body Ansi.Surfaces is
                Node := Next;
             end loop Main_Loop;
          -- We flush the file.
-         Ansi.Text_IO.Put_Ansi_Sequence(Chunk(1 .. Length - 1));
+         Pop;
          -- Ansi.Text_IO.Flush;
          Surf.Head := null;
          Surf.Tail := null;

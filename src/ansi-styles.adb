@@ -26,14 +26,13 @@
 --                                                                           --
 -------------------------------------------------------------------------------
 
+with Ansi.Compliance;
 with Ansi.Cursors;
 with Ansi.Exceptions;
-with Ansi.Text_IO;
 
 
 package body Ansi.Styles is
 
-   ZERO: CONSTANT Natural := Character'Pos('0');
    
    ------------------------
    -- SURFACE OPERATIONS --
@@ -45,40 +44,20 @@ package body Ansi.Styles is
                         Col    : Col_Type) is
    begin
 
-      Styles := Surface.Grid(Row, Col).Fmt.Style;
-
-   exception
-      when Constraint_Error =>
+      if Row > Surface.Height or Col > Surface.Width then
          raise Ansi.Exceptions.Out_Of_Bounds_Issue
          with "Index out of range!";
+      end if;
+
+      Styles := Surface.Grid(Row, Col).Fmt.Style;
 
    end Get_Style;
 
 
    procedure Put_Style (Styles: Style_Array) is
-      -- The sequence is stored in an array like:
-      -- ESC[<>;<>;<>m
-      -- Where <> are two bytes the first one is \0 if the Style is printed,
-      -- otherwise it's '2'. The second one is the style code.
-      Size    : CONSTANT Positive := Styles'Size * 3;
-      Sequence: Str_Type (1 .. Size) := (others => Char_Type'Val(0));
-      Pointer : Natural := 1;
    begin
-      -- We add the semicolons to the string.
-      for I in Natural range 1 .. Styles'Size loop
-         Sequence(3*I) := ';';
-      end loop;
-      Sequence(Size) := 'm';
-
-      for S in Styles'Range loop
-         Sequence(Pointer + 1) := Char_Type'Val(S'Enum_Rep + ZERO);
-         if not Styles(S) then
-            Sequence(Pointer) := '2';
-         end if;
-         Pointer := Pointer + 3;
-      end loop;
-
-      Ansi.Text_IO.Put_Ansi_Sequence(ESC & Sequence);
+      
+      Ansi.Compliance.Put_Style(Styles => Styles);
 
    end Put_Style;
 
@@ -86,9 +65,7 @@ package body Ansi.Styles is
    procedure Put_Style (Style: Style_Type) is
    begin
 
-      Ansi.Text_IO.Put_Ansi_Sequence(ESC &
-                                     Char_Type'Val(Style'Enum_Rep + ZERO) &
-                                     'm');
+      Ansi.Compliance.Put_Style(Style => Style);
 
    end Put_Style;
 
@@ -99,17 +76,17 @@ package body Ansi.Styles is
                         Row    : Row_Type;
                         Col    : Col_Type) is
    begin
+
+      if Row > Surface.Height or Col > Surface.Width then
+         raise Ansi.Exceptions.Out_Of_Bounds_Issue
+         with "Index out of range!";
+      end if;
    
       if Surface.Grid(Row, Col).Fmt.Style /= Styles then
          Surface.Grid(Row, Col).Fmt.Style := Styles;
          Surface.Push(Ansi.Cursors.New_Cursor(Row, Col));
       end if;
    
-   exception
-      when Constraint_Error =>
-         raise Ansi.Exceptions.Out_Of_Bounds_Issue
-         with "Index out of range!";
-
    end Set_Style;
 
 
@@ -119,15 +96,15 @@ package body Ansi.Styles is
                         Col    : Col_Type) is
    begin
 
+      if Row > Surface.Height or Col > Surface.Width then
+         raise Ansi.Exceptions.Out_Of_Bounds_Issue
+         with "Index out of range!";
+      end if;
+
       if not Surface.Grid(Row, Col).Fmt.Style(Style) then
          Surface.Grid(Row, Col).Fmt.Style(Style) := True;
          Surface.Push(Ansi.Cursors.New_Cursor(Row, Col));
       end if;
-
-   exception
-      when Constraint_Error =>
-         raise Ansi.Exceptions.Out_Of_Bounds_Issue
-         with "Index out of range!";
 
    end Set_Style;
 
@@ -138,15 +115,15 @@ package body Ansi.Styles is
                            Col    : Col_Type) is
    begin
 
+      if Row > Surface.Height or Col > Surface.Width then
+         raise Ansi.Exceptions.Out_Of_Bounds_Issue
+         with "Index out of range!";
+      end if;
+
       if Surface.Grid(Row, Col).Fmt.Style(Style) then
          Surface.Grid(Row, Col).Fmt.Style(Style) := False;
          Surface.Push(Ansi.Cursors.New_Cursor(Row, Col));
       end if;
-
-   exception
-      when Constraint_Error =>
-         raise Ansi.Exceptions.Out_Of_Bounds_Issue
-         with "Index out of range!";
 
    end Remove_Style;
 
@@ -160,7 +137,8 @@ package body Ansi.Styles is
                         To_Col  : Col_Type) is
    begin
 
-      if To_Row > Surface.Height or To_Col > Surface.Width then
+      if From_Row > Surface.Height or From_Col > Surface.Width or
+           To_Row > Surface.Height or   To_Col > Surface.Width then
          raise Ansi.Exceptions.Out_Of_Bounds_Issue
          with "Range out of bounds!";
       end if;
@@ -184,7 +162,8 @@ package body Ansi.Styles is
                         To_Col  : Col_Type) is
    begin
 
-      if To_Row > Surface.Height or To_Col > Surface.Width then
+      if From_Row > Surface.Height or From_Col > Surface.Width or
+           To_Row > Surface.Height or   To_Col > Surface.Width then
          raise Ansi.Exceptions.Out_Of_Bounds_Issue
          with "Range out of bounds!";
       end if;
@@ -209,7 +188,8 @@ package body Ansi.Styles is
                            To_Col  : Col_Type) is
    begin
       
-      if To_Row > Surface.Height or To_Col > Surface.Width then
+      if From_Row > Surface.Height or From_Col > Surface.Width or
+           To_Row > Surface.Height or   To_Col > Surface.Width then
          raise Ansi.Exceptions.Out_Of_Bounds_Issue
          with "Range out of bounds!";
       end if;

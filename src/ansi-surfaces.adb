@@ -220,6 +220,7 @@ package body Ansi.Surfaces is
    
 
    
+   -- TODO: Rewrite this to write directly into the chunk instead of a buffer.
    procedure Put (Surface: Surface_Type := null;
                   Row    : Row_Type := 1;
                   Col    : Col_Type := 1) is
@@ -374,7 +375,9 @@ package body Ansi.Surfaces is
             if Ansi.Compliance.Is_Ansi_Compliant then
                Push(Main_Cursor.Set_Position(Row + Y, Col));
             else
-               null; -- TODO
+               Main_Cursor.Set_Position(New_Row => Row + Y,
+                                        New_Col => Col,
+                                        Move    => True);
             end if;
          end loop;
          -- We then print the last buffer.
@@ -400,7 +403,9 @@ package body Ansi.Surfaces is
                   Push(Main_Cursor.Set_Position(Node.Cursor.Get_Row,
                                                 Node.Cursor.Get_Col));
                else
-                  null; -- TODO
+                  Main_Cursor.Set_Position(New_Row => Node.Cursor.Get_Row,
+                                           New_Col => Node.Cursor.Get_Col,
+                                           Move    => True);
                end if;
                
                -- We update the changes.

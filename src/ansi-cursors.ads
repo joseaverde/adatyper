@@ -101,6 +101,7 @@ package Ansi.Cursors is
                           New_Row: Row_Type;
                           New_Col: Col_Type)
                           return Str_Type;
+   pragma Pure_Function (Set_Position);
 
    --
    -- This procedure changes the position of the cursor to another.

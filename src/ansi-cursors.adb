@@ -26,16 +26,12 @@
 --                                                                           --
 -------------------------------------------------------------------------------
 
-
-with Ansi.Text_IO;
+with Ansi.Compliance;
 with Ansi.Exceptions;
-with Toolbox; use Toolbox;
+
 
 package body Ansi.Cursors is
 
-   procedure Put_Ansi_Sequence (Item: Str_Type)
-      renames Ansi.Text_IO.Put_Ansi_Sequence;
-   
 
    --------------------------------------
    -- CURSOR CREATION AND DEALLOCATION --
@@ -76,8 +72,8 @@ package body Ansi.Cursors is
       Cursor.Row := New_Row;
       Cursor.Col := New_Col;
 
-      return ESC & To_String(Positive(New_Row)) & ";" &
-                   To_String(Positive(New_Col)) & "H";
+      return Ansi.Compliance.Set_Position_Ret(Row => New_Row,
+                                              Col => New_Col);
 
    end Set_Position;
 
@@ -89,8 +85,8 @@ package body Ansi.Cursors is
    begin
       
       if Move then
-         Put_Ansi_Sequence(ESC & To_String(Positive(New_Row)) &
-                           ";" & To_String(Positive(New_Col)) & "H");
+         Ansi.Compliance.Set_Position(Row => New_Row,
+                                      Col => New_Col);
       end if;
       Cursor.Row := New_Row;
       Cursor.Col := New_Col;
@@ -104,8 +100,8 @@ package body Ansi.Cursors is
    begin
 
       if Move then
-         Put_Ansi_Sequence(ESC & To_String(Positive(Cursor2.Row)) &
-                           ";" & To_String(Positive(Cursor2.Col)) & "H");
+         Ansi.Compliance.Set_Position(Row => Cursor2.Row,
+                                      Col => Cursor2.Col);
       end if;
       Cursor.Row := Cursor2.Row;
       Cursor.Col := Cursor2.Col;
@@ -119,8 +115,8 @@ package body Ansi.Cursors is
    begin
       
       if Move then
-         Put_Ansi_Sequence(ESC & To_String(Positive(   New_Row)) &
-                           ";" & To_String(Positive(Cursor.Col)) & "H");
+         Ansi.Compliance.Set_Position(Row =>    New_Row,
+                                      Col => Cursor.Col);
       end if;
       Cursor.Row := New_Row;
 
@@ -133,8 +129,8 @@ package body Ansi.Cursors is
    begin
       
       if Move then
-         Put_Ansi_Sequence(ESC & To_String(Positive(Cursor.Row)) &
-                          ";" & To_String(Positive(   New_Col)) & "H");
+         Ansi.Compliance.Set_Position(Row => Cursor.Row,
+                                      Col =>    New_Col);
       end if;
       Cursor.Col := New_Col;
       
@@ -177,15 +173,16 @@ package body Ansi.Cursors is
                       Move  : Boolean  := True) is
    begin
       
+      if Cursor.Row <= Row_Type(Rows) then
+         raise Ansi.Exceptions.Out_Of_Bounds_Issue
+         with "Moving the cursor too much up!";
+      end if;
+
       if Move then
-         Put_Ansi_Sequence(ESC & To_String(Rows) & "A");
+         Ansi.Compliance.Move_Up(Rows);
       end if;
       Cursor.Row := Cursor.Row - Row_Type(Rows);
 
-   exception
-      when Constraint_Error =>
-         raise Ansi.Exceptions.Out_Of_Bounds_Issue
-         with "Moving the cursor too much up!";
    end Move_Up;
 
 
@@ -193,8 +190,9 @@ package body Ansi.Cursors is
                         Rows  : Positive := 1;
                         Move  : Boolean  := True) is
    begin
+
       if Move then
-         Put_Ansi_Sequence(ESC & To_String(Rows) & "B");
+         Ansi.Compliance.Move_Down(Rows);
       end if;
       Cursor.Row := Cursor.Row + Row_Type(Rows);
 
@@ -207,7 +205,7 @@ package body Ansi.Cursors is
    begin
       
       if Move then
-         Put_Ansi_Sequence(ESC & To_String(Cols) & "C");
+         Ansi.Compliance.Move_Right(Cols);
       end if;
       Cursor.Col := Cursor.Col + Col_Type(Cols);
 
@@ -219,15 +217,15 @@ package body Ansi.Cursors is
                         Move  : Boolean  := True) is
    begin
       
-      if Move then
-         Put_Ansi_Sequence(ESC & To_String(Cols) & "D");
-      end if;
-      Cursor.Col := Cursor.Col - Col_Type(Cols);
-
-   exception
-      when Constraint_Error =>
+      if Cursor.Col <= Col_Type(Cols) then
          raise Ansi.Exceptions.Out_Of_Bounds_Issue
          with "Moving the cursor too much to the left!";
+      end if;
+
+      if Move then
+         Ansi.Compliance.Move_Left(Cols);
+      end if;
+      Cursor.Col := Cursor.Col - Col_Type(Cols);
 
    end Move_Left;   
 

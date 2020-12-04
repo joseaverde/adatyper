@@ -205,11 +205,14 @@ project AdaTyper is
    Linker_Switches := ();
    case Operating_System is
       when "windows" =>
-         Linker_Switches :=
-            ("-Lexternal",
-             "-lANSI32");
-      when others =>
          null;
+      when others =>
+         case Build_Mode is
+            when "debug" =>
+               Linker_Switches := ("-lgmem");
+            when others =>
+               null;
+         end case;
    end case;
 
    

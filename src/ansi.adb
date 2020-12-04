@@ -26,11 +26,13 @@
 --                                                                           --
 -------------------------------------------------------------------------------
 
-with   Ada.Text_IO;
-with  Ansi.Cursors;
-with  Ansi.Exceptions;
-with  Ansi.Os_Utils;
-with  Ansi.Surfaces;
+with  Ada.Text_IO;
+with Ansi.Compliance;
+with Ansi.Cursors;
+with Ansi.Exceptions;
+with Ansi.Os_Utils;
+with Ansi.Surfaces;
+with Ansi.Text_IO;
 
 pragma Elaborate (Ansi.Cursors);
 pragma Elaborate (Ansi.Os_Utils);
@@ -68,13 +70,13 @@ package body Ansi is
    -----------------------
 
    procedure Clear is
-      Str: CONSTANT String(1 .. Positive(Height) * Positive(Width)) :=
+      Str: CONSTANT Str_Type(1 .. Positive(Height) * Positive(Width)) :=
                                                       (others => ' ');
    begin
 
       Main_Cursor.Set_Position(1, 1, True);
-      Ada.Text_IO.Put_Line(ASCII.ESC & "[0m");
-      Ada.Text_IO.Put_Line(Str);
+      Ansi.Compliance.Clear_Format;
+      Ansi.Text_IO.Put_Ansi_Sequence(Str);
       Main_Cursor.Set_Position(1, 1, True);
 
    end Clear;
@@ -129,7 +131,8 @@ package body Ansi is
       
       Ansi.Os_Utils.Clean_Up;
       Main_Cursor.Set_Position(Height - 1, Width - 1);
-      Ada.Text_IO.Put_Line(ASCII.ESC & "[0m");
+      Ansi.Compliance.Clear_Format;
+      -- TODO: Use the language and the Ansi.Text_IO packages in the future.
       Ada.Text_IO.Put("Press any key to continue...");
       Ada.Text_IO.Get_Immediate(Tmp);
 

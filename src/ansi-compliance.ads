@@ -126,28 +126,135 @@ private package Ansi.Compliance is
    ----------------------
    -- STYLE OPERATIONS --
    ----------------------
+   -- This part declares the styling procedures.
+   
+   --
+   -- This procedure is used to set an array of styles into standard output.
+   -- However in Windows most of the styles are not available.
+   --
+   -- @param Styles
+   -- The styles to put into standard output.
+   --
+   procedure Put_Style (Styles: Style_Array);
+   pragma Inline (Put_Style);
+
+   --
+   -- This procedure is used to put a single style into standard output.
+   -- However most of the styles available under ansi-compliant terminals are
+   -- not available in the Windows console (CMD).
+   -- 
+   -- @param Style
+   -- The style to put into standard output.
+   --
+   procedure Put_Style (Style: Style_Type);
+   pragma Inline (Put_Style);
    
 
    -----------------------
    -- FORMAT OPERATIONS --
    -----------------------
-   -- This part is only important for Windows because it makes it faster.
 
    --
    -- This procedure puts a full format into the console, the format is a
    -- private type only available in this package's private part.
    --
-   -- @param Format
+   -- @param Fmt
    -- The format.
    --
    procedure Put_Format (Fmt: Format);
    pragma Inline (Put_Format);
 
+   --
+   -- This procedure clears the format
+   --
+   procedure Clear_Format;
+   pragma Inline (Clear_Format);
+
    
    -----------------------
    -- CURSOR OPERATIONS --
    -----------------------
+   -- This part is used to move the cursor depending on the operating system
+   -- and ansi compliance.
+
+   --
+   -- This procedure sets the position of the cursor on the screen.
+   --
+   -- @param Row
+   -- The row to move the cursor to.
+   --
+   -- @param Col
+   -- The column to move the cursor to.
+   --
+   procedure Set_Position (Row: Row_Type;
+                           Col: Col_Type);
+   pragma Inline (Set_Position);
+
+   --
+   -- This function returns the escape sequence to use to move the cursor up,
+   -- however, in non-ansi-compliant Windows systems it will also change it and
+   -- return a null string.
+   --
+   -- @param Row
+   -- The row to move the cursor to.
+   --
+   -- @param Col
+   -- The column to move the cursor to.
+   --
+   -- @return
+   -- - In non-ansi-compliant windows systems it returns a null string.
+   -- - In ansi-compliant systems it returns the ansi escape sequence.
+   --
+   function Set_Position_Ret (Row: Row_Type;
+                              Col: Col_Type)
+                              return Str_Type;
+   pragma Pure_Function (Set_Position_Ret);
+   pragma Inline (Set_Position_Ret);
+
+   --
+   -- This procedure moves the position of the cursor up. In windows it uses
+   -- the Set_Position function if it's non-ansi-compliant.
+   --
+   -- @param Rows
+   -- The number of rows to move up.
+   --
+   procedure Move_Up (Rows: Positive := 1);
+   pragma Inline (Move_Up);
+
+   --
+   -- This procedure moves the position of the cursor up. In windows it uses
+   -- the Set_Position function if it's non-ansi-compliant.
+   --
+   -- @param Rows
+   -- The number of rows to move up.
+   --
+   procedure Move_Down (Rows: Positive := 1);
+   pragma Inline (Move_Down);
+
+   --
+   -- This procedure moves the position of the cursor up. In windows it uses
+   -- the Set_Position function if it's non-ansi-compliant.
+   --
+   -- @param Rows
+   -- The number of rows to move up.
+   --
+   procedure Move_Right (Cols: Positive := 1);
+   pragma Inline (Move_Right);
    
+   --
+   -- This procedure moves the position of the cursor up. In windows it uses
+   -- the Set_Position function if it's non-ansi-compliant.
+   --
+   -- @param Rows
+   -- The number of rows to move up.
+   --
+   procedure Move_Left (Cols: Positive := 1);
+   pragma Inline (Move_Left);
+   
+
+   -------------
+   -- GLOBALS --
+   -------------
 
    -- This variable tells whether the terminal or the console is ansi-compliant
    Is_Ansi_Compliant: Boolean;

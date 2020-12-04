@@ -33,11 +33,42 @@
 
 #include <windows.h>
 
-// This function sets the foreground and background colours and attributes to
-// the windows console.
-void setWindowsConsoleColorWithAttributes ( WORD Colors ) {
+/*
+ * This function sets the foreground and background colours and attributes to
+ * the windows console.
+ *
+ * @param colors
+ * The colors to feed the console with.
+ *
+ */
+void setWindowsConsoleColorWithAttributes ( WORD colors ) {
+
    SetConsoleTextAttribute ( GetStdHandle ( STD_OUTPUT_HANDLE ),
-                             Colors );
+                             colors );
+
+}
+
+
+/*
+ * This function moves the cursor in a CMD.
+ *
+ * @param row
+ * The row.
+ *
+ * @param col
+ * The column.
+ *
+ */
+void setWindowsConsoleCursorPosition ( short row,
+                                       short col ) {
+
+   COORD position;
+   position.Y = row;
+   position.X = col;
+
+   SetConsoleCursorPosition ( GetStdHandle ( STD_OUTPUT_HANDLE ),
+                              position );
+
 }
 
 

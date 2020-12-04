@@ -27,6 +27,7 @@
 -------------------------------------------------------------------------------
 
 with Interfaces;
+with Interfaces.C; use Interfaces.C;
 
 
 package body Ansi.Compliance is
@@ -80,7 +81,8 @@ package body Ansi.Compliance is
           else                                  ATTRIBUTE_ZERO);
 
       procedure C_Driver_Set_Windows_Console_Color_With_Attributes(C: WORD);
-      pragma Import (C, C_Driver_Set_Windows_Console_Color_With_Attributes,
+      pragma Import (C,
+                     C_Driver_Set_Windows_Console_Color_With_Attributes,
                      "setWindowsConsoleColorWithAttributes");
    begin
  
@@ -145,6 +147,30 @@ package body Ansi.Compliance is
    end Put_Background;
 
 
+   ----------------------
+   -- STYLE OPERATIONS --
+   ----------------------
+   
+   procedure Put_Style (Styles: Style_Array) is
+   begin
+
+      Last_Format.Style := Styles;
+
+      Set_Windows_Console_Color_With_Attributes;
+      
+   end Put_Style;
+
+
+   procedure Put_Style (Style: Style_Type) is
+   begin
+
+      Last_Format.Style(Style) := True;
+      Set_Windows_Console_Color_With_Attributes;
+
+   end Put_Style;
+
+
+
    -----------------------
    -- FORMAT OPERATIONS --
    -----------------------
@@ -159,6 +185,95 @@ package body Ansi.Compliance is
 
    end Put_Format;
 
+
+   procedure Clear_Format is
+   begin
+      
+      Put_Format(Fmt => Format'(Fg_Color  => White,
+                                Fg_Bright => False,
+                                Bg_Color  => Black,
+                                Bg_Bright => False,
+                                Style     => (others => False)));
+
+   end Clear_Format;
+
+
+   -----------------------
+   -- CURSOR OPERATIONS --
+   -----------------------
+   
+   type COORD is
+      record
+         X: Col_Type;
+         Y: Row_Type;
+      end record;
+
+   CMD_CURSOR: COORD;
+
+   procedure Set_Position (Row: Row_Type;
+                           Col: Col_Type) is
+      procedure C_Driver_Set_Windows_Console_Cursor_Position (Row: short;
+                                                              Col: short);
+      pragma Import(C,
+                    C_Driver_Set_Windows_Console_Cursor_Position,
+                    "setWindowsConsoleCursorPosition");
+   begin
+
+      CMD_CURSOR.X := Col;
+      CMD_CURSOR.Y := Row;
+      C_Driver_Set_Windows_Console_Cursor_Position(Row => short(Row),
+                                                   Col => short(Col));
+
+   end Set_Position;
+
+
+   function Set_Position_Ret (Row: Row_Type;
+                              Col: Col_Type)
+                              return Str_Type is
+   begin
+
+      Set_Position(Row => Row,
+                   Col => Col);
+
+      return "";
+
+   end Set_Position_Ret;
+
+
+   procedure Move_Up (Rows: Positive := 1) is
+   begin
+
+      Set_Position (Row => CMD_CURSOR.Y - Row_Type(Rows),
+                    Col => CMD_CURSOR.X);
+
+   end Move_Up;
+
+
+   procedure Move_Down (Rows: Positive := 1) is
+   begin
+
+      Set_Position (Row => CMD_CURSOR.Y + Row_Type(Rows),
+                    Col => CMD_CURSOR.X);
+
+   end Move_Down;
+
+
+   procedure Move_Right (Cols: Positive := 1) is
+   begin
+
+      Set_Position (Row => CMD_CURSOR.Y,
+                    Col => CMD_CURSOR.X + Col_Type(Cols));
+
+   end Move_Right;
+
+
+   procedure Move_Left (Cols: Positive := 1) is
+   begin
+
+      Set_Position (Row => CMD_CURSOR.Y,
+                    Col => CMD_CURSOR.X + Col_Type(Cols));
+
+   end Move_Left;
 
 begin
 

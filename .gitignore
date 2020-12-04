@@ -18,3 +18,7 @@ alire/*
 # The external is used for testing some external packages I would need
 external
 old
+
+# DEBUGGING #
+gmem.out
+Makefile

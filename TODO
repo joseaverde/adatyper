@@ -1,18 +1,15 @@
 (Remember to Free the operation's cursor as it's an access type.)
 
- * Raise Out_Of_Bounds_Issue in colours package.
- * Check for null surface in colours package.
-  (The same for styles)
- * Scrolling.
+# NOT SO IMPORTANT #
  * Check `tput smcup' and `tput rmcup'
  * Make all types Controlled types. And add garbage collection.
  * Add own pool to stack.
  * In functions with repeated code, use procedures inide them with global
    variables and constants to reduce duplication related problems. Also, inline
    them.
+ * Translate README.md file
+
+# MORE IMPORTANT #
  * TODO TODO comments.
  * Update styles in the Put function of Ansi.Surfaces
- * Check whats wrong with the command prompt
- * Add Put and Put_Str functions to Ansi.Text_IO;
- * Add new flags to README.md file
- * Translate README.md file
+ * Recheck implementations.

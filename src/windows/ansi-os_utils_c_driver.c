@@ -60,7 +60,7 @@ void fixEncoding() {
 
    // We enable buffering because Ada my raise an
    // `ADA.IO_EXCEPTIONS:DEVICE_ERROR' exception for incomplete sequences.
-   setvbuf(stdout, NULL, _IOFBF, 1000);
+   setvbuf(stderr, NULL, _IOFBF, 1000);
 }
 
 
@@ -73,6 +73,7 @@ static DWORD outModeInit;
 
 // This function sets up the console.
 void setupConsole( void ) {
+   // fixEncoding();
    DWORD outMode = 0;
    stdoutHandle = GetStdHandle(STD_OUTPUT_HANDLE);
 
@@ -95,7 +96,6 @@ void setupConsole( void ) {
 
 // This function restores the console.
 void restoreConsole( void ) {
-   printf("\033[0m");
    if ( ! SetConsoleMode( stdoutHandle, outModeInit ) ) {
       exit( GetLastError() );
    }

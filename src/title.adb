@@ -98,8 +98,13 @@ begin
    Ansi.Colors.Set_Foreground(Letter_Small_r,  Ansi.Red,  True);
    Ansi.Colors.Set_Foreground(Letter_Cursor , Ansi.White, True);
 
-   -- We change some styles.
-   Ansi.Styles.Set_Style(Letter_Big_A, Ansi.Reversed);
+   Ansi.Colors.Set_Background(Letter_Small_d, Ansi.Red, False);
+   Ansi.Styles.Set_Style(  Letter_Big_A, Ansi.Bright);
+   Ansi.Styles.Set_Style(Letter_Small_d, Ansi.Dim);
+   Ansi.Styles.Set_Style(Letter_Small_a, Ansi.Italics);
+   Ansi.Styles.Set_Style(  Letter_Big_T, Ansi.Underlined);
+   Ansi.Styles.Set_Style(Letter_Small_y, Ansi.Slow_Blink);
+   Ansi.Styles.Set_Style(Letter_Small_p, Ansi.Reversed);
 
    -- We add them to the letterer.
    Letterer.Add(  Letter_Big_A);

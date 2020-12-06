@@ -38,6 +38,18 @@ package body Ansi.Styles is
    -- SURFACE OPERATIONS --
    ------------------------
    
+   function Gen_Style (Style : Style_Type;
+                       Remove: Boolean := False)
+                       return Str_Type is
+   begin
+
+      return Ansi.Compliance.Gen_Style(Style  => Style,
+                                       Remove => Remove);
+
+   end Gen_Style;
+   
+
+
    procedure Get_Style (Surface: in  not null Surface_Type;
                         Styles : out Style_Array;
                         Row    : Row_Type;

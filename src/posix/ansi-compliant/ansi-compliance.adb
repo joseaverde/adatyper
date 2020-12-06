@@ -45,11 +45,8 @@ package body Ansi.Compliance is
                             return Str_Type is
    begin
 
-      return (if Bright then
-                  '9'
-              else
-                  '3'
-              ) & Char_Type'Val(ZERO + Color'Enum_Rep);
+      return (if Bright then '9'
+              else           '3') & Char_Type'Val(ZERO + Color'Enum_Rep);
 
    end Gen_Foreground;
 
@@ -59,10 +56,9 @@ package body Ansi.Compliance is
                             return Str_Type is
    begin
 
-      return (if Bright then
-                  "10"
-              else
-                  "4") & Char_Type'Val(ZERO + Color'Enum_Rep);
+      return (if Bright then "10"
+              else           Char_Type'Val(0) &"4") &
+                 Char_Type'Val(ZERO + Color'Enum_Rep);
 
    end Gen_Background;
 
@@ -86,9 +82,32 @@ package body Ansi.Compliance is
    end Put_Background;
 
 
+
    ----------------------
    -- STYLE OPERATIONS --
    ----------------------
+
+   function Gen_Style (Style : Style_Type;
+                       Remove: Boolean := False)
+                       return Str_Type is
+   begin
+
+      case Remove is
+         when True =>
+            case Style is
+               when Bright | Dim =>
+                  return "22";
+               when others =>
+                  return '2' & Char_Type'Val(Style'Enum_Rep + ZERO);
+            end case;
+
+         when others =>
+            return Char_Type'Val(0) & Char_Type'Val(Style'Enum_Rep + ZERO);
+
+      end case;
+
+   end Gen_Style;
+
 
    procedure Put_Style (Styles: Style_Array) is
       -- The sequence is stored in an array like this one:
@@ -106,10 +125,9 @@ package body Ansi.Compliance is
       Sequence(Size) := 'm';
 
       for S in Styles'Range loop
-         Sequence(Pointer + 1) := Char_Type'Val(S'Enum_Rep + ZERO);
-         if not Styles(S) then
-            Sequence(Pointer) := '2';
-         end if;
+         Sequence(Pointer .. Pointer + 1) := Gen_Style
+                                                   (Style  => S,
+                                                    Remove => not Styles(S));
          Pointer := Pointer + 3;
       end loop;
 
@@ -144,7 +162,7 @@ package body Ansi.Compliance is
    procedure Clear_Format is
    begin
 
-      Ansi.Text_IO.Put_Ansi_Sequence(ESC & "[0m");
+      Ansi.Text_IO.Put_Ansi_Sequence(ESC & "0m");
 
    end Clear_Format;
 

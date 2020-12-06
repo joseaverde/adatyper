@@ -130,9 +130,10 @@ package body Ansi is
    begin
       
       Ansi.Os_Utils.Clean_Up;
-      Main_Cursor.Set_Position(Height - 1, Width - 1);
       Ansi.Compliance.Clear_Format;
+      Main_Cursor.Set_Position(Height - 1, Width - 1);
       -- TODO: Use the language and the Ansi.Text_IO packages in the future.
+      Ada.Text_IO.New_Line;
       Ada.Text_IO.Put("Press any key to continue...");
       Ada.Text_IO.Get_Immediate(Tmp);
 

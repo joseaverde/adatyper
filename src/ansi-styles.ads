@@ -43,6 +43,26 @@ package Ansi.Styles is
    ------------------------
    
    --
+   -- This function returns the code used to put a style in a two byte string,
+   -- for example to put it bright its: ESC[1m, then it returns "_1" (The
+   -- underscore is a null byte. In windows it returns a null string.
+   --
+   -- @param Style
+   -- The style to put.
+   --
+   -- @param Remove
+   -- If true it returns the code to remove the style.
+   --
+   -- @return
+   -- The string to put to get such style.
+   --
+   function Gen_Style (Style : Style_Type;
+                       Remove: Boolean := False)
+                       return Str_Type;
+   pragma Inline (Gen_Style);
+   pragma Pure_Function (Gen_Style);
+
+   --
    -- This procedure returns the style in a certain position of the surface.
    --
    -- @param Surface

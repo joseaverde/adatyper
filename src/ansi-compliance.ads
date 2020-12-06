@@ -127,6 +127,27 @@ private package Ansi.Compliance is
    -- STYLE OPERATIONS --
    ----------------------
    -- This part declares the styling procedures.
+
+   --
+   -- This function returns the code to put a style in standard output without
+   -- the trailing `ESC[' and the `m'.
+   --
+   -- @param Style
+   -- The style to generate.
+   --
+   -- @param Remove
+   -- If this parameter is set to true, it will return the code to remove the
+   -- given style.
+   --
+   -- @return
+   -- The code to put the given style, in Windows it returns a null string,
+   -- though.
+   --
+   function Gen_Style (Style : Style_Type;
+                       Remove: Boolean := False)
+                       return Str_Type;
+   pragma Inline (Gen_Style);
+   pragma Pure_Function (Gen_Style);
    
    --
    -- This procedure is used to set an array of styles into standard output.
@@ -235,7 +256,7 @@ private package Ansi.Compliance is
    -- This procedure moves the position of the cursor up. In windows it uses
    -- the Set_Position function if it's non-ansi-compliant.
    --
-   -- @param Rows
+   -- @param Cols
    -- The number of rows to move up.
    --
    procedure Move_Right (Cols: Positive := 1);
@@ -245,7 +266,7 @@ private package Ansi.Compliance is
    -- This procedure moves the position of the cursor up. In windows it uses
    -- the Set_Position function if it's non-ansi-compliant.
    --
-   -- @param Rows
+   -- @param Cols
    -- The number of rows to move up.
    --
    procedure Move_Left (Cols: Positive := 1);

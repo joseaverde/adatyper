@@ -7,18 +7,23 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
-## [0.0.3] -
+## [0.0.3] - 2020-12-06
 ### Added
-- Added documentation to all parts of the Ansi package.
+- Added documentation to all parts of the Ansi package except IO package.
 - Added Signal and Input handling.
+- Finished implementing surfaces, colours and styles.
+- Added support for the non-ansi-compliant windows console CMD, to support older versions of Windows.
+- Finished some things marked to do.
 
 ### Fixed
 - Fixed the format of this changelog.
 - Fixed Put(3) procedure in Ansi.Surfaces and added style printing too.
 - Fixed native support for older Windows consoles.
+- Fixed some bugs and errors found while coding.
 
 ### Removed
 - Removed the inlining of many of the functions and procedures throughout the package.
+- Removed Ansi.Pools, it will be available in a future.
 
 
 ## [0.0.2] - 2020-11-21

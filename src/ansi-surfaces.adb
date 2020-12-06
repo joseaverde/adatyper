@@ -31,7 +31,7 @@ with Ansi.Compliance;
 with Ansi.Colors;
 with Ansi.Cursors;
 with Ansi.Exceptions;
--- with Ansi.Styles;
+with Ansi.Styles;
 with Ansi.Text_IO;
 -- with Debug; use Debug; -- DEBUGING
 
@@ -241,8 +241,6 @@ package body Ansi.Surfaces is
           others                           => NUL);
 
       -- This type is used to store changes.
-      Fg_Changes: Boolean := False;
-      Bg_Changes: Boolean := False;
       Changes   : Boolean := False;
 
       -- This is the memory chunk.
@@ -271,6 +269,7 @@ package body Ansi.Surfaces is
 
 
       procedure Compare_Item is
+         I: Positive := 10;
       begin
          -- We check which parts of the format have changed.
          -- First the foreground colour; the colour and the brightness come in
@@ -291,10 +290,42 @@ package body Ansi.Surfaces is
                Buffer(5) := ';';
             end if;
 
-            Fg_Changes := True;
             Changes := True;
          end if;
-         -- TODO: Add styles. elsif ...
+         
+         if Item.Fmt.Bg_Color  /= Last_Fmt.Bg_Color or else
+            Item.Fmt.Bg_Bright /= Last_Fmt.Bg_Bright
+         then
+            -- We update the new Last_Fmt
+            Last_Fmt.Bg_Color  := Item.Fmt.Bg_Color;
+            Last_Fmt.Bg_Bright := Item.Fmt.Bg_Bright;
+
+            -- We add it to the buffer if it is Ansi-Compliant.
+            if Ansi.Compliance.Is_Ansi_Compliant then
+               Buffer(6 .. 8) := Ansi.Colors.Gen_Background(
+                                          Color  => Last_Fmt.Bg_Color,
+                                          Bright => Last_Fmt.Bg_Bright);
+               Buffer(9) := ';';
+            end if;
+
+            Changes := True;
+         end if;
+
+         if Item.Fmt.Style /= Last_Fmt.Style then
+            for S in Style_Type'Range loop
+               if Item.Fmt.Style(S) /= Last_Fmt.Style(S) then
+                  Last_Fmt.Style(S) := Item.Fmt.Style(S);
+                  if Ansi.Compliance.Is_Ansi_Compliant then
+                     Buffer(I .. I + 1) := Ansi.Styles.Gen_Style
+                        (Style  => S,
+                         Remove => not Last_Fmt.Style(S));
+                     Buffer(I + 2) := ';';
+                  end if;
+               end if;
+               I := I + 3;
+            end loop;
+            Changes := True;
+         end if;
       end Compare_Item;
 
       procedure Update_Changes is
@@ -302,18 +333,26 @@ package body Ansi.Surfaces is
          -- We then check if there has been any changes, if so we print
          -- the escape sequence and set it back to 0.
          if Changes and Ansi.Compliance.Is_Ansi_Compliant then
-            -- We remove the last colomn.
-            if Bg_Changes then
-               Buffer(9) := NUL;
-            elsif Fg_Changes then
-               Buffer(5) := NUL;
-            end if;
-
-            Changes := False;
-            Bg_Changes := False;
-            Fg_Changes := False;
+            -- We remove the last colon.
+            for I in reverse Buffer'Range loop
+               if Buffer(I) = ';' then
+                  Buffer(I) := NUL;
+                  exit;
+               end if;
+            end loop;
 
             Push(Buffer & Item.Char);
+            Changes := False;
+-- DEBUG:
+-- Debug_Scope_Put:
+-- declare
+--    Data: String(Buffer'First + 1 .. Buffer'Last);
+-- begin
+--    for K in Positive range Buffer'First + 1 .. Buffer'Last loop
+--       Data(K) := Character'Val(Char_Type'Pos(Buffer(K)));
+--    end loop;
+-- BREAKPOINT(Data, 3, True);
+-- end Debug_Scope_Put;
 
             -- We finally default some parts of the buffer, to make it
             -- easier for the terminal emulator not to have so many
@@ -338,8 +377,6 @@ package body Ansi.Surfaces is
       Next: Operation;
 
    begin
-      -- TODO: Add styles
-      
       -- We wait for the Update lock to be lifted.
       while Lock loop
          null;
@@ -347,6 +384,8 @@ package body Ansi.Surfaces is
 
       -- We lock the main surface.
       Lock := True;
+
+      Ansi.Compliance.Clear_Format;
 
       -- We first see two possible scenaries, the first one is a screen that is
       -- completely when the Update_All attribute is set to true. The second
@@ -383,7 +422,14 @@ package body Ansi.Surfaces is
          -- We then print the last buffer.
          Pop;
          -- And we finally remove log of applied changes to the surface.
-         -- TODO: Free stack
+         while Node /= null loop
+            Next := Node.Next;
+            Ansi.Cursors.Free(Node.Cursor);
+            Free(Node);
+            Node := Next;
+         end loop;
+         Surface.Head := null;
+         Surface.Tail := null;
          Surface.Update_All := False;
 
       else
@@ -426,6 +472,9 @@ package body Ansi.Surfaces is
       -- We unlock the Main_Surface.
       Lock := False;
 
+      -- We clear the format.
+      Ansi.Compliance.Clear_Format;
+
    end Put;
 
 
@@ -434,15 +483,22 @@ package body Ansi.Surfaces is
                   Col    : Col_Type;
                   Length : Positive)
                   return Str_Type is
+      Str: Str_Type(1 .. Length);
    begin
 
-      if Positive(Row) = Positive(Col) then
-         return "TODO";
-      elsif Positive(Surface.Width) = Length then
-         return "TODO";
-      else
-         return "TODO";
+      if Row > Surface.Height or
+         Col > Surface.Width  or
+         Col + Col_Type(Length) - 1 > Surface.Width
+      then
+         raise Ansi.Exceptions.Out_Of_Bounds_Issue
+         with "Couldn't fit the string in the surface!";
       end if;
+
+      for I in Str'Range loop
+         Str(I) := Surface.Grid(Row, Col + Col_Type(I) - 1).Char;
+      end loop;
+
+      return Str;
 
    end Read;
 
@@ -1005,22 +1061,64 @@ package body Ansi.Surfaces is
    end Get_Visibility;
 
 
+
    procedure Move_Layer (Layerer: Layerer_Type;
-                         From   : Positive;
+                         Layer  : Surface_Type;
                          To     : Positive) is
+      Temp_Layer: Surface_Type;
    begin
 
-      null; -- TODO
+      if To > Layerer.Size then
+         raise Ansi.Exceptions.Out_Of_Bounds_Issue
+         with "The destination position is out of bounds!";
+      end if;
+
+      for I in Positive range 1 .. Layerer.Size loop
+         if Layerer.Layers(I) = Layer then
+            Temp_Layer := Layerer.Layers(I);
+            if To > I then
+               for K in Positive range I .. To - 1 loop
+                  Layerer.Layers(K) := Layerer.Layers(K + 1);
+               end loop;
+            elsif To < I then
+               for K in reverse Positive range To + 1 .. I loop
+                  Layerer.Layers(K) := Layerer.Layers(K - 1);
+               end loop;
+            end if;
+            Layerer.Layers(To) := Temp_Layer;
+            return;
+         end if;
+      end loop;
+
+      raise Ansi.Exceptions.Unknown_Layer_Issue
+      with "The layer to be hidden isn't in the layerer!";
 
    end Move_Layer;
 
 
    procedure Move_Layer (Layerer: Layerer_Type;
-                         Layer  : Surface_Type;
+                         From   : Positive;
                          To     : Positive) is
+      Temp_Layer: Surface_Type;
    begin
 
-      null; -- TODO
+      if To > Layerer.Size or From > Layerer.Size then
+         raise Ansi.Exceptions.Out_Of_Bounds_Issue
+         with "Either the `From', the `To' or both Positions are out of the " &
+              "layerer bounds!";
+      end if;
+
+      Temp_Layer := Layerer.Layers(From);
+      if To > From then
+         for K in Positive range From .. To - 1 loop
+            Layerer.Layers(K) := Layerer.Layers(K + 1);
+         end loop;
+      elsif To < From then
+         for K in reverse Positive range To + 1 .. From loop
+            Layerer.Layers(K) := Layerer.Layers(K - 1);
+         end loop;
+      end if;
+      Layerer.Layers(To) := Temp_Layer;
 
    end Move_Layer;
 

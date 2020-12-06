@@ -151,6 +151,20 @@ package body Ansi.Compliance is
    -- STYLE OPERATIONS --
    ----------------------
    
+   function Gen_Style (Style : Style_Type;
+                       Remove: Boolean := False)
+                       return Str_Type is
+   begin
+
+      Last_Format.Style(Style) := Remove;
+
+      Set_Windows_Console_Color_With_Attributes;
+
+      return "";
+      
+   end Gen_Style;
+
+   
    procedure Put_Style (Styles: Style_Array) is
    begin
 

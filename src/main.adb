@@ -32,7 +32,7 @@ with Ansi;
 -- with Ansi.Colors;
 -- with Ansi.Cursors;
 -- with Ansi.Styles;
--- with Ansi.Surfaces;
+with Ansi.Surfaces;
 -- with Ansi.Text_IO;
 with Credits;
 -- with System;
@@ -49,9 +49,9 @@ function Main return Natural is
 
 begin
 
-
 --  Ansi.Finalize;
    Credits.Startup_Notice;
+   Ansi.Surfaces.Put(Ansi.Get_Main_Surface);
    Title.Main_Title;
 -- Credits.Start_UP
 

@@ -26,6 +26,9 @@
 --                                                                           --
 -------------------------------------------------------------------------------
 
+with Ada.Characters.Conversions;
+
+
 package body Toolbox is
 
    function To_String (Number: Positive)
@@ -50,6 +53,54 @@ package body Toolbox is
          end Create_String;
                
    end To_String;
+
+
+   function To_String (Str: Str_Type)
+                       return String is
+      Wide_Str: Wide_String(Str'Range);
+   begin
+      
+      for I in Wide_Str'Range loop
+         Wide_Str(I) := Str(I);
+      end loop;
+
+      return Ada.Characters.Conversions.To_String(Wide_Str);
+
+   end To_String;
+
+
+   function To_Str_Type (Str: String)
+                         return Str_Type is
+      Wide_Str: constant Wide_String := Ada.Characters.Conversions.
+                                             To_Wide_String(Str);
+      Str_Type_Str: Str_Type(Wide_Str'Range);
+   begin
+
+      for I in Str_Type_Str'Range loop
+         Str_Type_Str(I) := Wide_Str(I);
+      end loop;
+
+      return Str_Type_Str;
+
+   end To_Str_Type;
+
+
+   function To_Character (Char: Char_Type)
+                          return Character is
+   begin
+
+      return Ada.Characters.Conversions.To_Character(Char);
+
+   end To_Character;
+
+
+   function To_Char_Type (Char: Character)
+                          return Char_Type is
+   begin
+
+      return Ada.Characters.Conversions.To_Wide_Character(Char);
+
+   end To_Char_Type;
 
 end Toolbox;
 

@@ -29,9 +29,13 @@
 
 with Ansi.Exceptions;
 with Ansi.Text_IO;
+with Info;
+with Toolbox;
 
 
 package body Ansi.Os_Utils is
+
+   use type Str_Type;
 
    ------------
    -- SYSTEM --
@@ -55,6 +59,7 @@ package body Ansi.Os_Utils is
 
       -- We add many new lines in order not to overwrite what is already
       -- written.
+      Update_Terminal_Size;
       for Row in Row_Type range 1 .. Height loop
          Ansi.Text_IO.Put_Ansi_Sequence("" & Char_Type'Val(10));
       end loop;
@@ -69,6 +74,13 @@ package body Ansi.Os_Utils is
          with "Couldn't prepare the terminal!";
 
       end if;
+
+      -- We finally change the terminal title.
+      Ansi.Text_IO.Put_Ansi_Sequence(Toolbox.To_Char_Type(ASCII.ESC) &
+                                     "]2;" &
+                                     Toolbox.To_Str_Type(
+                                        Info.Programme_Full_Name) &
+                                     Char_Type'Val(16#07#));
 
    end Prepare;
 

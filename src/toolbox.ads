@@ -26,8 +26,6 @@
 --                                                                           --
 -------------------------------------------------------------------------------
 
-with Ansi; use Ansi;
-
 --
 -- @summary
 -- This package contains functions common to all the project.
@@ -36,6 +34,17 @@ with Ansi; use Ansi;
 -- Toolbox is a toolbox of functions that are used in all the project.
 --
 package Toolbox is
+
+   -- The type of character we will use for this programme.
+   subtype Char_Type is Wide_Character;
+   
+   -- The type of string we will use for this programme.
+   type Str_Type is array (Positive range <>) of Char_Type;
+
+
+   ----------------------
+   -- TYPE CONVERSIONS --
+   ----------------------
 
    --
    -- This procedure converts a positive number into a string, and the results
@@ -50,6 +59,61 @@ package Toolbox is
    function To_String (Number: Positive)
                        return Str_Type;
    pragma Pure_Function (To_String);
+
+   --
+   -- This function converts a string type into a string.
+   --
+   -- @param Str
+   -- The Str_Type string to convert.
+   --
+   -- @return
+   -- The converted string.
+   --
+   function To_String (Str: Str_Type)
+                       return String;
+   pragma Inline (To_String);
+   pragma Pure_Function (To_String);
+
+   --
+   -- This function converts a string into a Str_Type string.
+   --
+   -- @param Str
+   -- The String (type) string to convert.
+   --
+   -- @return
+   -- The converted String.
+   --
+   function To_Str_Type (Str: String)
+                         return Str_Type;
+   pragma Inline (To_Str_Type);
+   pragma Pure_Function (To_Str_Type);
+
+   --
+   -- This function converts a Char_Type into a Character.
+   --
+   -- @param Char
+   -- The character to convert.
+   --
+   -- @return
+   -- The converted character.
+   --
+   function To_Character (Char: Char_Type)
+                          return Character;
+   pragma Inline (To_Character);
+   pragma Pure_Function (To_Character);
+
+   --
+   -- This function convertes a Character into Char_Type.
+   --
+   -- @param Char
+   -- The character to convert.
+   --
+   -- @return
+   -- The converted character.
+   function To_Char_Type (Char: Character)
+                          return Char_Type;
+   pragma Inline (To_Char_Type);
+   pragma Pure_Function (To_Char_Type);
 
 
 end Toolbox;

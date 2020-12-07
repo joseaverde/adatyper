@@ -14,3 +14,5 @@
  * Update styles in the Put function of Ansi.Surfaces
  * Recheck implementations.
  * Finish Windows part
+ * Add To_String, To_Character, To_Str_Type and To_Char_Type functions to
+   Toolbox.

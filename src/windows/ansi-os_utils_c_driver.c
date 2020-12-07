@@ -40,7 +40,9 @@
 #include <windows.h>
 
 // This function fixes the Windows's console encoding.
+// DEPRECIATED, because it doesn't work.
 void fixEncoding() {
+
    /* This solution was found in StackOverflow, thanks to the author for their
     * solution for this problem. Here is the page:
     * <https://stackoverflow.com/questions/45575863/how-to-print-utf-8-strings-
@@ -61,7 +63,9 @@ void fixEncoding() {
    // We enable buffering because Ada my raise an
    // `ADA.IO_EXCEPTIONS:DEVICE_ERROR' exception for incomplete sequences.
    setvbuf(stderr, NULL, _IOFBF, 1000);
+
 }
+
 
 
 #ifndef ENABLE_VIRTUAL_TERMINAL_PROCESSING
@@ -73,6 +77,7 @@ static DWORD outModeInit;
 
 // This function sets up the console.
 void setupConsole( void ) {
+   
    // fixEncoding();
    DWORD outMode = 0;
    stdoutHandle = GetStdHandle(STD_OUTPUT_HANDLE);
@@ -90,21 +95,39 @@ void setupConsole( void ) {
 
    if ( ! SetConsoleMode( stdoutHandle, outMode ) ) {
       exit( GetLastError() );
+   
    }
 }
 
 
 // This function restores the console.
 void restoreConsole( void ) {
+   
    if ( ! SetConsoleMode( stdoutHandle, outModeInit ) ) {
       exit( GetLastError() );
    }
+
 }
 
+
 // This function returns the number of rows and columns the terminal has
-int getConsoleScreenSize (short *rows, short *cols) {
-   // TODO: Finish this.
-   return 1;
+void getConsoleScreenSize (short *rows, short *cols) {
+
+   CONSOLE_SCREEN_BUFFER_INFO csbi;
+   
+   GetConsoleScreenBufferInfo( stdoutHandle, &csbi );
+
+   *rows = csbi.srWindow.Bottom - csbi.srWindow.Top + 1;
+   *cols = csbi.srWindow.Right - csbi.srWindow.Left + 1;
+
+}
+
+
+// This function chagnes the title of the console
+void setConsoleTitle (const char* title) {
+
+   SetConsoleTitle(title);
+
 }
 
 

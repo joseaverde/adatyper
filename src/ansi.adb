@@ -185,9 +185,6 @@ begin
 
    -- We initialize the package.
    
-   -- We first update the terminal size.
-   Ansi.Os_Utils.Update_Terminal_Size;
-
    -- We prepare the screen.
    Ansi.Os_Utils.Prepare;
 

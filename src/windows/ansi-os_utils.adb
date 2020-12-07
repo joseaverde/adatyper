@@ -28,43 +28,60 @@
 -------------------------------------------------------------------------------
 
 with Ansi.Text_IO;
+-- with Debug; use Debug;
+with Info;
+with Interfaces.C;
 
 
 package body Ansi.Os_Utils is
 
+   use type Str_Type;
+
    procedure Prepare is
-      procedure Set_Up_Console;
-      pragma Import (C, Set_Up_Console, "setupConsole");
+      procedure C_Driver_Set_Up_Console;
+      pragma Import (C, C_Driver_Set_Up_Console, "setupConsole");
+
+      procedure C_Driver_Set_Console_Title (Title: Interfaces.C.Char_Array);
+      pragma Import (C, C_Driver_Set_Console_Title, "setConsoleTitle");
    begin
    
-      Set_Up_Console;
+      C_Driver_Set_Up_Console;
+      C_Driver_Set_Console_Title(Interfaces.C.To_C(Info.Programme_Full_Name));
       -- We add many new lines in order not to overwrite what has already been
       -- written.
       for Row in Row_Type range 1 .. Height loop
          Ansi.Text_IO.Put_Ansi_Sequence("" & Char_Type'Val(10));
       end loop;
 
-      -- TODO Add errors and complete it.
+      Update_Terminal_Size;
       
    end Prepare;
 
 
    procedure Clean_Up is
-      procedure Restore_Console;
-      pragma Import (C, Restore_Console, "restoreConsole");
+      procedure C_Driver_Restore_Console;
+      pragma Import (C, C_Driver_Restore_Console, "restoreConsole");
    begin
 
-      Restore_Console;
+      C_Driver_Restore_Console;
    
    end Clean_Up;
 
    
-   -- TODO
    procedure Update_Terminal_Size is
+      procedure C_Driver_Get_Console_Screen_Size (rows:out Interfaces.C.short;
+                                                  cols:out Interfaces.C.short);
+      pragma Import (C,
+                     C_Driver_Get_Console_Screen_Size,
+                     "getConsoleScreenSize");
+
+      rows, cols: Interfaces.C.short;
    begin
 
-      Height := 24;
-      Width  := 80;
+      C_Driver_Get_Console_Screen_Size (rows => rows,
+                                        cols => cols);
+      Height := Row_Type(rows);
+      Width  := Col_Type(cols);
 
    end Update_Terminal_Size;
 

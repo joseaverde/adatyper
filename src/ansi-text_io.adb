@@ -30,8 +30,12 @@ with Ada.Wide_Text_IO;
 with Ansi.Cursors;
 with Ansi.Exceptions;
 -- with Debug; use Debug;
+-- with Encoding;
+
 
 package body Ansi.Text_IO is
+
+   use type Str_Type;
 
    package Ada_Text_IO renames Ada.Wide_Text_IO;
 

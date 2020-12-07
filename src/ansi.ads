@@ -27,9 +27,10 @@
 -------------------------------------------------------------------------------
 
 private with Ada.Unchecked_Deallocation;
-private with Constants;
 limited with Ansi.Cursors;
+private with Constants;
 private with System;
+with Toolbox;
 
 --
 -- @summary
@@ -174,15 +175,11 @@ package Ansi is
    type Style_Array is array (Style_Type'Range) of Boolean
       with Default_Component_Value => False;
    pragma Pack(Style_Array);
+   
+   subtype Char_Type is Toolbox.Char_Type;
+   subtype Str_Type is Toolbox.Str_Type;
 
-   -- The type of character we will use for this programme.
-   subtype Char_Type is Wide_Character;
-   
-   -- The type of string we will use for this programme.
-   type Str_Type is array (Positive range <>) of Char_Type;
 
-   
-   
    ---------------
    -- CONSTANTS --
    ---------------

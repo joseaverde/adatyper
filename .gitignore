@@ -23,3 +23,6 @@ old
 gmem.out
 Makefile
 github
+
+# tests
+tests

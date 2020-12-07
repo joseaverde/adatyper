@@ -1,6 +1,6 @@
 -------------------------------------------------------------------------------
 --                                                                           --
---                           C R E D I T S . A D B                           --
+--                          E N C O D I N G . A D B                          --
 --                                                                           --
 --                              A D A T Y P E R                              --
 --                                                                           --
@@ -26,41 +26,46 @@
 --                                                                           --
 -------------------------------------------------------------------------------
 
-with Ada.Command_Line;
-with Ada.Text_IO;
-with Info;
+package body Encoding is
 
-
-package body Credits is
-
-   procedure Startup_Notice is
-      procedure P(Item: String) renames Ada.Text_IO.Put_Line;
-      C: Character;
+   function Convert (Source: Str_Type)
+                     return String is
+      Str: String(1 .. Source'Length * 2);
+      Len: Natural := 0;
+      N  : Natural;
    begin
-      P("AdaTyper Copyright (c) 2020 " & Info.Author);
-      P("This program comes with ABSOLUTELY NO WARRANTY; for details see the");
-      P("`Warranty'  subsection  inside the  `Credits'  menu or  running the");
-      P("program with the `--warranty' flag:");
-      P("   " & Ada.Command_Line.Command_Name & " --warranty");
-      P("This is free software software, and you are welcome to redistribute");
-      P("it under certain conditions; see the  `Redistribute it'  subsection");
-      P("inside  the   `Credits'  menu  or  running  the  program  with  the");
-      P("`--conditions' flag:");
-      P("   " & Ada.Command_Line.Command_Name & " --conditions");
-      P("");
-      P("In other languages the subsections' names inside the `Credits' menu");
-      P("may change but not the command line arguments.");
-      P("You can also  read the copy of the  GNU General Public Licence  you");
-      P("must have received with this piece of software. If not see:");
-      P("   <https://www.gnu.org/licenses/>   ");
-      P("");
-      P("      Warm your fingers up and press any key to continue...");
-      Ada.Text_IO.Get_Immediate(C);
-      Ada.Text_IO.Put_Line(ASCII.ESC & "[2J");
-      -- Ansi.Clear;
-   end Startup_Notice;
+      
+      for I in Source'Range loop
+         N := Char_Type'Pos(Source(I));
+         if N < 256 then
+            Len := Len + 1;
+            Str(Len) := Character'Val(N);
+         else
+            Len := Len + 2;
+            Str(Len - 1) := Character'Val(N / 256);
+            Str(Len) := Character'Val(N mod 256);
+         end if;
+      end loop;
 
-end Credits;
+      return Str(1 .. Len);
+
+   end Convert;
+
+
+   function Convert (Source: Char_Type)
+                     return String is
+      N: constant Natural := Char_Type'Pos(Source);
+   begin
+
+      if N < 256 then
+         return Character'Val(N) & "";
+      else
+         return Character'Val(N / 256) & Character'Val(N mod 256);
+      end if;
+
+   end Convert;
+      
+end Encoding;
 
 
 ---=======================-------------------------=========================---

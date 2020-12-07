@@ -38,6 +38,7 @@ with Ansi.Text_IO;
 
 package body Ansi.Surfaces is
 
+   use type Str_Type;
 
    ----------------------------
    -- FUNCTIONS FOR SURFACES --

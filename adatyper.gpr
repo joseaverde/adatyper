@@ -74,19 +74,24 @@ project AdaTyper is
    -- Ansi compliance, there are different kind of compilations depending
    -- whether it's compiled to an ansi-compliant or non-ansi-compliant terminal
    -- or console.
+   --
+   -- Also, it will change depending on whether it allows utf-8 or not.
    Ansi_Dir := "";
+   Encoding_Dir := "";
    case Operating_System is
       when "windows" =>
+         Encoding_Dir := "src\ascii";
          case Ansi_Compliant is
             when "enabled" =>
-               Ansi_Dir := "src\posix\ansi-compliant";
+               Ansi_Dir := "src\ansi-compliant";
             when others =>
-               Ansi_Dir := "src\windows\non-ansi-compliant";
+               Ansi_Dir := "src\non-ansi-compliant";
             end case;
       when others =>
+         Encoding_Dir := "src/utf-8";
          case Ansi_Compliant is
             when "enabled" =>
-               Ansi_Dir := "src/posix/ansi-compliant";
+               Ansi_Dir := "src/ansi-compliant";
             when others =>
                Ansi_Dir := "Posix non-ansi-compliant terminal are not " &
                            "supported";
@@ -100,12 +105,14 @@ project AdaTyper is
       when "windows" =>
          for Source_Dirs   use ("src",
                                 "src\windows",
-                                Ansi_Dir);
+                                Ansi_Dir,
+                                Encoding_Dir);
          Prefix := "alire\build\";
       when others =>
          for Source_Dirs   use ("src",
                                 "src/posix",
-                                Ansi_Dir);
+                                Ansi_Dir,
+                                Encoding_Dir);
          Prefix := "alire/build/";
    end case;
 

@@ -20,7 +20,7 @@ maintainers-logins = ["joseaverde"]
 
 
 # Information about the package's licence.
-licenses = ["GPL 3.0"]
+licenses = "GPL-3.0-or-later"
 website = "https://github.com/joseaverde/adatyper"
 tags = ["game", "learn", "typing", "ansi"]
 
@@ -66,3 +66,7 @@ ADATYPER_ALIRE_BUILT = "on"
 [[actions.'case(os)'.linux]]
 type = "test"
 command = ["gprbuild -p -Ptests/tests.gpr -XADATYPER_TESTS OPERATING_SYSTEM=linux"]
+[[depends-on]]  # Added by alr
+malef = "~0.3.0"  # Added by alr
+[[pins]]  # Added by alr
+malef = { path='../Malef/Malef' }   # Added by alr

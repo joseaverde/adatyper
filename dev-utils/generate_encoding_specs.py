@@ -28,8 +28,19 @@
 #                                                                             #
 #=============================================================================#
 
+#=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=#
+#  Due to the amount of work to hard-code the encodings I prefer to use this  #
+# marvellous programming language to write a script to automate it.  Moreover #
+#     The first commit that had this file was used several times until it     #
+#                             eventually worked.                              #
+#                                                                             #
+#=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=#
+
 import os
 
+# I hard-coded this I hope there are no typos. This are the characters in the
+# positions from 128 to 254 according to a fast programme I wrote in Ada. This
+# way it will be also portable for Windows.
 encoding = {
     128: ["Ç", "UC_C_Cedilla"],
     129: ["ü", "LC_Dieresis"],
@@ -162,10 +173,11 @@ encoding = {
 
 
 def main():
+    # This is the licence that appears on top of every source file.
     licence = """
 -------------------------------------------------------------------------------
 --                                                                           --
---                          E N C O D I N G . A D S                          --
+{name}
 --                                                                           --
 --                              A D A T Y P E R                              --
 --                                                                           --
@@ -192,9 +204,22 @@ def main():
 -------------------------------------------------------------------------------
     """[1:].rstrip(" ")
 
-    summary = """
+    # This is the name of the parent package Encoding.
+    filename_encoding_ads = """
+--                          E N C O D I N G . A D S                          --
+"""[1:-1]
+
+    # This is the name of the child package Encoding.Converter.
+    filename_encoding_converter_ads = """
+--                E N C O D I N G - C O N V E R T E R . A D S                --
+"""[1:-1]
+
+
+    # This is the summary of what are these packages for.
+    summary_encoding_ads = """
 --
 -- @summary
+-- This package is used to declare some encoding
 --
     """[1:].rstrip(" ")
 

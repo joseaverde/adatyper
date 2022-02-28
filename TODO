@@ -16,3 +16,21 @@
  * Finish Windows part
  * Add To_String, To_Character, To_Str_Type and To_Char_Type functions to
    Toolbox.
+ * Convert certain characters like █ (#DB) to the UTF-8 equivalent with
+   conversion tables. Thus having the same specification, but a child package
+   with the conversion tables that does nothing in non-utf8 systems. This is
+   the price to pay if I want portability, thus bye other languages, hello
+   latin-1/ascii-extended/latin-alfphabet-european languages. I'll fix this in
+   a future.
+
+   As bytes from 128 to 255 an utf-8 sequence and don't have any real
+   representation, i'm going to use bytes starting with \0 or any other
+   unused charactet followed by those bytes to tell the Ansi.Text_IO.Put
+   function to change it to one both Linux and Windows understand.
+   That way we reduce the Encoding specifications to a single file and create
+   the conversion table in a child package different in Windows and Linux.
+   Then a fast index will act as a layer to choose the correct character.
+   Because characters like '█', use three bytes which don't fit in the
+   Char_Type without changing it. It will also support other languages like
+   Japanese, because a whole character takes two spaces and they are three
+   bytes long, so they fit perfectly.

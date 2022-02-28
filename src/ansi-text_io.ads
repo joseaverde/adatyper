@@ -26,8 +26,14 @@
 --                                                                           --
 -------------------------------------------------------------------------------
 
-
+--
+-- @summary
 -- This package contains input and output functions.
+--
+-- @description
+-- Instead of using the normal Ada.Wide_Text_IO package, I'm using this to add
+-- a very thin indirect layer to the package. So if I decide to go full Wide
+-- Wide, I have to change as minimum as possible.
 package Ansi.Text_IO is
    
    -- This procedure flushes the Standard Output.
